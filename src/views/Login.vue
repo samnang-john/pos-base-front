@@ -23,21 +23,22 @@ const isOpen = ref(false);
 
 const user = {
   username: "samnang",
-  password: "samnang168",
+  password: "admin123",
 };
 
 function login() {
+  // router.push({ name: "app.dashboard" });
   loading.value = true;
   store
     .dispatch("login", user)
     .then(() => {
       loading.value = false;
       console.log("data", store.state.user.data);
-      if (store.state.user.data.role === 'Admin') {
-        router.push({ name: "app.dashboard" });
-      } else if (store.state.user.data.role === 'Cashier') {
-        router.push({ name: "app.pos" });
-      }
+      // if (store.state.user.data.role === "Admin") {
+      router.push({ name: "app.dashboard" });
+      // } else if (store.state.user.data.role === "Cashier") {
+      // router.push({ name: "app.pos" });
+      // }
     })
     .catch(({ response }) => {
       loading.value = false;
