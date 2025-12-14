@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import store from "../../store";
 import ProductCard from "./ProductCard.vue";
 import { PRODUCTS_PER_PAGE } from "../../constants";
+import { toast } from "vue3-toastify";
 
 const perPage = ref(PRODUCTS_PER_PAGE);
 const search = ref("");
@@ -14,6 +15,7 @@ const isLoadingProduct = ref(false);
 
 // 🟡 CART
 const cart = ref([]);
+const userItem = ref(null);
 
 // Add product to cart
 function addToCart(product) {
@@ -24,19 +26,19 @@ function addToCart(product) {
   );
 
   if (existing) {
-    existing.qty += 1; // increase quantity
+    existing.quantity += 1; // increase quantity
   } else {
-    cart.value.push({ ...product, qty: 1 });
+    cart.value.push({ ...product, quantity: 1, product_id: product?._id });
   }
 }
 
 function increaseQty(item) {
-  item.qty += 1;
+  item.quantity += 1;
 }
 
 function decreaseQty(item) {
-  if (item.qty > 1) {
-    item.qty -= 1;
+  if (item.quantity > 1) {
+    item.quantity -= 1;
   } else {
     // remove item when qty = 0
     cart.value = cart.value.filter((i) => i !== item);
@@ -45,7 +47,10 @@ function decreaseQty(item) {
 
 // Computed totals
 const subtotal = computed(() =>
-  cart.value.reduce((sum, p) => sum + Number(p.cost_of_each || 0) * p.qty, 0)
+  cart.value.reduce(
+    (sum, p) => sum + Number(p.cost_of_each || 0) * p.quantity,
+    0
+  )
 );
 
 const tax = computed(() => subtotal.value); //* 0.075
@@ -53,11 +58,20 @@ const total = computed(() => subtotal.value + tax.value);
 
 onMounted(async () => {
   try {
-    await Promise.all([getProducts()]);
+    await Promise.all([getProducts(), getUser()]);
   } catch (error) {
     console.error("Error during initialization:", error);
   }
 });
+
+const getUser = async () => {
+  try {
+    const resUser = await store.dispatch("getUser");
+    userItem.value = resUser || null;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const getProducts = async (page = 1) => {
   isLoadingProduct.value = true;
@@ -76,6 +90,22 @@ const getProducts = async (page = 1) => {
     console.log(error);
   } finally {
     isLoadingProduct.value = false;
+  }
+};
+
+const completeOrder = async () => {
+  console.log("cart", cart.value, userItem.value.name);
+  const objData = {
+    customer: userItem.value.name,
+    discount: 0,
+    tax: 0,
+    items: cart.value,
+  };
+  const resOrder = await store.dispatch("createOrder", objData);
+
+  if (resOrder) {
+    cart.value = [];
+    toast.success("Order product successfully!");
   }
 };
 </script>
@@ -151,7 +181,7 @@ const getProducts = async (page = 1) => {
             <div>
               <p class="font-semibold">{{ item.type_of_wood_Object.name }}</p>
               <p class="text-yellow-400">
-                ${{ (item.cost_of_each * item.qty).toFixed(2) }}
+                ${{ (item.cost_of_each * item.quantity).toFixed(2) }}
               </p>
             </div>
 
@@ -164,7 +194,7 @@ const getProducts = async (page = 1) => {
                 −
               </button>
 
-              <span class="w-6 text-center">{{ item.qty }}</span>
+              <span class="w-6 text-center">{{ item.quantity }}</span>
 
               <button
                 class="w-7 h-7 rounded bg-yellow-400 text-black font-bold hover:bg-yellow-300"
@@ -201,6 +231,7 @@ const getProducts = async (page = 1) => {
         <button
           class="mt-6 w-full bg-yellow-400 text-black font-semibold py-3 rounded-lg hover:bg-yellow-300 transition"
           v-if="cart.length > 0"
+          @click="completeOrder()"
         >
           Complete Purchase
         </button>
