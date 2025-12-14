@@ -23,38 +23,6 @@ export function logout({ commit }) {
   });
 }
 
-// export function getProducts(
-//   { commit, state },
-//   { url = null, search = "", per_page, sort_field, sort_direction } = {}
-// ) {
-//   commit("setProducts", [true]);
-
-//   // If url is full URL with query params, don't add extra params
-//   const hasQueryParams = url && url.includes("?");
-
-//   // Base URL if no URL passed
-//   url = url || "/product/getAllProducts";
-
-//   // Build params only if url doesn't already contain them
-//   const params = hasQueryParams
-//     ? {}
-//     : {
-//         search,
-//         per_page: per_page || state.products.limit,
-//         sort_field,
-//         sort_direction,
-//       };
-
-//   return axiosClient
-//     .get(url, { params })
-//     .then((response) => {
-//       commit("setProducts", [false, response.data]);
-//     })
-//     .catch(() => {
-//       commit("setProducts", [false]);
-//     });
-// }
-
 export function getProducts({ commit }, params) {
   return axiosClient
     .get(`/product/list?page=${params?.page}&size=${params?.pageSize}`)
@@ -275,6 +243,17 @@ export function getUsers({ commit }, params) {
     })
     .catch(() => {
       console.log("Get Users Fail", data);
+    });
+}
+
+export function createOrder({ commit }, params) {
+  return axiosClient
+    .post("/order/create", params)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch(() => {
+      console.log("Create Order Fail", data);
     });
 }
 
