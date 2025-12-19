@@ -54,7 +54,7 @@ const subtotal = computed(() =>
 );
 
 const tax = computed(() => subtotal.value); //* 0.075
-const total = computed(() => subtotal.value + tax.value);
+const total = computed(() => subtotal.value);
 
 onMounted(async () => {
   try {
@@ -180,9 +180,7 @@ const completeOrder = async () => {
           >
             <div>
               <p class="font-semibold">{{ item.type_of_wood_Object.name }}</p>
-              <p class="text-yellow-400">
-                ${{ (item.cost_of_each * item.quantity).toFixed(2) }}
-              </p>
+              <p class="text-yellow-400">${{ item.cost_of_each.toFixed(2) }}</p>
             </div>
 
             <!-- Quantity Controls -->

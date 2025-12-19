@@ -5,6 +5,7 @@ import Dashboard from "../views/Dashboard.vue";
 import RequestPassword from "../views/RequestPassword.vue";
 import ResetPassword from "../views/ResetPassword.vue";
 import store from "../store";
+import Order from "../views/Orders/Order.vue";
 import Product from "../views/Products/Product.vue";
 import CreateProduct from "../views/Products/CreateProduct.vue";
 import ProductDetail from "../views/Products/ProductDetail.vue";
@@ -33,6 +34,11 @@ const routes = [
         path: "dashboard",
         name: "app.dashboard",
         component: Dashboard,
+      },
+      {
+        path: "order",
+        name: "app.order",
+        component: Order,
       },
       {
         path: "product",

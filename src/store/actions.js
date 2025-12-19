@@ -23,6 +23,20 @@ export function logout({ commit }) {
   });
 }
 
+export function getOrders({ commit }, params) {
+  console.log("params", params);
+  return axiosClient
+    .get(
+      `order/list?page=${params?.page}&size=${params?.pageSize}&startDate=${params?.startDate}&endDate=${params?.endDate}`
+    )
+    .then(({ data }) => {
+      return data;
+    })
+    .catch(() => {
+      console.log("Get All Orders Fail", data);
+    });
+}
+
 export function getProducts({ commit }, params) {
   return axiosClient
     .get(`/product/list?page=${params?.page}&size=${params?.pageSize}`)
