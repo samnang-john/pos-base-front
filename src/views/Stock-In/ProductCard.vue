@@ -15,11 +15,11 @@ function handleAddToCart() {
 
 <template>
   <div
-    class="group relative bg-gray-900/50 border border-yellow-500/30 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:border-yellow-500/60 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/20"
+    class="group relative bg-[#986b41] border border-[#986b41] rounded-xl overflow-hidden cursor-pointer duration-300 hover:scale-105"
     @click="handleAddToCart"
   >
     <!-- Image Container -->
-    <div class="aspect-w-1 aspect-h-1 w-full bg-gray-800">
+    <div class="aspect-w-1 aspect-h-1 w-full bg-white">
       <div
         class="h-48 sm:h-56 md:h-64 flex items-center justify-center overflow-hidden"
       >
@@ -35,7 +35,7 @@ function handleAddToCart() {
     <div class="p-4 sm:p-5">
       <!-- Wood Type -->
       <h3
-        class="font-bold text-yellow-400 text-lg sm:text-xl line-clamp-2"
+        class="font-bold text-white text-lg sm:text-xl line-clamp-2"
         :title="product.type_of_wood_Object?.name"
       >
         {{ product.type_of_wood_Object?.name || "Premium Wood" }}
@@ -58,16 +58,16 @@ function handleAddToCart() {
       </p>
 
       <!-- Price -->
-      <p class="mt-4 text-yellow-300 text-xl sm:text-2xl font-bold">
+      <p class="mt-4 text-white text-lg sm:text-xl font-bold">
         ${{ Number(product.cost_of_each || 0).toFixed(2) }}
       </p>
     </div>
 
     <!-- Optional: Subtle "Add" indicator on hover (desktop) -->
     <div
-      class="absolute inset-0 bg-yellow-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex items-center justify-center"
+      class="absolute inset-0 bg-[#986b41]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex items-center justify-center"
     >
-      <span class="text-yellow-400 font-bold text-lg">+ Add to Cart</span>
+      <span class="text-[#986b41] font-bold text-lg">+ Add to Cart</span>
     </div>
   </div>
 </template>

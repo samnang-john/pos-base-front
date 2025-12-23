@@ -65,6 +65,16 @@ const openSettings = ref(false);
     </router-link>
 
     <router-link
+      :to="{ name: 'app.stockin' }"
+      class="flex items-center p-2 rounded transition-colors hover:bg-black/30"
+    >
+      <span class="mr-2 text-gray-300">
+        <ListBulletIcon class="w-5" />
+      </span>
+      <span class="text-xs">Stock In</span>
+    </router-link>
+
+    <router-link
       :to="{ name: 'app.product' }"
       class="flex items-center p-2 rounded transition-colors hover:bg-black/30"
     >

@@ -16,6 +16,7 @@ import Pos from "../views/POS/Pos.vue";
 import WoodType from "../views/Settings/WoodType.vue";
 import WoodLength from "../views/Settings/WoodLength.vue";
 import WoodGrain from "../views/Settings/WoodGrain.vue";
+import StockIn from "../views/Stock-In/StockIn.vue";
 
 const routes = [
   {
@@ -39,6 +40,11 @@ const routes = [
         path: "order",
         name: "app.order",
         component: Order,
+      },
+      {
+        path: "stockin",
+        name: "app.stockin",
+        component: StockIn,
       },
       {
         path: "product",
