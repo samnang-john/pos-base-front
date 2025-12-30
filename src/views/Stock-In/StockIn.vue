@@ -81,8 +81,6 @@ const getProducts = async (page = 1) => {
       pageSize: pageSize.value,
     });
 
-    console.log("product", res.data.items);
-
     products.value = res.data.items || [];
 
     // save pagination
@@ -95,63 +93,14 @@ const getProducts = async (page = 1) => {
   }
 };
 
-const completeOrder = async () => {
-  console.log("cart", cart.value, userItem.value.name);
-  const objData = {
-    customer: userItem.value.name,
-    discount: 0,
-    tax: 0,
-    items: cart.value,
-  };
-  const resOrder = await store.dispatch("createOrder", objData);
-
-  if (resOrder) {
-    cart.value = [];
-    toast.success("Order product successfully!");
-  }
-};
+const completeStockIn = async () => {};
 </script>
 
 <template>
-  <div class="bg-[#0e0b16] text-white min-h-screen">
-    <div class="container mx-auto py-8 px-4 md:px-8">
-      <!-- Header -->
-      <div
-        class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="w-12 h-12 border-2 border-gray-400 flex items-center justify-center rounded-full shadow-lg bg-transparent overflow-hidden"
-          >
-            <img
-              src="../../assets/my-logo.png"
-              alt="Logo"
-              class="w-12 h-12 object-contain"
-            />
-          </div>
-
-          <h1 class="text-3xl font-extrabold tracking-wide text-yellow-400">
-            WOOD
-          </h1>
-        </div>
-
-        <div class="flex items-center gap-4">
-          <p class="text-gray-400">
-            Welcome,
-            <span class="text-yellow-400 font-semibold">{{
-              userItem?.name
-            }}</span>
-          </p>
-        </div>
-      </div>
-
-      <!-- Search -->
-      <div class="mb-6">
-        <input
-          type="text"
-          placeholder="Search our luxury collection..."
-          class="w-full px-6 py-3 rounded-xl shadow-inner focus:ring-2 focus:ring-yellow-400 text-gray-700 bg-white"
-        />
+  <div class="text-white">
+    <div class="">
+      <div class="flex mb-4">
+        <h1 class="text-3xl font-semibold text-black">Stock In</h1>
       </div>
 
       <!-- Main Layout: Products + Cart -->
@@ -159,9 +108,9 @@ const completeOrder = async () => {
         <!-- LEFT SIDE: Products -->
         <div class="flex-1 lg:order-1 order-2">
           <!-- Product cards -->
-          <div class="max-h-[60vh] md:max-h-[80vh] overflow-y-auto">
+          <div class="">
             <div
-              class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
             >
               <ProductCard
                 v-for="product in products"
@@ -177,11 +126,9 @@ const completeOrder = async () => {
         <div
           class="w-full lg:w-80 lg:border-l border-yellow-500/40 lg:pl-6 lg:order-2 order-1"
         >
-          <h2 class="font-semibold text-lg mb-6">
+          <h2 class="font-semibold text-lg mb-6 text-black">
             Your Selection
-            <span class="ml-2 text-yellow-400">
-              ({{ cart.length }} items)
-            </span>
+            <span class="ml-2 text-[#986b41]"> ({{ cart.length }} items) </span>
           </h2>
 
           <!-- Cart Items -->
@@ -192,7 +139,7 @@ const completeOrder = async () => {
               class="flex justify-between items-center"
             >
               <div>
-                <p class="font-semibold">
+                <p class="font-semibold text-black">
                   {{
                     item.type_of_wood_Object.name +
                     " " +
@@ -201,7 +148,7 @@ const completeOrder = async () => {
                     item.length_of_wood_Object.name
                   }}
                 </p>
-                <p class="text-yellow-400">
+                <p class="text-[#986b41]">
                   ${{ item.cost_of_each.toFixed(2) }}
                 </p>
               </div>
@@ -215,10 +162,12 @@ const completeOrder = async () => {
                   −
                 </button>
 
-                <span class="w-6 text-center">{{ item.quantity }}</span>
+                <span class="w-6 text-center text-black">{{
+                  item.quantity
+                }}</span>
 
                 <button
-                  class="w-7 h-7 rounded bg-yellow-400 text-black font-bold hover:bg-yellow-300"
+                  class="w-7 h-7 rounded bg-[#986b41] text-white font-bold hover:bg-[#B68E65]"
                   @click="increaseQty(item)"
                 >
                   +
@@ -242,7 +191,7 @@ const completeOrder = async () => {
               <p>Tax (7.5%):</p>
               <p>${{ tax.toFixed(2) }}</p>
             </div> -->
-            <div class="flex justify-between font-bold text-yellow-400 text-xl">
+            <div class="flex justify-between font-bold text-[#B68E65] text-xl">
               <p>Total:</p>
               <p>${{ total.toFixed(2) }}</p>
             </div>
@@ -250,11 +199,11 @@ const completeOrder = async () => {
 
           <!-- Purchase Button -->
           <button
-            class="mt-6 w-full bg-yellow-400 text-black font-semibold py-3 rounded-lg hover:bg-yellow-300 transition"
+            class="mt-6 w-full bg-[#986b41] text-white font-semibold py-3 rounded-lg hover:bg-[#B68E65] transition"
             v-if="cart.length > 0"
             @click="completeOrder()"
           >
-            Complete Purchase
+            Complete Stock In
           </button>
         </div>
       </div>

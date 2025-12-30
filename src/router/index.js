@@ -5,6 +5,7 @@ import Dashboard from "../views/Dashboard.vue";
 import RequestPassword from "../views/RequestPassword.vue";
 import ResetPassword from "../views/ResetPassword.vue";
 import store from "../store";
+import Order from "../views/Orders/Order.vue";
 import Product from "../views/Products/Product.vue";
 import CreateProduct from "../views/Products/CreateProduct.vue";
 import ProductDetail from "../views/Products/ProductDetail.vue";
@@ -15,6 +16,7 @@ import Pos from "../views/POS/Pos.vue";
 import WoodType from "../views/Settings/WoodType.vue";
 import WoodLength from "../views/Settings/WoodLength.vue";
 import WoodGrain from "../views/Settings/WoodGrain.vue";
+import StockIn from "../views/Stock-In/StockIn.vue";
 
 const routes = [
   {
@@ -33,6 +35,16 @@ const routes = [
         path: "dashboard",
         name: "app.dashboard",
         component: Dashboard,
+      },
+      {
+        path: "order",
+        name: "app.order",
+        component: Order,
+      },
+      {
+        path: "stockin",
+        name: "app.stockin",
+        component: StockIn,
       },
       {
         path: "product",

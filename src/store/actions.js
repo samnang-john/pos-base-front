@@ -23,6 +23,43 @@ export function logout({ commit }) {
   });
 }
 
+export function getOrders({ commit }, params) {
+  console.log("params", params);
+  return axiosClient
+    .get(
+      `order/list?page=${params?.page}&size=${params?.pageSize}&startDate=${params?.startDate}&endDate=${params?.endDate}`
+    )
+    .then(({ data }) => {
+      return data;
+    })
+    .catch(() => {
+      console.log("Get All Orders Fail", data);
+    });
+}
+
+export function getOrdersPDF({ commit }, params) {
+  return axiosClient
+    .get("/order/pdf", { responseType: "blob" })
+    .then(({ data }) => {
+      console.log("data", data);
+      return data;
+    })
+    .catch(() => {
+      console.log("Get Order PDF Fail", data);
+    });
+}
+
+export function getOrdersExcel({ commit }, params) {
+  return axiosClient
+    .get("/order/excel", { responseType: "blob" })
+    .then(({ data }) => {
+      return data;
+    })
+    .catch(() => {
+      console.log("Get Order Excel Fail", data);
+    });
+}
+
 export function getProducts({ commit }, params) {
   return axiosClient
     .get(`/product/list?page=${params?.page}&size=${params?.pageSize}`)
