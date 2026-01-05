@@ -28,7 +28,12 @@ function addToCart(product) {
   if (existing) {
     existing.quantity += 1; // increase quantity
   } else {
-    cart.value.push({ ...product, quantity: 1, product_id: product?._id });
+    cart.value.push({
+      ...product,
+      quantity: 1,
+      product_id: product?._id,
+      discount: 0,
+    });
   }
 }
 
@@ -48,7 +53,7 @@ function decreaseQty(item) {
 // Computed totals
 const subtotal = computed(() =>
   cart.value.reduce(
-    (sum, p) => sum + Number(p.cost_of_each || 0) * p.quantity,
+    (sum, p) => sum - p.discount + Number(p.cost_of_each || 0) * p.quantity,
     0
   )
 );
@@ -191,7 +196,7 @@ const completeOrder = async () => {
               :key="item.name"
               class="flex justify-between items-center"
             >
-              <div>
+              <div class="flex-1">
                 <p class="font-semibold">
                   {{
                     item.type_of_wood_Object.name +
@@ -202,12 +207,33 @@ const completeOrder = async () => {
                   }}
                 </p>
                 <p class="text-yellow-400">
-                  ${{ item.cost_of_each.toFixed(2) }}
+                  ${{ item.cost_of_each.toFixed(2) * item.quantity }}
                 </p>
+                <div v-if="item.discount != 0">
+                  <p class="font-semibold mt-2">Price After Discount</p>
+                  <p class="text-yellow-400">
+                    ${{
+                      item.cost_of_each.toFixed(2) * item.quantity -
+                      item.discount
+                    }}
+                  </p>
+                </div>
+
+                <!-- Discount Field Added Here -->
+                <div class="mt-2">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Discount ($)"
+                    v-model="item.discount"
+                    class="w-full px-3 py-1 text-sm bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-yellow-400"
+                  />
+                </div>
               </div>
 
               <!-- Quantity Controls -->
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 ml-4">
                 <button
                   class="w-7 h-7 rounded bg-gray-700 hover:bg-gray-600"
                   @click="decreaseQty(item)"
@@ -239,9 +265,9 @@ const completeOrder = async () => {
               <p>${{ subtotal.toFixed(2) }}</p>
             </div>
             <!-- <div class="flex justify-between text-gray-400">
-              <p>Tax (7.5%):</p>
-              <p>${{ tax.toFixed(2) }}</p>
-            </div> -->
+      <p>Tax (7.5%):</p>
+      <p>${{ tax.toFixed(2) }}</p>
+    </div> -->
             <div class="flex justify-between font-bold text-yellow-400 text-xl">
               <p>Total:</p>
               <p>${{ total.toFixed(2) }}</p>

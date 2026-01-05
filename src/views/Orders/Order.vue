@@ -250,13 +250,6 @@ const closeModal = () => {
             >
               Total Price
             </TableHeaderCell>
-
-            <!-- <TableHeaderCell
-              field="actions"
-              class="py-3.5 pl-3 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6"
-            >
-              Actions
-            </TableHeaderCell> -->
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
@@ -302,69 +295,6 @@ const closeModal = () => {
             >
               {{ "$" + order.grand_total }}
             </td>
-
-            <!-- <td
-              class="relative whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm font-medium sm:pr-6"
-            >
-              <Menu as="div" class="relative inline-block text-left">
-                <div>
-                  <MenuButton
-                    class="flex items-center rounded-full p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200"
-                  >
-                    <span class="sr-only">Open options</span>
-                    <EllipsisVerticalIcon class="h-5 w-5" aria-hidden="true" />
-                  </MenuButton>
-                </div>
-
-                <transition
-                  enter-active-class="transition duration-100 ease-out"
-                  enter-from-class="transform scale-95 opacity-0"
-                  enter-to-class="transform scale-100 opacity-100"
-                  leave-active-class="transition duration-75 ease-in"
-                  leave-from-class="transform scale-100 opacity-100"
-                  leave-to-class="transform scale-95 opacity-0"
-                >
-                  <MenuItems
-                    class="absolute right-0 z-10 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                  >
-                    <div class="py-1">
-                      <MenuItem v-slot="{ active }">
-                        <button
-                          :class="[
-                            active
-                              ? 'bg-indigo-50 text-indigo-700'
-                              : 'text-gray-700',
-                            'group flex w-full items-center px-4 py-2 text-sm',
-                          ]"
-                          @click="onEdit(product)"
-                        >
-                          <PencilIcon
-                            class="mr-3 h-4 w-4 text-indigo-500 group-hover:text-indigo-700"
-                            aria-hidden="true"
-                          />
-                          Edit
-                        </button>
-                      </MenuItem>
-                      <MenuItem v-slot="{ active }">
-                        <button
-                          :class="[
-                            active ? 'bg-red-50 text-red-700' : 'text-gray-700',
-                            'group flex w-full items-center px-4 py-2 text-sm',
-                          ]"
-                          @click="onDeleteProduct(product._id)"
-                        >
-                          <TrashIcon
-                            class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-700"
-                            aria-hidden="true"
-                          />
-                          Delete
-                        </button>
-                      </MenuItem>
-                    </div>
-                  </MenuItems>
-                </transition>
-              </Menu>
-            </td> -->
           </tr>
         </tbody>
       </table>

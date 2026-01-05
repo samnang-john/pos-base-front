@@ -24,7 +24,6 @@ export function logout({ commit }) {
 }
 
 export function getOrders({ commit }, params) {
-  console.log("params", params);
   return axiosClient
     .get(
       `order/list?page=${params?.page}&size=${params?.pageSize}&startDate=${params?.startDate}&endDate=${params?.endDate}`
@@ -291,6 +290,17 @@ export function createOrder({ commit }, params) {
     })
     .catch(() => {
       console.log("Create Order Fail", data);
+    });
+}
+
+export function createStockIn({ commit }, params) {
+  return axiosClient
+    .post("/order/sync-stock", params)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch(() => {
+      console.log("Create Stock Sync Fail", data);
     });
 }
 

@@ -93,7 +93,18 @@ const getProducts = async (page = 1) => {
   }
 };
 
-const completeStockIn = async () => {};
+const completeStockIn = async () => {
+  // console.log("cart", cart.value, userItem.value.name);
+  const objData = {
+    items: cart.value,
+  };
+  const resOrder = await store.dispatch("createStockIn", objData);
+
+  if (resOrder) {
+    cart.value = [];
+    toast.success("Create stock in successfully!");
+  }
+};
 </script>
 
 <template>
@@ -201,7 +212,7 @@ const completeStockIn = async () => {};
           <button
             class="mt-6 w-full bg-[#986b41] text-white font-semibold py-3 rounded-lg hover:bg-[#B68E65] transition"
             v-if="cart.length > 0"
-            @click="completeOrder()"
+            @click="completeStockIn()"
           >
             Complete Stock In
           </button>
