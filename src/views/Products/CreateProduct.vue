@@ -110,7 +110,7 @@ const onCreateProduct = async () => {
       toast.success("Product created successfully!");
       setTimeout(() => {
         router.back();
-      }, 3000);
+      }, 1000);
     }
   } catch (error) {
     console.log("Error adding product:", error);

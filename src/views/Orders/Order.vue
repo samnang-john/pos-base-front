@@ -65,7 +65,10 @@ const getOrders = async (page = 1) => {
 };
 
 const downloadPDF = async () => {
-  const res = await store.dispatch("getOrdersPDF");
+  const res = await store.dispatch("getOrdersPDF", {
+    startDate: startDate.value,
+    endDate: endDate.value,
+  });
 
   // Create blob from binary data
   const blob = new Blob([res], { type: "application/pdf" });
@@ -84,7 +87,10 @@ const downloadPDF = async () => {
 };
 
 const downloadExcel = async () => {
-  const res = await store.dispatch("getOrdersExcel");
+  const res = await store.dispatch("getOrdersExcel", {
+    startDate: startDate.value,
+    endDate: endDate.value,
+  });
 
   // Trigger download
   const url = window.URL.createObjectURL(res);
@@ -110,7 +116,6 @@ const prevPage = () => {
 };
 
 const openModal = (orderItem) => {
-  console.log("akfdkfksda", orderItem);
   objDetail.value = orderItem;
   isModalOpen.value = true;
 };

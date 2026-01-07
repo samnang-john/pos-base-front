@@ -7,6 +7,10 @@ import {
   TagIcon,
   ChevronDownIcon,
   Cog6ToothIcon,
+  ShoppingBagIcon,
+  ArchiveBoxIcon,
+  ArchiveBoxArrowDownIcon,
+  ComputerDesktopIcon,
 } from "@heroicons/vue/24/solid";
 import { ref } from "vue";
 
@@ -39,7 +43,7 @@ const openSettings = ref(false);
       class="flex items-center p-2 rounded transition-colors hover:bg-black/30"
     >
       <span class="mr-2 text-gray-300">
-        <HomeIcon class="w-5" />
+        <ComputerDesktopIcon class="w-5" />
       </span>
       <span class="text-xs">POS</span>
     </router-link>
@@ -59,7 +63,7 @@ const openSettings = ref(false);
       class="flex items-center p-2 rounded transition-colors hover:bg-black/30"
     >
       <span class="mr-2 text-gray-300">
-        <ListBulletIcon class="w-5" />
+        <ShoppingBagIcon class="w-5" />
       </span>
       <span class="text-xs">Order</span>
     </router-link>
@@ -69,7 +73,7 @@ const openSettings = ref(false);
       class="flex items-center p-2 rounded transition-colors hover:bg-black/30"
     >
       <span class="mr-2 text-gray-300">
-        <ListBulletIcon class="w-5" />
+        <ArchiveBoxArrowDownIcon class="w-5" />
       </span>
       <span class="text-xs">Stock In</span>
     </router-link>
@@ -79,7 +83,7 @@ const openSettings = ref(false);
       class="flex items-center p-2 rounded transition-colors hover:bg-black/30"
     >
       <span class="mr-2 text-gray-300">
-        <ListBulletIcon class="w-5" />
+        <ArchiveBoxIcon class="w-5" />
       </span>
       <span class="text-xs">Product</span>
     </router-link>

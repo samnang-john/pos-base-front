@@ -3,6 +3,7 @@ import { onMounted, ref } from "vue";
 import store from "../../store";
 import Spinner from "../../components/core/Spinner.vue";
 import TableHeaderCell from "../../components/core/Table/TableHeaderCell.vue";
+import ConfirmModal from "../../components/AlertConfirm.vue";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import dayjs from "dayjs";
 import {
@@ -22,10 +23,12 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = ref(15);
 const isModalOpen = ref(false); // Control modal visibility
+const isModalConfirmOpen = ref(false); // Control modal visibility
 const userForm = ref({
   name: "",
   username: "",
   password: "",
+  confir_pass: "",
   image: "",
 });
 const isUpdate = ref(false); // Control For Update
@@ -80,23 +83,33 @@ const closeModal = () => {
   isModalOpen.value = false;
   userForm.value = {
     name: "",
-    description: "",
+    username: "",
   }; // Reset input on close
   isUpdate.value = false;
   // objEdit.value = null;
+};
+
+const openModalConfirm = (user) => {
+  isModalConfirmOpen.value = true;
+  objEdit.value = user;
 };
 
 const submitUser = async () => {
   if (
     userForm.value.name !== "" ||
     userForm.value.username !== "" ||
-    userForm.value.password !== ""
+    userForm.value.password !== "" ||
+    userForm.value.confir_pass !== ""
   ) {
     try {
-      await store.dispatch("createUser", userForm.value);
-      getUsers();
-      closeModal();
-      toast.success("User type created successfully!");
+      if (userForm?.value?.password === userForm?.value?.confir_pass) {
+        await store.dispatch("createUser", userForm.value);
+        getUsers();
+        closeModal();
+        toast.success("User type created successfully!");
+      } else {
+        toast.error("Confirm password not match!");
+      }
     } catch (error) {
       closeModal();
       console.log("Error=>", error);
@@ -109,13 +122,18 @@ const submitUser = async () => {
 };
 
 // Handle Edit action
-const onEdit = (wood_type) => {
+const onEdit = (user) => {
+  console.log("user>>>>", user);
   isUpdate.value = true;
   isModalOpen.value = true;
-  objEdit.value = wood_type;
+  objEdit.value = user;
+  image.value = user?.image;
   userForm.value = {
-    name: wood_type?.name,
-    description: wood_type?.description,
+    image: user?.image,
+    name: user?.name,
+    username: user?.username,
+    password: "",
+    confir_pass: "",
   };
 };
 
@@ -124,25 +142,32 @@ const onUpdate = async () => {
     const obj = {
       id: objEdit.value?._id,
       name: userForm.value?.name,
-      description: userForm?.value?.description,
+      username: userForm?.value?.username,
+      password: userForm?.value?.password,
+      confir_pass: userForm?.value?.confir_pass,
+      image: userForm?.value?.image,
     };
-    await store.dispatch("updateWoodType", obj);
-    getUsers();
-    closeModal();
-    toast.success("Wood type updated successfully!");
+    if (userForm?.value?.password === userForm?.value?.confir_pass) {
+      await store.dispatch("updateUser", obj);
+      getUsers();
+      closeModal();
+      toast.success("User updated successfully!");
+    } else {
+      toast.error("Confirm password not match!");
+    }
   } catch (error) {
     console.log("Error=>", error);
-    toast.error("Wood type update unsuccessfully!");
+    toast.error("User update unsuccessfully!");
   }
 };
 
-const onDeleteWoodType = async (woodTypeId) => {
+const onDeleteUser = async () => {
   try {
-    await store.dispatch("deleteWoodType", woodTypeId);
+    await store.dispatch("deleteUser", objEdit.value?._id);
     getUsers();
-    toast.info("Wood type deleted successfully!");
+    toast.info("User deleted successfully!");
   } catch (error) {
-    toast.error("Wood type unsuccessfully!");
+    toast.error("User deleted unsuccessfully!");
   }
 };
 
@@ -230,9 +255,7 @@ const handleImageUpload = (e) => {
           <tr v-if="isLoadingUser || !listUsers.length">
             <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
               <Spinner v-if="isLoadingUser" class="mx-auto" />
-              <p v-else class="text-center py-8 text-gray-500">
-                No wood type found
-              </p>
+              <p v-else class="text-center py-8 text-gray-500">No user found</p>
             </td>
           </tr>
           <tr
@@ -297,7 +320,7 @@ const handleImageUpload = (e) => {
                               : 'text-gray-700',
                             'group flex w-full items-center px-4 py-2 text-sm',
                           ]"
-                          @click="onEdit(wood)"
+                          @click="onEdit(user)"
                         >
                           <PencilIcon
                             class="mr-3 h-4 w-4 text-indigo-500 group-hover:text-indigo-700"
@@ -312,7 +335,7 @@ const handleImageUpload = (e) => {
                             active ? 'bg-red-50 text-red-700' : 'text-gray-700',
                             'group flex w-full items-center px-4 py-2 text-sm',
                           ]"
-                          @click="onDeleteWoodType(user._id)"
+                          @click="openModalConfirm(user)"
                         >
                           <TrashIcon
                             class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-700"
@@ -440,6 +463,23 @@ const handleImageUpload = (e) => {
           required
         />
       </div>
+      <div class="mb-4">
+        <label for="password" class="block text-sm font-medium text-gray-700"
+          >Confirm Password
+          <span class="text-red-500">*</span>
+        </label>
+        <input
+          v-model="userForm.confir_pass"
+          id="confir_pass"
+          type="confir_pass"
+          :class="[
+            'mt-1 w-full p-2 border rounded-lg focus:ring-[#986b41] focus:border-[#986b41]',
+            isErrorValue ? 'border-red-500' : 'border-gray-300',
+          ]"
+          placeholder="Enter password"
+          required
+        />
+      </div>
       <!-- <div class="mb-4">
         <label for="note" class="block text-sm font-medium text-gray-700"
           >Note</label
@@ -476,6 +516,15 @@ const handleImageUpload = (e) => {
       </div>
     </div>
   </div>
+
+  <!-- Modal Confirm -->
+  <ConfirmModal
+    v-model:is-open="isModalConfirmOpen"
+    title="Delete Account !"
+    message="Do you really want to delete this account?"
+    @confirm="onDeleteUser"
+    @cancel="console.log('Cancelled')"
+  />
 </template>
 
 <style scoped>

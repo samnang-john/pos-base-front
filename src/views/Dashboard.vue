@@ -133,9 +133,7 @@ const closeModal = () => {
 
     <!-- Optional: Quick stats for today -->
     <div class="mt-10 bg-white rounded-lg p-6 border border-[#9A6A3A]">
-      <h2 class="text-xl font-semibold mb-4 text-yellow-400">
-        Today's Summary
-      </h2>
+      <h2 class="text-xl font-semibold mb-4 text-[#9A6A3A]">Today's Summary</h2>
 
       <!-- Orders Table -->
       <div class="overflow-x-auto rounded-lg border border-gray-200">

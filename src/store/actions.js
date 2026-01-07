@@ -38,7 +38,10 @@ export function getOrders({ commit }, params) {
 
 export function getOrdersPDF({ commit }, params) {
   return axiosClient
-    .get("/order/pdf", { responseType: "blob" })
+    .get(
+      `/order/pdf?startDate=${params?.startDate}&endDate=${params?.endDate}`,
+      { responseType: "blob" }
+    )
     .then(({ data }) => {
       console.log("data", data);
       return data;
@@ -50,7 +53,10 @@ export function getOrdersPDF({ commit }, params) {
 
 export function getOrdersExcel({ commit }, params) {
   return axiosClient
-    .get("/order/excel", { responseType: "blob" })
+    .get(
+      `/order/excel?startDate=${params?.startDate}&endDate=${params?.endDate}`,
+      { responseType: "blob" }
+    )
     .then(({ data }) => {
       return data;
     })
@@ -321,66 +327,20 @@ export function createUser({ commit }, user) {
     });
 }
 
-// export function getUsers(
-//   { commit, state },
-//   { url = null, search = "", per_page, sort_field, sort_direction } = {}
-// ) {
-//   commit("setUsers", [true]);
-
-//   const hasQueryParams = url && url.includes("?");
-//   url = url || "/user/getAllUsers";
-//   const params = hasQueryParams
-//     ? {}
-//     : {
-//         search,
-//         per_page: per_page || state.users.limit,
-//         sort_field,
-//         sort_direction,
-//       };
-
-//   return axiosClient
-//     .get(url, { params })
-//     .then((response) => {
-//       commit("setUsers", [false, response.data]);
-//     })
-//     .catch(() => {
-//       commit("setUsers", [false]);
-//     });
-// }
-
 export function getUserDetail({ commit }, id) {
   return axiosClient.get(`/user/detail/${id}`);
 }
 
-// export function createUser({ commit }, user) {
-//   if (user.image instanceof File) {
-//     const form = new FormData();
-//     form.append("username", user.username);
-//     form.append("password", user.password);
-//     form.append("full_name", user.full_name);
-//     form.append("image", user.image);
-//     form.append("role", user.role);
+export function updateUser({ commit }, userObj) {
+  const id = userObj.id;
 
-//     user = form;
-//   }
+  const form = new FormData();
+  form.append("id", userObj.id);
+  form.append("username", userObj.username);
+  form.append("password", userObj.password);
+  form.append("image", userObj.image);
 
-//   return axiosClient.post("/user/create", user);
-// }
-
-export function updateUser({ commit }, user) {
-  const id = user._id;
-  if (user.image instanceof File) {
-    const form = new FormData();
-    form.append("id", user._id);
-    form.append("username", user.username);
-    form.append("password", user.password);
-    form.append("full_name", user.full_name);
-    form.append("image", user.image);
-    form.append("role", user.role);
-
-    user = form;
-  }
-  return axiosClient.put(`/user/update/${id}`, user);
+  return axiosClient.put(`/user/update/${id}`, form);
 }
 
 export function deleteUser({ commit }, id) {
