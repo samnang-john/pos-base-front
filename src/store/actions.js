@@ -1,5 +1,16 @@
 import axiosClient from "../axios";
 
+export function getDashboard({ commit }, data) {
+  return axiosClient
+    .get("/report/overview")
+    .then(({ data }) => {
+      return data;
+    })
+    .catch(() => {
+      console.log("Get Dashboard Fail", data);
+    });
+}
+
 export function getUser({ commit }, data) {
   return axiosClient.get("/auth/me", data).then(({ data }) => {
     commit("setUser", data);
@@ -307,6 +318,41 @@ export function createStockIn({ commit }, params) {
     })
     .catch(() => {
       console.log("Create Stock Sync Fail", data);
+    });
+}
+
+export function downloadStockIn({ commit }, params) {
+  return axiosClient
+    .get(`/stock/stock-sync/${params?.stockInID}/pdf`, { responseType: "blob" })
+    .then(({ data }) => {
+      return data;
+    })
+    .catch(() => {
+      console.log("Download Stock In Fail", data);
+    });
+}
+
+export function getStockInHistory({ commit }, params) {
+  return axiosClient
+    .get(
+      `/stock/stock-syncs?page=${params?.page}&size=${params?.pageSize}&startDate=${params?.startDate}&endDate=${params?.endDate}`
+    )
+    .then(({ data }) => {
+      return data;
+    })
+    .catch(() => {
+      console.log("Get Stock In History Fail", data);
+    });
+}
+
+export function getStockInHistoryDetail({ commit }, params) {
+  return axiosClient
+    .get(`/stock/stock-sync/${params?.stockInID}`)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch(() => {
+      console.log("Get Stock In History Detail Fail", data);
     });
 }
 

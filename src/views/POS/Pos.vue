@@ -22,7 +22,7 @@ function addToCart(product) {
   const existing = cart.value.find(
     (item) =>
       item?.type_of_wood_Object.name === product.type_of_wood_Object.name &&
-      item?.cost_of_each === product.cost_of_each
+      item?.price_of_each === product.price_of_each
   );
 
   if (existing) {
@@ -53,7 +53,7 @@ function decreaseQty(item) {
 // Computed totals
 const subtotal = computed(() =>
   cart.value.reduce(
-    (sum, p) => sum - p.discount + Number(p.cost_of_each || 0) * p.quantity,
+    (sum, p) => sum - p.discount + Number(p.price_of_each || 0) * p.quantity,
     0
   )
 );
@@ -207,13 +207,13 @@ const completeOrder = async () => {
                   }}
                 </p>
                 <p class="text-yellow-400">
-                  ${{ item.cost_of_each.toFixed(2) * item.quantity }}
+                  ${{ item.price_of_each.toFixed(2) * item.quantity }}
                 </p>
                 <div v-if="item.discount != 0">
                   <p class="font-semibold mt-2">Price After Discount</p>
                   <p class="text-yellow-400">
                     ${{
-                      item.cost_of_each.toFixed(2) * item.quantity -
+                      item.price_of_each.toFixed(2) * item.quantity -
                       item.discount
                     }}
                   </p>

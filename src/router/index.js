@@ -17,6 +17,7 @@ import WoodType from "../views/Settings/WoodType.vue";
 import WoodLength from "../views/Settings/WoodLength.vue";
 import WoodGrain from "../views/Settings/WoodGrain.vue";
 import StockIn from "../views/Stock-In/StockIn.vue";
+import StockInHistory from "../views/Stock-In/StockInHistory.vue";
 
 const routes = [
   {
@@ -55,6 +56,11 @@ const routes = [
         path: "createproduct",
         name: "app.createproduct",
         component: CreateProduct,
+      },
+      {
+        path: "stockinhistory",
+        name: "app.stockinhistory",
+        component: StockInHistory,
       },
       {
         path: "productdetail/:pro_id",
