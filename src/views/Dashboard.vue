@@ -5,12 +5,15 @@ import dayjs from "dayjs";
 
 const listProduct = ref([]);
 const listOrder = ref([]);
+const listHistory = ref([]);
 const startDate = ref(dayjs().format("YYYY-MM-DD"));
 const endDate = ref(dayjs().format("YYYY-MM-DD"));
 const isLoadingProduct = ref(false);
 const isLoadingOrder = ref(false);
+const isLoadingHistory = ref(false);
 const isModalOpen = ref(false);
 const objDetail = ref(null);
+const dashboardData = ref(null);
 
 // Computed totals
 const subtotal = computed(() =>
@@ -19,24 +22,36 @@ const subtotal = computed(() =>
 
 onMounted(async () => {
   try {
-    await Promise.all([getProducts(), getOrders()]);
+    await Promise.all([getDasboard(), getOrders(), getStockInHistory()]);
   } catch (error) {
     console.error("Error during initialization:", error);
   }
 });
 
-const getProducts = async (page = 1) => {
+const getDasboard = async () => {
   isLoadingProduct.value = true;
   try {
-    const res = await store.dispatch("getProducts");
-
-    listProduct.value = res.data.items || [];
+    const res = await store.dispatch("getDashboard");
+    dashboardData.value = res?.data;
   } catch (error) {
     console.log(error);
   } finally {
     isLoadingProduct.value = false;
   }
 };
+
+// const getProducts = async (page = 1) => {
+//   isLoadingProduct.value = true;
+//   try {
+//     const res = await store.dispatch("getProducts");
+
+//     listProduct.value = res.data.items || [];
+//   } catch (error) {
+//     console.log(error);
+//   } finally {
+//     isLoadingProduct.value = false;
+//   }
+// };
 
 const getOrders = async (page = 1) => {
   isLoadingOrder.value = true;
@@ -45,12 +60,27 @@ const getOrders = async (page = 1) => {
       startDate: startDate.value,
       endDate: endDate.value,
     });
-
     listOrder.value = res.data.items || [];
   } catch (error) {
     console.log(error);
   } finally {
     isLoadingOrder.value = false;
+  }
+};
+
+const getStockInHistory = async (page = 1) => {
+  isLoadingHistory.value = true;
+  try {
+    const res = await store.dispatch("getStockInHistory", {
+      startDate: startDate.value,
+      endDate: endDate.value,
+    });
+
+    listHistory.value = res.data.items || [];
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isLoadingHistory.value = false;
   }
 };
 
@@ -77,7 +107,7 @@ const closeModal = () => {
           <div>
             <p class="text-gray-400 text-sm">Total Products</p>
             <p class="text-3xl font-bold mt-2 text-black">
-              {{ listProduct.length }}
+              {{ dashboardData?.total_products }}
             </p>
           </div>
           <div class="text-yellow-400 text-4xl opacity-70">
@@ -95,7 +125,7 @@ const closeModal = () => {
           <div>
             <p class="text-gray-400 text-sm">Orders Today</p>
             <p class="text-3xl font-bold mt-2 text-black">
-              {{ listOrder.length }}
+              {{ dashboardData?.orders_today }}
             </p>
           </div>
           <div class="text-yellow-400 text-4xl opacity-70">🛒</div>
@@ -110,7 +140,7 @@ const closeModal = () => {
           <div>
             <p class="text-gray-400 text-sm">Income (Today)</p>
             <p class="text-3xl font-bold mt-2 text-green-400">
-              ${{ subtotal.toFixed(2) }}
+              ${{ dashboardData?.total_profit?.toFixed(2) }}
             </p>
           </div>
           <div class="text-green-400 text-4xl opacity-70">↑</div>
@@ -124,7 +154,9 @@ const closeModal = () => {
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-400 text-sm">Expenses (Today)</p>
-            <p class="text-3xl font-bold mt-2 text-red-400">$00.00</p>
+            <p class="text-3xl font-bold mt-2 text-red-400">
+              ${{ dashboardData?.expense_today?.toFixed(2) }}
+            </p>
           </div>
           <div class="text-red-400 text-4xl opacity-70">↓</div>
         </div>
@@ -133,9 +165,7 @@ const closeModal = () => {
 
     <!-- Optional: Quick stats for today -->
     <div class="mt-10 bg-white rounded-lg p-6 border border-[#9A6A3A]">
-      <h2 class="text-xl font-semibold mb-4 text-yellow-400">
-        Today's Summary
-      </h2>
+      <h2 class="text-xl font-semibold mb-4 text-[#9A6A3A]">Today's Order</h2>
 
       <!-- Orders Table -->
       <div class="overflow-x-auto rounded-lg border border-gray-200">
@@ -196,6 +226,77 @@ const closeModal = () => {
               </td>
 
               <td class="px-4 py-4 text-gray-900">${{ order.grand_total }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Optional: Quick stats for today -->
+    <div class="mt-10 bg-white rounded-lg p-6 border border-[#9A6A3A]">
+      <h2 class="text-xl font-semibold mb-4 text-[#9A6A3A]">
+        Today's Stock In
+      </h2>
+
+      <!-- Orders Table -->
+      <div class="overflow-x-auto rounded-lg border border-gray-200">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                class="px-4 py-4 text-left font-semibold text-gray-900 sm:px-6"
+              >
+                No
+              </th>
+              <th class="px-4 py-4 text-left font-semibold text-gray-900">
+                Stock In ID
+              </th>
+              <th class="px-4 py-4 text-left font-semibold text-gray-900">
+                Stock In Items
+              </th>
+              <th class="px-4 py-4 text-left font-semibold text-gray-900">
+                Order Date
+              </th>
+              <!-- <th class="px-4 py-4 text-left font-semibold text-gray-900">
+                Total Price
+              </th> -->
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-gray-200 bg-white">
+            <!-- Loading / Empty State -->
+            <tr v-if="isLoadingHistory || !listHistory.length">
+              <td colspan="5" class="py-12 text-center text-gray-500">
+                <Spinner v-if="isLoadingOrder" class="mx-auto h-8 w-8" />
+                <p v-else>No stock in found today</p>
+              </td>
+            </tr>
+
+            <!-- Order Rows -->
+            <tr
+              v-else
+              v-for="(history, index) in listHistory"
+              :key="history._id"
+              class="hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+              @click="openModal(history)"
+            >
+              <td class="px-4 py-4 font-medium text-gray-700 sm:px-6">
+                {{ String(index + 1).padStart(2, "0") }}
+              </td>
+
+              <td class="px-4 py-4 text-gray-900 truncate max-w-xs">
+                {{ history.sync_invoice }}
+              </td>
+
+              <td class="px-4 py-4 text-gray-900">
+                x{{ history?.total_items }}
+              </td>
+
+              <td class="px-4 py-4 text-gray-900">
+                {{ dayjs(history.created_date).format("DD/MM/YYYY - hh:mm A") }}
+              </td>
+
+              <!-- <td class="px-4 py-4 text-gray-900">${{ order.grand_total }}</td> -->
             </tr>
           </tbody>
         </table>

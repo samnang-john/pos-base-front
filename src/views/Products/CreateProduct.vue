@@ -110,7 +110,7 @@ const onCreateProduct = async () => {
       toast.success("Product created successfully!");
       setTimeout(() => {
         router.back();
-      }, 3000);
+      }, 1000);
     }
   } catch (error) {
     console.log("Error adding product:", error);
@@ -121,7 +121,7 @@ const onCreateProduct = async () => {
 };
 
 const onTotalPrice = () => {
-  const totalPrice = formData.value.price * formData.value.quantity;
+  const totalPrice = formData.value.cost * formData.value.quantity;
   formData.value.total_price = totalPrice;
 };
 
@@ -256,7 +256,7 @@ const goBack = () => {
           >
           <input
             type="number"
-            v-model="formData.price"
+            v-model="formData.cost"
             value="0"
             class="w-full p-3 rounded-lg bg-white"
             @input="onTotalPrice"
@@ -298,7 +298,7 @@ const goBack = () => {
           >
           <input
             type="number"
-            v-model="formData.cost"
+            v-model="formData.price"
             value="0"
             class="w-full p-3 rounded-lg bg-white"
           />

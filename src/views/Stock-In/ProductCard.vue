@@ -58,8 +58,11 @@ function handleAddToCart() {
       </p>
 
       <!-- Price -->
-      <p class="mt-4 text-white text-lg sm:text-xl font-bold">
-        ${{ Number(product.price_of_each || 0).toFixed(2) }}
+      <p class="mt-4 text-white text-lg sm:text-lg font-bold">
+        Cost: ${{ Number(product.cost_of_each || 0).toFixed(2) }}
+      </p>
+      <p class="text-white text-lg sm:text-lg font-bold">
+        Price: ${{ Number(product.price_of_each || 0).toFixed(2) }}
       </p>
     </div>
 

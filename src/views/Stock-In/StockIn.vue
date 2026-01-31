@@ -4,6 +4,8 @@ import store from "../../store";
 import ProductCard from "./ProductCard.vue";
 import { PRODUCTS_PER_PAGE } from "../../constants";
 import { toast } from "vue3-toastify";
+import router from "../../router";
+import { ClockIcon } from "@heroicons/vue/24/solid";
 
 const perPage = ref(PRODUCTS_PER_PAGE);
 const search = ref("");
@@ -96,127 +98,161 @@ const getProducts = async (page = 1) => {
 const completeStockIn = async () => {
   // console.log("cart", cart.value, userItem.value.name);
   const objData = {
+    note: "New stock in!",
     items: cart.value,
   };
   const resOrder = await store.dispatch("createStockIn", objData);
+
+  downloadPDF(resOrder?.data?._id);
 
   if (resOrder) {
     cart.value = [];
     toast.success("Create stock in successfully!");
   }
 };
+
+const downloadPDF = async (stockInID) => {
+  console.log("stockInID", stockInID);
+  const res = await store.dispatch("downloadStockIn", {
+    stockInID: stockInID,
+  });
+
+  // Create blob from binary data
+  const blob = new Blob([res], { type: "application/pdf" });
+
+  // Create download link
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `report-${new Date().toISOString().slice(0, 10)}.pdf`; // e.g., report-2025-12-20.pdf
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Clean up
+  window.URL.revokeObjectURL(url);
+};
+
+const onViewListHistory = () => {
+  router.push({
+    name: "app.stockinhistory",
+  });
+};
 </script>
 
 <template>
   <div class="text-white">
-    <div class="">
-      <div class="flex mb-4">
-        <h1 class="text-3xl font-semibold text-black">Stock In</h1>
+    <!-- Main Layout: Products + Cart -->
+    <div class="flex flex-col lg:flex-row gap-10">
+      <!-- LEFT SIDE: Products -->
+      <div class="flex-1 lg:order-1 order-2">
+        <div class="flex mb-4 justify-between">
+          <h1 class="text-3xl font-semibold text-black">Stock In</h1>
+          <button
+            type="button"
+            @click="onViewListHistory"
+            class="inline-flex items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#986b41] hover:bg-[#B68E65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <ClockIcon class="h-5 w-5 mr-2" />
+            Stock In History
+          </button>
+        </div>
+        <!-- Product cards -->
+        <div class="">
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
+          >
+            <ProductCard
+              v-for="product in products"
+              :key="product._id"
+              :product="product"
+              @add-to-cart="addToCart"
+            />
+          </div>
+        </div>
       </div>
 
-      <!-- Main Layout: Products + Cart -->
-      <div class="flex flex-col lg:flex-row gap-10">
-        <!-- LEFT SIDE: Products -->
-        <div class="flex-1 lg:order-1 order-2">
-          <!-- Product cards -->
-          <div class="">
-            <div
-              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-            >
-              <ProductCard
-                v-for="product in products"
-                :key="product._id"
-                :product="product"
-                @add-to-cart="addToCart"
-              />
+      <!-- RIGHT SIDE: Cart (fixed width on large screens, full on small) -->
+      <div
+        class="w-full lg:w-80 lg:border-l border-yellow-500/40 lg:pl-6 lg:order-2 order-1"
+      >
+        <h2 class="font-semibold text-lg mb-6 text-black">
+          Your Selection
+          <span class="ml-2 text-[#986b41]"> ({{ cart.length }} items) </span>
+        </h2>
+
+        <!-- Cart Items -->
+        <div class="space-y-4" v-if="cart.length > 0">
+          <div
+            v-for="item in cart"
+            :key="item.name"
+            class="flex justify-between items-center"
+          >
+            <div>
+              <p class="font-semibold text-black">
+                {{
+                  item.type_of_wood_Object.name +
+                  " " +
+                  item.end_grain_of_wood_Object.name +
+                  " x " +
+                  item.length_of_wood_Object.name
+                }}
+              </p>
+              <p class="text-[#986b41]">${{ item.cost_of_each.toFixed(2) }}</p>
+            </div>
+
+            <!-- Quantity Controls -->
+            <div class="flex items-center gap-2">
+              <button
+                class="w-7 h-7 rounded bg-gray-700 hover:bg-gray-600"
+                @click="decreaseQty(item)"
+              >
+                −
+              </button>
+
+              <span class="w-6 text-center text-black">{{
+                item.quantity
+              }}</span>
+
+              <button
+                class="w-7 h-7 rounded bg-[#986b41] text-white font-bold hover:bg-[#B68E65]"
+                @click="increaseQty(item)"
+              >
+                +
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- RIGHT SIDE: Cart (fixed width on large screens, full on small) -->
+        <p v-else class="text-gray-500">No items added yet.</p>
+
+        <!-- Totals -->
         <div
-          class="w-full lg:w-80 lg:border-l border-yellow-500/40 lg:pl-6 lg:order-2 order-1"
+          class="mt-8 space-y-2 border-t border-gray-700 pt-4"
+          v-if="cart.length > 0"
         >
-          <h2 class="font-semibold text-lg mb-6 text-black">
-            Your Selection
-            <span class="ml-2 text-[#986b41]"> ({{ cart.length }} items) </span>
-          </h2>
-
-          <!-- Cart Items -->
-          <div class="space-y-4" v-if="cart.length > 0">
-            <div
-              v-for="item in cart"
-              :key="item.name"
-              class="flex justify-between items-center"
-            >
-              <div>
-                <p class="font-semibold text-black">
-                  {{
-                    item.type_of_wood_Object.name +
-                    " " +
-                    item.end_grain_of_wood_Object.name +
-                    " x " +
-                    item.length_of_wood_Object.name
-                  }}
-                </p>
-                <p class="text-[#986b41]">
-                  ${{ item.cost_of_each.toFixed(2) }}
-                </p>
-              </div>
-
-              <!-- Quantity Controls -->
-              <div class="flex items-center gap-2">
-                <button
-                  class="w-7 h-7 rounded bg-gray-700 hover:bg-gray-600"
-                  @click="decreaseQty(item)"
-                >
-                  −
-                </button>
-
-                <span class="w-6 text-center text-black">{{
-                  item.quantity
-                }}</span>
-
-                <button
-                  class="w-7 h-7 rounded bg-[#986b41] text-white font-bold hover:bg-[#B68E65]"
-                  @click="increaseQty(item)"
-                >
-                  +
-                </button>
-              </div>
-            </div>
+          <div class="flex justify-between text-gray-400">
+            <p>Subtotal:</p>
+            <p>${{ subtotal.toFixed(2) }}</p>
           </div>
-
-          <p v-else class="text-gray-500">No items added yet.</p>
-
-          <!-- Totals -->
-          <div
-            class="mt-8 space-y-2 border-t border-gray-700 pt-4"
-            v-if="cart.length > 0"
-          >
-            <div class="flex justify-between text-gray-400">
-              <p>Subtotal:</p>
-              <p>${{ subtotal.toFixed(2) }}</p>
-            </div>
-            <!-- <div class="flex justify-between text-gray-400">
+          <!-- <div class="flex justify-between text-gray-400">
               <p>Tax (7.5%):</p>
               <p>${{ tax.toFixed(2) }}</p>
             </div> -->
-            <div class="flex justify-between font-bold text-[#B68E65] text-xl">
-              <p>Total:</p>
-              <p>${{ total.toFixed(2) }}</p>
-            </div>
+          <div class="flex justify-between font-bold text-[#B68E65] text-xl">
+            <p>Total:</p>
+            <p>${{ total.toFixed(2) }}</p>
           </div>
-
-          <!-- Purchase Button -->
-          <button
-            class="mt-6 w-full bg-[#986b41] text-white font-semibold py-3 rounded-lg hover:bg-[#B68E65] transition"
-            v-if="cart.length > 0"
-            @click="completeStockIn()"
-          >
-            Complete Stock In
-          </button>
         </div>
+
+        <!-- Purchase Button -->
+        <button
+          class="mt-6 w-full bg-[#986b41] text-white font-semibold py-3 rounded-lg hover:bg-[#B68E65] transition"
+          v-if="cart.length > 0"
+          @click="completeStockIn()"
+        >
+          Complete Stock In
+        </button>
       </div>
     </div>
   </div>

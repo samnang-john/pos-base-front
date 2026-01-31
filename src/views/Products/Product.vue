@@ -3,6 +3,7 @@ import { onMounted, ref } from "vue";
 import store from "../../store";
 import Spinner from "../../components/core/Spinner.vue";
 import TableHeaderCell from "../../components/core/Table/TableHeaderCell.vue";
+import ConfirmModal from "../../components/AlertConfirm.vue";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import {
   EllipsisVerticalIcon,
@@ -22,13 +23,7 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = ref(15);
 const isModalOpen = ref(false); // Control modal visibility
-const woodTypeNameForm = ref({
-  name: "",
-  description: "",
-});
-const isUpdate = ref(false); // Control For Update
-const isErrorValue = ref(false);
-const objEdit = ref(null);
+const productID = ref(null);
 
 onMounted(async () => {
   try {
@@ -74,18 +69,9 @@ const onAddNew = () => {
   router.push({ name: "app.createproduct" });
 };
 
-const openModal = () => {
+const openModal = (productItem) => {
   isModalOpen.value = true;
-};
-
-const closeModal = () => {
-  isModalOpen.value = false;
-  woodTypeNameForm.value = {
-    name: "",
-    description: "",
-  }; // Reset input on close
-  isUpdate.value = false;
-  // objEdit.value = null;
+  productID.value = productItem?._id;
 };
 
 // Handle Edit action
@@ -94,18 +80,11 @@ const onEdit = (productItem) => {
     name: "app.productdetail",
     params: { pro_id: productItem?._id },
   });
-  // isUpdate.value = true;
-  // isModalOpen.value = true;
-  // objEdit.value = wood_type;
-  // woodTypeNameForm.value = {
-  //   name: wood_type?.name,
-  //   description: wood_type?.description,
-  // };
 };
 
-const onDeleteProduct = async (productId) => {
+const onDeleteProduct = async () => {
   try {
-    await store.dispatch("deleteProduct", productId);
+    await store.dispatch("deleteProduct", productID?.value);
     getProducts();
     toast.info("Product deleted successfully!");
   } catch (error) {
@@ -293,7 +272,7 @@ const onDeleteProduct = async (productId) => {
                             active ? 'bg-red-50 text-red-700' : 'text-gray-700',
                             'group flex w-full items-center px-4 py-2 text-sm',
                           ]"
-                          @click="onDeleteProduct(product._id)"
+                          @click="openModal(product)"
                         >
                           <TrashIcon
                             class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-700"
@@ -334,17 +313,14 @@ const onDeleteProduct = async (productId) => {
     </div>
   </div>
 
-  <!-- Modal -->
-  <div
-    v-if="isModalOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center"
-    style="background-color: rgba(0, 0, 0, 0.4)"
-    @click="closeModal"
-  >
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" @click.stop>
-      <h2 class="text-lg font-bold text-gray-800 mb-4">Product Detail</h2>
-    </div>
-  </div>
+  <!-- Modal Confirm -->
+  <ConfirmModal
+    v-model:is-open="isModalOpen"
+    title="Delete Product !"
+    message="Do you really want to delete this product?"
+    @confirm="onDeleteProduct"
+    @cancel="console.log('Cancelled')"
+  />
 </template>
 
 <style scoped>

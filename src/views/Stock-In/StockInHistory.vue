@@ -3,58 +3,45 @@ import { onMounted, ref } from "vue";
 import store from "../../store";
 import Spinner from "../../components/core/Spinner.vue";
 import TableHeaderCell from "../../components/core/Table/TableHeaderCell.vue";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
-import {
-  EllipsisVerticalIcon,
-  PencilIcon,
-  TrashIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/vue/24/outline";
-import { toast } from "vue3-toastify";
+import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
 import "vue3-toastify/dist/index.css";
 import { useRouter } from "vue-router";
 import dayjs from "dayjs";
-import { DocumentIcon, DocumentTextIcon } from "@heroicons/vue/24/solid";
+import { DocumentTextIcon } from "@heroicons/vue/24/solid";
 
 const router = useRouter();
-const listOrder = ref([]);
+const listHistory = ref([]);
 const search = ref("");
 const isLoadingProduct = ref(false);
-const startDate = ref(dayjs().format("YYYY-MM-DD"));
-const endDate = ref(dayjs().format("YYYY-MM-DD"));
+const isLoadingDetail = ref(false);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = ref(15);
-const isModalOpen = ref(false); // Control modal visibility
-const woodTypeNameForm = ref({
-  name: "",
-  description: "",
-});
-const isUpdate = ref(false); // Control For Update
-const isErrorValue = ref(false);
+const isModalOpen = ref(false);
 const objDetail = ref(null);
+const totalPrice = ref("");
+const startDate = ref(dayjs().format("YYYY-MM-DD"));
+const endDate = ref(dayjs().format("YYYY-MM-DD"));
 
 onMounted(async () => {
   try {
-    await Promise.all([getOrders()]);
+    await Promise.all([getStockInHistory()]);
   } catch (error) {
     console.error("Error during initialization:", error);
   }
 });
 
-const getOrders = async (page = 1) => {
+const getStockInHistory = async (page = 1) => {
   isLoadingProduct.value = true;
   try {
-    const res = await store.dispatch("getOrders", {
+    const res = await store.dispatch("getStockInHistory", {
       page,
       pageSize: pageSize.value,
       startDate: startDate.value,
       endDate: endDate.value,
     });
 
-    console.log("LLLLLL", res.data);
-
-    listOrder.value = res.data.items || [];
+    listHistory.value = res.data.items || [];
 
     // save pagination
     currentPage.value = res?.data?.pagination?.currentPage;
@@ -66,10 +53,50 @@ const getOrders = async (page = 1) => {
   }
 };
 
-const downloadPDF = async () => {
-  const res = await store.dispatch("getOrdersPDF", {
-    startDate: startDate.value,
-    endDate: endDate.value,
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    getWoodTypes(currentPage.value + 1);
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    getWoodTypes(currentPage.value - 1);
+  }
+};
+
+const openModal = (stockInID) => {
+  isModalOpen.value = true;
+  getStockInHistoryDetail(stockInID);
+};
+
+const getStockInHistoryDetail = async (stockInID) => {
+  isLoadingDetail.value = true;
+  try {
+    const res = await store.dispatch("getStockInHistoryDetail", {
+      stockInID: stockInID,
+    });
+    objDetail.value = res?.data;
+    const total = res?.data.items.reduce(
+      (sum, p) => sum + Number(p.product_id.cost_of_each || 0) * p.quantity,
+      0
+    );
+    totalPrice.value = total;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isLoadingDetail.value = false;
+  }
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+};
+
+const downloadPDF = async (stockInID) => {
+  console.log("stockInID", stockInID);
+  const res = await store.dispatch("downloadStockIn", {
+    stockInID: stockInID,
   });
 
   // Create blob from binary data
@@ -88,71 +115,54 @@ const downloadPDF = async () => {
   window.URL.revokeObjectURL(url);
 };
 
-const downloadExcel = async () => {
-  const res = await store.dispatch("getOrdersExcel", {
-    startDate: startDate.value,
-    endDate: endDate.value,
-  });
-
-  // Trigger download
-  const url = window.URL.createObjectURL(res);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `orders-report-${new Date().toISOString().slice(0, 10)}.xlsx`; // .xlsx extension
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
+const goBack = () => {
+  router.back();
 };
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    getOrders(currentPage.value + 1);
-  }
-};
+// Computed totals
+// const subtotal = computed(() => {
+//   console.log("ghghghgh", objDetail);
+//   // objDetail.value.items.reduce(
+//   //   (sum, p) => sum - p.discount + Number(p.price_of_each || 0) * p.quantity,
+//   //   0
+//   // )
+// });
 
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    getOrders(currentPage.value - 1);
-  }
-};
-
-const openModal = (orderItem) => {
-  objDetail.value = orderItem;
-  isModalOpen.value = true;
-};
-
-const closeModal = () => {
-  isModalOpen.value = false;
-  woodTypeNameForm.value = {
-    name: "",
-    description: "",
-  }; // Reset input on close
-  isUpdate.value = false;
-  // objEdit.value = null;
-};
+// const total = computed(() => subtotal.value);
 </script>
 
 <template>
   <!-- Main Header -->
-  <div class="flex items-center justify-between mb-3">
-    <h1 class="text-3xl font-semibold">Orders</h1>
-    <!-- <button
-      type="button"
-      @click="onAddNew"
-      class="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#986b41] hover:bg-[#B68E65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-    >
-      Add New
-    </button> -->
+  <div class="flex items-center gap-3 mb-3" @click="goBack">
+    <!-- Back Button -->
+    <button class="p-2 rounded-full hover:bg-gray-200 transition">
+      <!-- Arrow Icon (Heroicons) -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+        class="w-6 h-6"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </button>
+
+    <!-- Title -->
+    <h1 class="text-3xl font-semibold">Stock In History</h1>
   </div>
 
   <!-- Table List Items -->
   <div class="bg-white p-6 rounded-xl shadow-lg animate-fade-in-down">
     <!-- Header Section -->
     <div
-      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-5 mb-5 border-b border-gray-100"
+      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 mb-5 border-b border-gray-100"
     >
-      <!-- Search Input -->
       <div class="relative w-full md:w-auto">
         <div
           class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
@@ -161,7 +171,7 @@ const closeModal = () => {
         </div>
         <input
           v-model="search"
-          @change="getOrders"
+          @change="getProducts(null)"
           class="block w-full md:w-64 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
           placeholder="Search wood type..."
         />
@@ -182,7 +192,7 @@ const closeModal = () => {
             <input
               id="startDate"
               v-model="startDate"
-              @change="getOrders"
+              @change="getStockInHistory"
               type="date"
               class="block w-full px-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
             />
@@ -194,29 +204,11 @@ const closeModal = () => {
             <input
               id="endDate"
               v-model="endDate"
-              @change="getOrders"
+              @change="getStockInHistory"
               type="date"
               class="block w-full px-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
             />
           </div>
-        </div>
-
-        <!-- Download Buttons -->
-        <div class="flex gap-3 mt-4 lg:mt-0">
-          <button
-            @click="downloadPDF"
-            class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm"
-          >
-            <DocumentTextIcon class="h-4 w-4 mr-2" />
-            Download PDF
-          </button>
-          <button
-            @click="downloadExcel"
-            class="inline-flex items-center px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 shadow-sm"
-          >
-            <DocumentIcon class="h-4 w-4 mr-2" />
-            Download Excel
-          </button>
         </div>
       </div>
     </div>
@@ -226,40 +218,46 @@ const closeModal = () => {
       <table class="w-full">
         <thead class="bg-gray-50">
           <tr>
-            <TableHeaderCell
+            <!-- <TableHeaderCell
               field="id"
               class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
             >
-              No
+              ID
+            </TableHeaderCell> -->
+            <TableHeaderCell
+              field="title"
+              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
+            >
+              Sync Invoice
             </TableHeaderCell>
             <TableHeaderCell
               field="title"
               class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
             >
-              Order ID
+              Item
             </TableHeaderCell>
             <TableHeaderCell
               field="title"
               class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
             >
-              Order Item
+              Created Date
             </TableHeaderCell>
             <TableHeaderCell
               field="title"
               class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
             >
-              Order Date
+              Note
             </TableHeaderCell>
             <TableHeaderCell
               field="title"
               class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
             >
-              Total Price
+              Action
             </TableHeaderCell>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
-          <tr v-if="isLoadingProduct || !listOrder.length">
+          <tr v-if="isLoadingProduct || !listHistory.length">
             <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
               <Spinner v-if="isLoadingProduct" class="mx-auto" />
               <p v-else class="text-center py-8 text-gray-500">
@@ -269,37 +267,48 @@ const closeModal = () => {
           </tr>
           <tr
             v-else
-            v-for="(order, index) of listOrder"
-            :key="order._id"
+            v-for="(history, index) of listHistory"
+            :key="history._id"
             class="animate-fade-in-down hover:bg-gray-50 transition-colors duration-150"
             :style="{ 'animation-delay': index * 0.05 + 's' }"
-            @click="openModal(order)"
+            @click="openModal(history._id)"
           >
-            <td
+            <!-- <td
               class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-medium text-gray-700 sm:pl-6"
             >
-              {{ (index + 1).toString().padStart(2, "0") }}
-            </td>
+              {{ history._id }}
+            </td> -->
 
             <td
               class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
             >
-              {{ order.order_number }}
+              {{ history.sync_invoice }}
             </td>
             <td
               class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
             >
-              {{ "x" + order.items?.length }}
+              {{ history.total_items }}
             </td>
             <td
               class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
             >
-              {{ dayjs(order.order_date).format("DD/MM/YYYY - hh:MM A") }}
+              {{ dayjs(history.createdAt).format("DD/MM/YYYY - hh:MM A") }}
             </td>
             <td
               class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
             >
-              {{ "$" + order.grand_total }}
+              {{ history.note }}
+            </td>
+            <td
+              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
+            >
+              <button
+                @click="downloadPDF(history._id)"
+                class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm"
+              >
+                <DocumentTextIcon class="h-4 w-4 mr-2" />
+                Download PDF
+              </button>
             </td>
           </tr>
         </tbody>
@@ -336,76 +345,88 @@ const closeModal = () => {
     @click="closeModal"
   >
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" @click.stop>
-      <h2 class="text-lg font-bold text-[#9A6A3A] mb-4">Order Detail</h2>
-
-      <!-- First Row -->
-      <div class="flex justify-around mb-4">
-        <div class="text-center">
-          <p class="text-sm text-gray-600">Order ID</p>
-          <p class="text-md font-bold text-gray-900">
-            {{ objDetail["order_number"] }}
-          </p>
-        </div>
-        <div class="text-center">
-          <p class="text-sm text-gray-600">Order Date</p>
-          <p class="text-md font-bold text-gray-900">
-            {{ dayjs(objDetail["order_date"]).format("DD/MM/YYYY - hh:mm A") }}
-          </p>
-        </div>
+      <h2 class="text-lg font-bold text-[#9A6A3A] mb-4">
+        Stock In History Detail
+      </h2>
+      <div v-if="isLoadingDetail">
+        <Spinner v-if="isLoadingDetail" class="mx-auto" />
       </div>
+      <div v-else>
+        <!-- First Row -->
+        <div class="flex justify-around mb-4">
+          <div class="text-center">
+            <p class="text-sm text-gray-600">Stock In ID</p>
+            <p class="text-md font-bold text-gray-900">
+              {{ objDetail["sync_invoice"] }}
+            </p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-gray-600">Stock In Date</p>
+            <p class="text-md font-bold text-gray-900">
+              {{ dayjs(objDetail["createdAt"]).format("DD/MM/YYYY - hh:mm A") }}
+            </p>
+          </div>
+        </div>
 
-      <!-- Second Row -->
-      <div class="flex justify-around mb-4">
-        <div class="text-center">
+        <!-- Second Row -->
+        <div class="flex justify-around mb-4">
+          <!-- <div class="text-center">
           <p class="text-sm text-gray-600">Customer</p>
           <p class="text-md font-bold text-gray-900">
-            {{ objDetail["customer"] }}
+            {{ "Supplier" }}
           </p>
-        </div>
-        <div class="text-center">
+        </div> -->
+          <!-- <div class="text-center">
           <p class="text-sm text-gray-600">Payment Status</p>
           <p class="text-md font-bold text-gray-900">
             {{ objDetail["payment_status"] }}
           </p>
+        </div> -->
         </div>
-      </div>
 
-      <!-- Order Items (looped) -->
-      <div class="border-t border-gray-200 pt-4">
-        <h3 class="text-md font-semibold text-gray-800">Order Items</h3>
+        <!-- Order Items (looped) -->
+        <div class="border-t border-gray-200 pt-4">
+          <h3 class="text-md font-semibold text-gray-800">Stock In Items</h3>
 
-        <div
-          v-for="item in objDetail['items']"
-          :key="item._id"
-          class="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0"
-        >
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-900">
-              {{ item.product_name || item.product_id }}
-              <!-- Adjust key if needed -->
-            </p>
-            <p class="text-xs text-gray-500">
-              Qty: {{ item.quantity }} × ${{ item.price }}
-            </p>
-            <p class="text-xs text-gray-500">Discount: ${{ item.discount }}</p>
+          <div
+            v-for="item in objDetail['items']"
+            :key="item._id"
+            class="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0"
+          >
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-900">
+                {{ item.product_id.type_of_wood_id.name || "" }}
+              </p>
+              <p class="text-xs text-gray-500">Qty: {{ item.quantity }}</p>
+              <!-- <p class="text-xs text-gray-500">Discount: ${{ item.discount }}</p> -->
+            </div>
+            <div class="text-right">
+              <p class="text-md font-bold text-gray-900">
+                ${{ item.product_id.cost_of_each.toFixed(2) * item.quantity }}
+              </p>
+            </div>
           </div>
-          <div class="text-right">
+
+          <!-- Optional: Total -->
+          <!-- <div class="flex justify-end mt-4">
             <p class="text-md font-bold text-gray-900">
-              ${{ item.total.toFixed(2) }}
+              Tax: ${{ objDetail["tax"] }}
+            </p>
+          </div> -->
+          <div class="flex justify-end mt-2">
+            <p class="text-lg font-bold text-gray-900">
+              Total: ${{ totalPrice.toFixed(2) }}
             </p>
           </div>
         </div>
-
-        <!-- Optional: Total -->
-        <div class="flex justify-end mt-4">
-          <p class="text-md font-bold text-gray-900">
-            Tax: ${{ objDetail["tax"] }}
-          </p>
-        </div>
-        <div class="flex justify-end mt-2">
-          <p class="text-lg font-bold text-gray-900">
-            Total: ${{ objDetail["grand_total"].toFixed(2) }}
-          </p>
+        <div class="mt-6 flex justify-end">
+          <button
+            @click="downloadPDF(objDetail._id)"
+            class="mt-2 inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm"
+          >
+            <DocumentTextIcon class="h-4 w-4 mr-2" />
+            Download PDF
+          </button>
         </div>
       </div>
     </div>
