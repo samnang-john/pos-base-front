@@ -105,7 +105,7 @@ const closeModal = () => {
       >
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm">Total Products</p>
+            <p class="text-gray-400 text-sm">{{ $t('DASHBOARD.total_product') }}</p>
             <p class="text-3xl font-bold mt-2 text-black">
               {{ dashboardData?.total_products }}
             </p>
@@ -123,7 +123,7 @@ const closeModal = () => {
       >
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm">Orders Today</p>
+            <p class="text-gray-400 text-sm">{{ $t('DASHBOARD.order_today') }}</p>
             <p class="text-3xl font-bold mt-2 text-black">
               {{ dashboardData?.orders_today }}
             </p>
@@ -138,7 +138,7 @@ const closeModal = () => {
       >
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm">Income (Today)</p>
+            <p class="text-gray-400 text-sm">{{ $t('DASHBOARD.income_today') }}</p>
             <p class="text-3xl font-bold mt-2 text-green-400">
               ${{ dashboardData?.total_profit?.toFixed(2) }}
             </p>
@@ -153,7 +153,7 @@ const closeModal = () => {
       >
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm">Expenses (Today)</p>
+            <p class="text-gray-400 text-sm">{{ $t('DASHBOARD.expense_today') }}</p>
             <p class="text-3xl font-bold mt-2 text-red-400">
               ${{ dashboardData?.expense_today?.toFixed(2) }}
             </p>
@@ -165,7 +165,7 @@ const closeModal = () => {
 
     <!-- Optional: Quick stats for today -->
     <div class="mt-10 bg-white rounded-lg p-6 border border-[#9A6A3A]">
-      <h2 class="text-xl font-semibold mb-4 text-[#9A6A3A]">Today's Order</h2>
+      <h2 class="text-xl font-semibold mb-4 text-[#9A6A3A]">{{ $t('DASHBOARD.today_order') }}</h2>
 
       <!-- Orders Table -->
       <div class="overflow-x-auto rounded-lg border border-gray-200">
@@ -235,7 +235,7 @@ const closeModal = () => {
     <!-- Optional: Quick stats for today -->
     <div class="mt-10 bg-white rounded-lg p-6 border border-[#9A6A3A]">
       <h2 class="text-xl font-semibold mb-4 text-[#9A6A3A]">
-        Today's Stock In
+        {{ $t('DASHBOARD.today_stock_in') }}
       </h2>
 
       <!-- Orders Table -->

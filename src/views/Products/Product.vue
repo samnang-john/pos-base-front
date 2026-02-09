@@ -96,13 +96,13 @@ const onDeleteProduct = async () => {
 <template>
   <!-- Main Header -->
   <div class="flex items-center justify-between mb-3">
-    <h1 class="text-3xl font-semibold">Products</h1>
+    <h1 class="text-3xl font-semibold">{{ $t('MENU.product') }}</h1>
     <button
       type="button"
       @click="onAddNew"
       class="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#986b41] hover:bg-[#B68E65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
     >
-      Add New
+      {{ $t('BUTTON.add_new') }}
     </button>
   </div>
 
@@ -295,11 +295,11 @@ const onDeleteProduct = async () => {
           :disabled="currentPage === 1"
           class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40"
         >
-          Previous
+          {{ $t('BUTTON.previous') }}
         </button>
 
         <span class="text-gray-600">
-          Page {{ currentPage }} of {{ totalPages }}
+          {{ $t('BUTTON.page') }} {{ currentPage }} {{ $t('BUTTON.of') }} {{ totalPages }}
         </span>
 
         <button
@@ -307,7 +307,7 @@ const onDeleteProduct = async () => {
           :disabled="currentPage === totalPages"
           class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40"
         >
-          Next
+          {{ $t('BUTTON.next') }}
         </button>
       </div>
     </div>

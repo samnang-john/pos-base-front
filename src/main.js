@@ -3,8 +3,10 @@ import store from './store'
 import router from './router'
 import './style.css'
 import App from './App.vue'
+import i18n from "./i18n"
 
 createApp(App)
     .use(store)
     .use(router)
+    .use(i18n)
     .mount('#app')

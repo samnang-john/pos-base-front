@@ -35,7 +35,7 @@ const openSettings = ref(false);
       <span class="mr-2 text-gray-300">
         <HomeIcon class="w-5" />
       </span>
-      <span class="text-xs">Dashboard</span>
+      <span class="text-xs">{{ $t('MENU.dashboard') }}</span>
     </router-link>
     <!-- target="_blank" -->
     <router-link
@@ -45,7 +45,7 @@ const openSettings = ref(false);
       <span class="mr-2 text-gray-300">
         <ComputerDesktopIcon class="w-5" />
       </span>
-      <span class="text-xs">POS</span>
+      <span class="text-xs">{{ $t('MENU.pos') }}</span>
     </router-link>
 
     <!-- <router-link
@@ -65,7 +65,7 @@ const openSettings = ref(false);
       <span class="mr-2 text-gray-300">
         <ShoppingBagIcon class="w-5" />
       </span>
-      <span class="text-xs">Order</span>
+      <span class="text-xs">{{ $t('MENU.order') }}</span>
     </router-link>
 
     <router-link
@@ -75,7 +75,7 @@ const openSettings = ref(false);
       <span class="mr-2 text-gray-300">
         <ArchiveBoxArrowDownIcon class="w-5" />
       </span>
-      <span class="text-xs">Stock In</span>
+      <span class="text-xs">{{ $t('MENU.stock_in') }}</span>
     </router-link>
 
     <router-link
@@ -85,7 +85,7 @@ const openSettings = ref(false);
       <span class="mr-2 text-gray-300">
         <ArchiveBoxIcon class="w-5" />
       </span>
-      <span class="text-xs">Product</span>
+      <span class="text-xs">{{ $t('MENU.product') }}</span>
     </router-link>
 
     <!-- <router-link
@@ -105,7 +105,7 @@ const openSettings = ref(false);
       <span class="mr-2 text-gray-300">
         <ChartBarIcon class="w-5" />
       </span>
-      <span class="text-xs">Reports</span>
+      <span class="text-xs">{{ $t('MENU.report') }}</span>
     </router-link>
 
     <!-- Settings -->
@@ -114,7 +114,7 @@ const openSettings = ref(false);
       class="flex w-full items-center p-2 rounded hover:bg-black/30 transition-colors"
     >
       <Cog6ToothIcon class="w-5 mr-2 text-gray-300" />
-      <span class="text-xs">Settings</span>
+      <span class="text-xs">{{ $t('MENU.setting') }}</span>
 
       <ChevronDownIcon
         class="w-5 ml-auto mr-2 transition-transform"
@@ -130,7 +130,7 @@ const openSettings = ref(false);
         <span class="mr-2 text-gray-300">
           <ListBulletIcon class="w-5" />
         </span>
-        <span class="text-xs">Wood Type</span>
+        <span class="text-xs">{{ $t('MENU.wood_type') }}</span>
       </router-link>
       <router-link
         :to="{ name: 'app.woodgrain' }"
@@ -139,7 +139,7 @@ const openSettings = ref(false);
         <span class="mr-2 text-gray-300">
           <ListBulletIcon class="w-5" />
         </span>
-        <span class="text-xs">Wood Grain</span>
+        <span class="text-xs">{{ $t('MENU.wood_grain') }}</span>
       </router-link>
 
       <router-link
@@ -149,7 +149,7 @@ const openSettings = ref(false);
         <span class="mr-2 text-gray-300">
           <ListBulletIcon class="w-5" />
         </span>
-        <span class="text-xs">Wood Length</span>
+        <span class="text-xs">{{ $t('MENU.wood_length') }}</span>
       </router-link>
 
       <router-link
@@ -159,7 +159,7 @@ const openSettings = ref(false);
         <span class="mr-2 text-gray-300">
           <UsersIcon class="w-5" />
         </span>
-        <span class="text-xs">Users</span>
+        <span class="text-xs">{{ $t('MENU.user') }}</span>
       </router-link>
     </div>
   </div>
