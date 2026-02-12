@@ -107,7 +107,7 @@ const completeStockIn = async () => {
 
   if (resOrder) {
     cart.value = [];
-    toast.success("Create stock in successfully!");
+    toast.success(this.$t('TOAST.stock_in_success'));
   }
 };
 
@@ -147,47 +147,31 @@ const onViewListHistory = () => {
       <!-- LEFT SIDE: Products -->
       <div class="flex-1 lg:order-1 order-2">
         <div class="flex mb-4 justify-between">
-          <h1 class="text-3xl font-semibold text-black">Stock In</h1>
-          <button
-            type="button"
-            @click="onViewListHistory"
-            class="inline-flex items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#986b41] hover:bg-[#B68E65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
+          <h1 class="text-3xl font-semibold text-black">{{ $t('MENU.stock_in') }}</h1>
+          <button type="button" @click="onViewListHistory"
+            class="inline-flex items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#986b41] hover:bg-[#B68E65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <ClockIcon class="h-5 w-5 mr-2" />
-            Stock In History
+            {{ $t('BUTTON.stock_in_history') }}
           </button>
         </div>
         <!-- Product cards -->
         <div class="">
-          <div
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
-          >
-            <ProductCard
-              v-for="product in products"
-              :key="product._id"
-              :product="product"
-              @add-to-cart="addToCart"
-            />
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <ProductCard v-for="product in products" :key="product._id" :product="product" @add-to-cart="addToCart" />
           </div>
         </div>
       </div>
 
       <!-- RIGHT SIDE: Cart (fixed width on large screens, full on small) -->
-      <div
-        class="w-full lg:w-80 lg:border-l border-yellow-500/40 lg:pl-6 lg:order-2 order-1"
-      >
+      <div class="w-full lg:w-80 lg:border-l border-yellow-500/40 lg:pl-6 lg:order-2 order-1">
         <h2 class="font-semibold text-lg mb-6 text-black">
-          Your Selection
-          <span class="ml-2 text-[#986b41]"> ({{ cart.length }} items) </span>
+          {{ $t('BUTTON.your_selection') }}
+          <span class="ml-2 text-[#986b41]"> ({{ cart.length }} {{ $t('BUTTON.item') }}) </span>
         </h2>
 
         <!-- Cart Items -->
         <div class="space-y-4" v-if="cart.length > 0">
-          <div
-            v-for="item in cart"
-            :key="item.name"
-            class="flex justify-between items-center"
-          >
+          <div v-for="item in cart" :key="item.name" class="flex justify-between items-center">
             <div>
               <p class="font-semibold text-black">
                 {{
@@ -203,36 +187,28 @@ const onViewListHistory = () => {
 
             <!-- Quantity Controls -->
             <div class="flex items-center gap-2">
-              <button
-                class="w-7 h-7 rounded bg-gray-700 hover:bg-gray-600"
-                @click="decreaseQty(item)"
-              >
+              <button class="w-7 h-7 rounded bg-gray-700 hover:bg-gray-600" @click="decreaseQty(item)">
                 −
               </button>
 
               <span class="w-6 text-center text-black">{{
                 item.quantity
-              }}</span>
+                }}</span>
 
-              <button
-                class="w-7 h-7 rounded bg-[#986b41] text-white font-bold hover:bg-[#B68E65]"
-                @click="increaseQty(item)"
-              >
+              <button class="w-7 h-7 rounded bg-[#986b41] text-white font-bold hover:bg-[#B68E65]"
+                @click="increaseQty(item)">
                 +
               </button>
             </div>
           </div>
         </div>
 
-        <p v-else class="text-gray-500">No items added yet.</p>
+        <p v-else class="text-gray-500">{{ $t('BUTTON.no_item_add_yet') }}</p>
 
         <!-- Totals -->
-        <div
-          class="mt-8 space-y-2 border-t border-gray-700 pt-4"
-          v-if="cart.length > 0"
-        >
+        <div class="mt-8 space-y-2 border-t border-gray-700 pt-4" v-if="cart.length > 0">
           <div class="flex justify-between text-gray-400">
-            <p>Subtotal:</p>
+            <p>{{ $t('BUTTON.sub_total') }}:</p>
             <p>${{ subtotal.toFixed(2) }}</p>
           </div>
           <!-- <div class="flex justify-between text-gray-400">
@@ -240,18 +216,15 @@ const onViewListHistory = () => {
               <p>${{ tax.toFixed(2) }}</p>
             </div> -->
           <div class="flex justify-between font-bold text-[#B68E65] text-xl">
-            <p>Total:</p>
+            <p>{{ $t('BUTTON.total') }}:</p>
             <p>${{ total.toFixed(2) }}</p>
           </div>
         </div>
 
         <!-- Purchase Button -->
-        <button
-          class="mt-6 w-full bg-[#986b41] text-white font-semibold py-3 rounded-lg hover:bg-[#B68E65] transition"
-          v-if="cart.length > 0"
-          @click="completeStockIn()"
-        >
-          Complete Stock In
+        <button class="mt-6 w-full bg-[#986b41] text-white font-semibold py-3 rounded-lg hover:bg-[#B68E65] transition"
+          v-if="cart.length > 0" @click="completeStockIn()">
+          {{ $t('BUTTON.complete_stock_in') }}
         </button>
       </div>
     </div>

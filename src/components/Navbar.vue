@@ -13,7 +13,7 @@
                 : 'https://flagcdn.com/w20/kh.png'"
             class="w-5 h-4 rounded-sm"
         />
-        <span>{{ currentLang === 'en' ? 'English' : 'Khmer' }}</span>
+        <span>{{ currentLang === 'en' ? $t('BUTTON.english') : $t('BUTTON.khmer') }}</span>
         <ChevronDownIcon class="h-4 w-4 text-gray-400" />
     </MenuButton>
 
@@ -35,7 +35,7 @@
                     :class="active ? 'bg-indigo-600 text-white' : 'text-gray-900'"
                 >
                     <img src="https://flagcdn.com/w20/gb.png" class="w-5 h-4 rounded-sm" />
-                    English
+                    {{ $t('BUTTON.english') }}
                 </button>
             </MenuItem>
 
@@ -46,7 +46,7 @@
                     :class="active ? 'bg-indigo-600 text-white' : 'text-gray-900'"
                 >
                     <img src="https://flagcdn.com/w20/kh.png" class="w-5 h-4 rounded-sm" />
-                    Khmer
+                    {{ $t('BUTTON.khmer') }}
                 </button>
             </MenuItem>
         </MenuItems>
