@@ -137,77 +137,43 @@ const goBack = () => {
     <!-- Back Button -->
     <button class="p-2 rounded-full hover:bg-gray-200 transition">
       <!-- Arrow Icon (Heroicons) -->
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="2"
-        stroke="currentColor"
-        class="w-6 h-6"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M15 19l-7-7 7-7"
-        />
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+        class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
       </svg>
     </button>
 
     <!-- Title -->
-    <h1 class="text-3xl font-semibold">Stock In History</h1>
+    <h1 class="text-3xl font-semibold">{{ $t('MENU.stock_in_history') }}</h1>
   </div>
 
   <!-- Table List Items -->
   <div class="bg-white p-6 rounded-xl shadow-lg animate-fade-in-down">
     <!-- Header Section -->
     <div
-      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 mb-5 border-b border-gray-100"
-    >
+      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 mb-5 border-b border-gray-100">
       <div class="relative w-full md:w-auto">
-        <div
-          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-        >
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
         </div>
-        <input
-          v-model="search"
-          @change="getProducts(null)"
+        <input v-model="search" @change="getProducts(null)"
           class="block w-full md:w-64 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
-          placeholder="Search wood type..."
-        />
+          :placeholder="$t('TABLE.search_wood_type')" />
       </div>
 
       <!-- Filters and Download Buttons -->
-      <div
-        class="flex flex-col lg:flex-row gap-4 w-full md:w-auto items-start lg:items-center"
-      >
+      <div class="flex flex-col lg:flex-row gap-4 w-full md:w-auto items-start lg:items-center">
         <!-- Date Range Filters -->
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex flex-col">
-            <label
-              for="startDate"
-              class="text-sm font-medium text-gray-700 mb-1"
-              >Start Date</label
-            >
-            <input
-              id="startDate"
-              v-model="startDate"
-              @change="getStockInHistory"
-              type="date"
-              class="block w-full px-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
-            />
+            <label for="startDate" class="text-sm font-medium text-gray-700 mb-1">{{ $t('TABLE.start_date') }}</label>
+            <input id="startDate" v-model="startDate" @change="getStockInHistory" type="date"
+              class="block w-full px-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm" />
           </div>
           <div class="flex flex-col">
-            <label for="endDate" class="text-sm font-medium text-gray-700 mb-1"
-              >End Date</label
-            >
-            <input
-              id="endDate"
-              v-model="endDate"
-              @change="getStockInHistory"
-              type="date"
-              class="block w-full px-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
-            />
+            <label for="endDate" class="text-sm font-medium text-gray-700 mb-1">{{ $t('TABLE.end_date') }}</label>
+            <input id="endDate" v-model="endDate" @change="getStockInHistory" type="date"
+              class="block w-full px-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm" />
           </div>
         </div>
       </div>
@@ -224,35 +190,20 @@ const goBack = () => {
             >
               ID
             </TableHeaderCell> -->
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              Sync Invoice
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.sync_invoice') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              Item
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.item') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              Created Date
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.created_date') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              Note
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.note') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              Action
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.action') }}
             </TableHeaderCell>
           </tr>
         </thead>
@@ -265,88 +216,61 @@ const goBack = () => {
               </p>
             </td>
           </tr>
-          <tr
-            v-else
-            v-for="(history, index) of listHistory"
-            :key="history._id"
+          <tr v-else v-for="(history, index) of listHistory" :key="history._id"
             class="animate-fade-in-down hover:bg-gray-50 transition-colors duration-150"
-            :style="{ 'animation-delay': index * 0.05 + 's' }"
-            @click="openModal(history._id)"
-          >
+            :style="{ 'animation-delay': index * 0.05 + 's' }" @click="openModal(history._id)">
             <!-- <td
               class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-medium text-gray-700 sm:pl-6"
             >
               {{ history._id }}
             </td> -->
 
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ history.sync_invoice }}
             </td>
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ history.total_items }}
             </td>
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ dayjs(history.createdAt).format("DD/MM/YYYY - hh:MM A") }}
             </td>
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ history.note }}
             </td>
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
-              <button
-                @click="downloadPDF(history._id)"
-                class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm"
-              >
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
+              <button @click="downloadPDF(history._id)"
+                class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm">
                 <DocumentTextIcon class="h-4 w-4 mr-2" />
-                Download PDF
+                {{ $t('BUTTON.download_pdf') }}
               </button>
             </td>
           </tr>
         </tbody>
       </table>
       <div class="flex justify-between items-center py-4">
-        <button
-          @click="prevPage"
-          :disabled="currentPage === 1"
-          class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40"
-        >
-          Previous
+        <button @click="prevPage" :disabled="currentPage === 1"
+          class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40">
+          {{ $t('BUTTON.previous') }}
         </button>
 
         <span class="text-gray-600">
-          Page {{ currentPage }} of {{ totalPages }}
+          {{ $t('BUTTON.page') }} {{ currentPage }} {{ $t('BUTTON.of') }} {{ totalPages }}
         </span>
 
-        <button
-          @click="nextPage"
-          :disabled="currentPage === totalPages"
-          class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40"
-        >
-          Next
+        <button @click="nextPage" :disabled="currentPage === totalPages"
+          class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40">
+          {{ $t('BUTTON.next') }}
         </button>
       </div>
     </div>
   </div>
 
   <!-- Modal -->
-  <div
-    v-if="isModalOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center"
-    style="background-color: rgba(0, 0, 0, 0.4)"
-    @click="closeModal"
-  >
+  <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center"
+    style="background-color: rgba(0, 0, 0, 0.4)" @click="closeModal">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" @click.stop>
       <h2 class="text-lg font-bold text-[#9A6A3A] mb-4">
-        Stock In History Detail
+        {{ $t('MODAL.stock_in_detail') }}
       </h2>
       <div v-if="isLoadingDetail">
         <Spinner v-if="isLoadingDetail" class="mx-auto" />
@@ -355,13 +279,13 @@ const goBack = () => {
         <!-- First Row -->
         <div class="flex justify-around mb-4">
           <div class="text-center">
-            <p class="text-sm text-gray-600">Stock In ID</p>
+            <p class="text-sm text-gray-600">{{ $t('TABLE.sync_invoice') }}</p>
             <p class="text-md font-bold text-gray-900">
               {{ objDetail["sync_invoice"] }}
             </p>
           </div>
           <div class="text-center">
-            <p class="text-sm text-gray-600">Stock In Date</p>
+            <p class="text-sm text-gray-600">{{ $t('TABLE.created_date') }}</p>
             <p class="text-md font-bold text-gray-900">
               {{ dayjs(objDetail["createdAt"]).format("DD/MM/YYYY - hh:mm A") }}
             </p>
@@ -386,18 +310,15 @@ const goBack = () => {
 
         <!-- Order Items (looped) -->
         <div class="border-t border-gray-200 pt-4">
-          <h3 class="text-md font-semibold text-gray-800">Stock In Items</h3>
+          <h3 class="text-md font-semibold text-gray-800">{{ $t('TABLE.item') }}</h3>
 
-          <div
-            v-for="item in objDetail['items']"
-            :key="item._id"
-            class="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0"
-          >
+          <div v-for="item in objDetail['items']" :key="item._id"
+            class="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0">
             <div class="flex-1">
               <p class="text-sm font-medium text-gray-900">
                 {{ item.product_id.type_of_wood_id.name || "" }}
               </p>
-              <p class="text-xs text-gray-500">Qty: {{ item.quantity }}</p>
+              <p class="text-xs text-gray-500">{{ $t('TABLE.qty') }}: {{ item.quantity }}</p>
               <!-- <p class="text-xs text-gray-500">Discount: ${{ item.discount }}</p> -->
             </div>
             <div class="text-right">
@@ -415,17 +336,15 @@ const goBack = () => {
           </div> -->
           <div class="flex justify-end mt-2">
             <p class="text-lg font-bold text-gray-900">
-              Total: ${{ totalPrice.toFixed(2) }}
+              {{ $t('TABLE.total') }}: ${{ totalPrice.toFixed(2) }}
             </p>
           </div>
         </div>
         <div class="mt-6 flex justify-end">
-          <button
-            @click="downloadPDF(objDetail._id)"
-            class="mt-2 inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm"
-          >
+          <button @click="downloadPDF(objDetail._id)"
+            class="mt-2 inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm">
             <DocumentTextIcon class="h-4 w-4 mr-2" />
-            Download PDF
+            {{ $t('TABLE.download_pdf') }}
           </button>
         </div>
       </div>

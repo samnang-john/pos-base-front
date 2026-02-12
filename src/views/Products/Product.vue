@@ -86,9 +86,9 @@ const onDeleteProduct = async () => {
   try {
     await store.dispatch("deleteProduct", productID?.value);
     getProducts();
-    toast.info("Product deleted successfully!");
+    toast.info(this.$t('TOAST.product_deleted'));
   } catch (error) {
-    toast.error("Product unsuccessfully!");
+    toast.error(this.$t('TOAST.product_unsuccessful'));
   }
 };
 </script>
@@ -96,13 +96,10 @@ const onDeleteProduct = async () => {
 <template>
   <!-- Main Header -->
   <div class="flex items-center justify-between mb-3">
-    <h1 class="text-3xl font-semibold">Products</h1>
-    <button
-      type="button"
-      @click="onAddNew"
-      class="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#986b41] hover:bg-[#B68E65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-    >
-      Add New
+    <h1 class="text-3xl font-semibold">{{ $t('MENU.product') }}</h1>
+    <button type="button" @click="onAddNew"
+      class="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#986b41] hover:bg-[#B68E65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      {{ $t('BUTTON.add_new') }}
     </button>
   </div>
 
@@ -110,20 +107,14 @@ const onDeleteProduct = async () => {
   <div class="bg-white p-6 rounded-xl shadow-lg animate-fade-in-down">
     <!-- Header Section -->
     <div
-      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 mb-5 border-b border-gray-100"
-    >
+      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 mb-5 border-b border-gray-100">
       <div class="relative w-full md:w-auto">
-        <div
-          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-        >
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
         </div>
-        <input
-          v-model="search"
-          @change="getProducts(null)"
+        <input v-model="search" @change="getProducts(null)"
           class="block w-full md:w-64 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
-          placeholder="Search wood type..."
-        />
+          :placeholder="$t('TABLE.search_product')" />
       </div>
     </div>
 
@@ -132,47 +123,27 @@ const onDeleteProduct = async () => {
       <table class="w-full">
         <thead class="bg-gray-50">
           <tr>
-            <TableHeaderCell
-              field="id"
-              class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-            >
-              ID
+            <TableHeaderCell field="id" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+              {{ $t('TABLE.no') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              Wood type
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.wood_type') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              Wood End Grain
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.wood_grain') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              Wood Length
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.wood_length') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              Price of Each
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('price') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="title"
-              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
-            >
-              In Stock
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.in_stock') }}
             </TableHeaderCell>
-            <TableHeaderCell
-              field="actions"
-              class="py-3.5 pl-3 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6"
-            >
-              Actions
+            <TableHeaderCell field="actions"
+              class="py-3.5 pl-3 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6">
+              {{ $t('TABLE.action') }}
             </TableHeaderCell>
           </tr>
         </thead>
@@ -181,105 +152,70 @@ const onDeleteProduct = async () => {
             <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
               <Spinner v-if="isLoadingProduct" class="mx-auto" />
               <p v-else class="text-center py-8 text-gray-500">
-                No wood type found
+                {{ $t('TABLE.no_product_found') }}
               </p>
             </td>
           </tr>
-          <tr
-            v-else
-            v-for="(product, index) of listProduct"
-            :key="product._id"
+          <tr v-else v-for="(product, index) of listProduct" :key="product._id"
             class="animate-fade-in-down hover:bg-gray-50 transition-colors duration-150"
-            :style="{ 'animation-delay': index * 0.05 + 's' }"
-          >
-            <td
-              class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-medium text-gray-700 sm:pl-6"
-            >
+            :style="{ 'animation-delay': index * 0.05 + 's' }">
+            <td class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-medium text-gray-700 sm:pl-6">
               {{ (index + 1).toString().padStart(2, "0") }}
             </td>
 
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
-              {{ product.type_of_wood_Object.name }}
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
+              {{ product.type_of_wood_Object?.name || 'N/A' }}
             </td>
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
-              {{ product.end_grain_of_wood_Object.name }}
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
+              {{ product.end_grain_of_wood_Object?.name || 'N/A' }}
             </td>
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
-              {{ product.length_of_wood_Object.name }}
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
+              {{ product.length_of_wood_Object?.name || 'N/A' }}
             </td>
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ "$" + product.price_of_each }}
             </td>
-            <td
-              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
-            >
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ product.number_of_wood }}
             </td>
 
-            <td
-              class="relative whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm font-medium sm:pr-6"
-            >
+            <td class="relative whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm font-medium sm:pr-6">
               <Menu as="div" class="relative inline-block text-left">
                 <div>
                   <MenuButton
-                    class="flex items-center rounded-full p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200"
-                  >
-                    <span class="sr-only">Open options</span>
+                    class="flex items-center rounded-full p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
+                    <span class="sr-only">{{ $t('BUTTON.open_options') }}</span>
                     <EllipsisVerticalIcon class="h-5 w-5" aria-hidden="true" />
                   </MenuButton>
                 </div>
 
-                <transition
-                  enter-active-class="transition duration-100 ease-out"
-                  enter-from-class="transform scale-95 opacity-0"
-                  enter-to-class="transform scale-100 opacity-100"
-                  leave-active-class="transition duration-75 ease-in"
-                  leave-from-class="transform scale-100 opacity-100"
-                  leave-to-class="transform scale-95 opacity-0"
-                >
+                <transition enter-active-class="transition duration-100 ease-out"
+                  enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100"
+                  leave-active-class="transition duration-75 ease-in" leave-from-class="transform scale-100 opacity-100"
+                  leave-to-class="transform scale-95 opacity-0">
                   <MenuItems
-                    class="absolute right-0 z-10 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                  >
+                    class="absolute right-0 z-10 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div class="py-1">
                       <MenuItem v-slot="{ active }">
-                        <button
-                          :class="[
-                            active
-                              ? 'bg-indigo-50 text-indigo-700'
-                              : 'text-gray-700',
-                            'group flex w-full items-center px-4 py-2 text-sm',
-                          ]"
-                          @click="onEdit(product)"
-                        >
-                          <PencilIcon
-                            class="mr-3 h-4 w-4 text-indigo-500 group-hover:text-indigo-700"
-                            aria-hidden="true"
-                          />
-                          Edit
-                        </button>
+                      <button :class="[
+                        active
+                          ? 'bg-indigo-50 text-indigo-700'
+                          : 'text-gray-700',
+                        'group flex w-full items-center px-4 py-2 text-sm',
+                      ]" @click="onEdit(product)">
+                        <PencilIcon class="mr-3 h-4 w-4 text-indigo-500 group-hover:text-indigo-700"
+                          aria-hidden="true" />
+                        {{ $t('BUTTON.edit') }}
+                      </button>
                       </MenuItem>
                       <MenuItem v-slot="{ active }">
-                        <button
-                          :class="[
-                            active ? 'bg-red-50 text-red-700' : 'text-gray-700',
-                            'group flex w-full items-center px-4 py-2 text-sm',
-                          ]"
-                          @click="openModal(product)"
-                        >
-                          <TrashIcon
-                            class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-700"
-                            aria-hidden="true"
-                          />
-                          Delete
-                        </button>
+                      <button :class="[
+                        active ? 'bg-red-50 text-red-700' : 'text-gray-700',
+                        'group flex w-full items-center px-4 py-2 text-sm',
+                      ]" @click="openModal(product)">
+                        <TrashIcon class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-700" aria-hidden="true" />
+                        {{ $t('BUTTON.delete') }}
+                      </button>
                       </MenuItem>
                     </div>
                   </MenuItems>
@@ -290,37 +226,26 @@ const onDeleteProduct = async () => {
         </tbody>
       </table>
       <div class="flex justify-between items-center py-4">
-        <button
-          @click="prevPage"
-          :disabled="currentPage === 1"
-          class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40"
-        >
-          Previous
+        <button @click="prevPage" :disabled="currentPage === 1"
+          class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40">
+          {{ $t('BUTTON.previous') }}
         </button>
 
         <span class="text-gray-600">
-          Page {{ currentPage }} of {{ totalPages }}
+          {{ $t('BUTTON.page') }} {{ currentPage }} {{ $t('BUTTON.of') }} {{ totalPages }}
         </span>
 
-        <button
-          @click="nextPage"
-          :disabled="currentPage === totalPages"
-          class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40"
-        >
-          Next
+        <button @click="nextPage" :disabled="currentPage === totalPages"
+          class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40">
+          {{ $t('BUTTON.next') }}
         </button>
       </div>
     </div>
   </div>
 
   <!-- Modal Confirm -->
-  <ConfirmModal
-    v-model:is-open="isModalOpen"
-    title="Delete Product !"
-    message="Do you really want to delete this product?"
-    @confirm="onDeleteProduct"
-    @cancel="console.log('Cancelled')"
-  />
+  <ConfirmModal v-model:is-open="isModalOpen" :title="$t('MODAL.confirm_delete_product_title')"
+    :message="$t('MODAL.confirm_delete_product_msg')" @confirm="onDeleteProduct" @cancel="console.log('Cancelled')" />
 </template>
 
 <style scoped>
