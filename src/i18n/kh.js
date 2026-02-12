@@ -177,5 +177,16 @@ export default {
         edit_product: 'កែសម្រួលទំនិញ',
         guest: 'ភ្ញៀវ',
         discount_short: 'បញ្ចុះតម្លៃ($)'
+    },
+    LOGIN: {
+        welcome_to: 'សូមស្វាគមន៍មកកាន់',
+        wood_pos_system: 'ប្រព័ន្ធគ្រប់គ្រងការលក់ឈើប្រណិត',
+        welcome_msg: 'សូមស្វាគមន៍ សូមចូលប្រើគណនីរបស់អ្នក។',
+        email_address: 'អាសយដ្ឋានអ៊ីមែល',
+        password: 'ពាក្យសម្ងាត់',
+        remember_me: 'ចងចាំខ្ញុំ',
+        sign_in: 'ចូលប្រើប្រាស់',
+        login_error: 'ការចូលប្រើប្រាស់មិនជោគជ័យ!',
+        close: 'បិទ'
     }
 }

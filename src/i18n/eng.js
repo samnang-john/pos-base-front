@@ -177,5 +177,16 @@ export default {
         edit_product: 'Edit Product',
         guest: 'Guest',
         discount_short: 'Disc($)'
+    },
+    LOGIN: {
+        welcome_to: 'Welcome To',
+        wood_pos_system: 'WOOD POS SYSTEM',
+        welcome_msg: 'Welcome, please sign in into your account.',
+        email_address: 'Email address',
+        password: 'Password',
+        remember_me: 'Remember me',
+        sign_in: 'Sign in',
+        login_error: 'Login Error!',
+        close: 'Close'
     }
 }
