@@ -118,6 +118,7 @@ const prevPage = () => {
 };
 
 const openModal = (orderItem) => {
+  console.log("objDetail", orderItem);
   objDetail.value = orderItem;
   isModalOpen.value = true;
 };
@@ -256,6 +257,12 @@ const closeModal = () => {
             >
               Total Price
             </TableHeaderCell>
+            <TableHeaderCell
+              field="title"
+              class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
+            >
+              Action
+            </TableHeaderCell>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
@@ -300,6 +307,18 @@ const closeModal = () => {
               class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
             >
               {{ "$" + order.grand_total }}
+            </td>
+
+            <td
+              class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
+            >
+              <button
+                @click="downloadPDF(history._id)"
+                class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm"
+              >
+                <DocumentTextIcon class="h-4 w-4 mr-2" />
+                Download PDF
+              </button>
             </td>
           </tr>
         </tbody>
@@ -359,14 +378,14 @@ const closeModal = () => {
         <div class="text-center">
           <p class="text-sm text-gray-600">Customer</p>
           <p class="text-md font-bold text-gray-900">
-            {{ objDetail["customer"] }}
+            {{ objDetail["customer"] || "N/A" }}
           </p>
         </div>
         <div class="text-center">
-          <p class="text-sm text-gray-600">Payment Status</p>
+          <!-- <p class="text-sm text-gray-600">Payment Status</p>
           <p class="text-md font-bold text-gray-900">
             {{ objDetail["payment_status"] }}
-          </p>
+          </p> -->
         </div>
       </div>
 

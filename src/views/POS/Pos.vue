@@ -12,6 +12,7 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = ref(15);
 const isLoadingProduct = ref(false);
+const customer = ref("");
 
 // 🟡 CART
 const cart = ref([]);
@@ -103,7 +104,7 @@ const getProducts = async (page = 1) => {
 const completeOrder = async () => {
   console.log("cart", cart.value, userItem.value.name);
   const objData = {
-    customer: userItem.value.name,
+    customer: customer.value,
     discount: 0,
     tax: 0,
     items: cart.value,
@@ -182,12 +183,21 @@ const completeOrder = async () => {
         <div
           class="w-full lg:w-80 lg:border-l border-yellow-500/40 lg:pl-6 lg:order-2 order-1"
         >
-          <h2 class="font-semibold text-lg mb-6">
+          <h2 class="font-semibold text-lg mb-4">
             Your Selection
             <span class="ml-2 text-yellow-400">
               ({{ cart.length }} items)
             </span>
           </h2>
+
+          <input
+            id="customer-name"
+            name="customer"
+            type="string"
+            placeholder="Customer Name"
+            v-model="customer"
+            class="w-full px-3 py-1 text-sm bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-yellow-400 mb-4"
+          />
 
           <!-- Cart Items -->
           <div class="space-y-4" v-if="cart.length > 0">
@@ -221,6 +231,7 @@ const completeOrder = async () => {
 
                 <!-- Discount Field Added Here -->
                 <div class="mt-2">
+                  <p>Discount:</p>
                   <input
                     type="number"
                     min="0"

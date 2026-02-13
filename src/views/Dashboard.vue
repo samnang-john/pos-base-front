@@ -339,14 +339,14 @@ const closeModal = () => {
           <div class="text-center">
             <p class="text-sm text-gray-600">Customer</p>
             <p class="text-md font-bold text-gray-900">
-              {{ objDetail["customer"] }}
+              {{ objDetail["customer"] || "N/A" }}
             </p>
           </div>
           <div class="text-center">
-            <p class="text-sm text-gray-600">Payment Status</p>
+            <!-- <p class="text-sm text-gray-600">Payment Status</p>
             <p class="text-md font-bold text-gray-900">
               {{ objDetail["payment_status"] }}
-            </p>
+            </p> -->
           </div>
         </div>
 
