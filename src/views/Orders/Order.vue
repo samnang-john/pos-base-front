@@ -105,6 +105,27 @@ const downloadExcel = async () => {
   window.URL.revokeObjectURL(url);
 };
 
+const downloadReceiptPDF = async (orderID) => {
+  const res = await store.dispatch("getOrdersReceitPDF", {
+    orderID: orderID,
+  });
+
+  // Create blob from binary data
+  const blob = new Blob([res], { type: "application/pdf" });
+
+  // Create download link
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `report-${new Date().toISOString().slice(0, 10)}.pdf`; // e.g., report-2025-12-20.pdf
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Clean up
+  window.URL.revokeObjectURL(url);
+};
+
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     getOrders(currentPage.value + 1);
@@ -118,7 +139,6 @@ const prevPage = () => {
 };
 
 const openModal = (orderItem) => {
-  console.log("objDetail", orderItem);
   objDetail.value = orderItem;
   isModalOpen.value = true;
 };
@@ -137,7 +157,7 @@ const closeModal = () => {
 <template>
   <!-- Main Header -->
   <div class="flex items-center justify-between mb-3">
-    <h1 class="text-3xl font-semibold">Orders</h1>
+    <h1 class="text-3xl font-semibold">{{ $t("MENU.order") }}</h1>
     <!-- <button
       type="button"
       @click="onAddNew"
@@ -164,7 +184,7 @@ const closeModal = () => {
           v-model="search"
           @change="getOrders"
           class="block w-full md:w-64 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
-          placeholder="Search wood type..."
+          :placeholder="$t('TABLE.search_wood_type')"
         />
       </div>
 
@@ -178,7 +198,7 @@ const closeModal = () => {
             <label
               for="startDate"
               class="text-sm font-medium text-gray-700 mb-1"
-              >Start Date</label
+              >{{ $t("TABLE.start_date") }}</label
             >
             <input
               id="startDate"
@@ -189,8 +209,10 @@ const closeModal = () => {
             />
           </div>
           <div class="flex flex-col">
-            <label for="endDate" class="text-sm font-medium text-gray-700 mb-1"
-              >End Date</label
+            <label
+              for="endDate"
+              class="text-sm font-medium text-gray-700 mb-1"
+              >{{ $t("TABLE.end_date") }}</label
             >
             <input
               id="endDate"
@@ -209,14 +231,14 @@ const closeModal = () => {
             class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm"
           >
             <DocumentTextIcon class="h-4 w-4 mr-2" />
-            Download PDF
+            {{ $t("TABLE.download_pdf") }}
           </button>
           <button
             @click="downloadExcel"
             class="inline-flex items-center px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 shadow-sm"
           >
             <DocumentIcon class="h-4 w-4 mr-2" />
-            Download Excel
+            {{ $t("TABLE.download_excel") }}
           </button>
         </div>
       </div>
@@ -231,31 +253,31 @@ const closeModal = () => {
               field="id"
               class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
             >
-              No
+              {{ $t("TABLE.no") }}
             </TableHeaderCell>
             <TableHeaderCell
               field="title"
               class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
             >
-              Order ID
+              {{ $t("TABLE.order_id") }}
             </TableHeaderCell>
             <TableHeaderCell
               field="title"
               class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
             >
-              Order Item
+              {{ $t("TABLE.item") }}
             </TableHeaderCell>
             <TableHeaderCell
               field="title"
               class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
             >
-              Order Date
+              {{ $t("TABLE.created_date") }}
             </TableHeaderCell>
             <TableHeaderCell
               field="title"
               class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900"
             >
-              Total Price
+              {{ $t("TABLE.total") }}
             </TableHeaderCell>
             <TableHeaderCell
               field="title"
@@ -270,7 +292,7 @@ const closeModal = () => {
             <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
               <Spinner v-if="isLoadingProduct" class="mx-auto" />
               <p v-else class="text-center py-8 text-gray-500">
-                No wood type found
+                {{ $t("DASHBOARD.no_orders") }}
               </p>
             </td>
           </tr>
@@ -313,7 +335,7 @@ const closeModal = () => {
               class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate"
             >
               <button
-                @click="downloadPDF(history._id)"
+                @click="downloadReceiptPDF(order._id)"
                 class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm"
               >
                 <DocumentTextIcon class="h-4 w-4 mr-2" />
@@ -329,11 +351,12 @@ const closeModal = () => {
           :disabled="currentPage === 1"
           class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40"
         >
-          Previous
+          {{ $t("BUTTON.previous") }}
         </button>
 
         <span class="text-gray-600">
-          Page {{ currentPage }} of {{ totalPages }}
+          {{ $t("BUTTON.page") }} {{ currentPage }} {{ $t("BUTTON.of") }}
+          {{ totalPages }}
         </span>
 
         <button
@@ -341,7 +364,7 @@ const closeModal = () => {
           :disabled="currentPage === totalPages"
           class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40"
         >
-          Next
+          {{ $t("BUTTON.next") }}
         </button>
       </div>
     </div>
@@ -355,18 +378,20 @@ const closeModal = () => {
     @click="closeModal"
   >
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" @click.stop>
-      <h2 class="text-lg font-bold text-[#9A6A3A] mb-4">Order Detail</h2>
+      <h2 class="text-lg font-bold text-[#9A6A3A] mb-4">
+        {{ $t("MODAL.order_detail") }}
+      </h2>
 
       <!-- First Row -->
       <div class="flex justify-around mb-4">
         <div class="text-center">
-          <p class="text-sm text-gray-600">Order ID</p>
+          <p class="text-sm text-gray-600">{{ $t("TABLE.order_id") }}</p>
           <p class="text-md font-bold text-gray-900">
             {{ objDetail["order_number"] }}
           </p>
         </div>
         <div class="text-center">
-          <p class="text-sm text-gray-600">Order Date</p>
+          <p class="text-sm text-gray-600">{{ $t("TABLE.created_date") }}</p>
           <p class="text-md font-bold text-gray-900">
             {{ dayjs(objDetail["order_date"]).format("DD/MM/YYYY - hh:mm A") }}
           </p>
@@ -376,22 +401,24 @@ const closeModal = () => {
       <!-- Second Row -->
       <div class="flex justify-around mb-4">
         <div class="text-center">
-          <p class="text-sm text-gray-600">Customer</p>
+          <p class="text-sm text-gray-600">{{ $t("TABLE.customer") }}</p>
           <p class="text-md font-bold text-gray-900">
             {{ objDetail["customer"] || "N/A" }}
           </p>
         </div>
         <div class="text-center">
-          <!-- <p class="text-sm text-gray-600">Payment Status</p>
+          <p class="text-sm text-gray-600">{{ $t("TABLE.payment_status") }}</p>
           <p class="text-md font-bold text-gray-900">
             {{ objDetail["payment_status"] }}
-          </p> -->
+          </p>
         </div>
       </div>
 
       <!-- Order Items (looped) -->
       <div class="border-t border-gray-200 pt-4">
-        <h3 class="text-md font-semibold text-gray-800">Order Items</h3>
+        <h3 class="text-md font-semibold text-gray-800">
+          {{ $t("TABLE.item") }}
+        </h3>
 
         <div
           v-for="item in objDetail['items']"
@@ -404,9 +431,11 @@ const closeModal = () => {
               <!-- Adjust key if needed -->
             </p>
             <p class="text-xs text-gray-500">
-              Qty: {{ item.quantity }} × ${{ item.price }}
+              {{ $t("TABLE.qty") }}: {{ item.quantity }} × ${{ item.price }}
             </p>
-            <p class="text-xs text-gray-500">Discount: ${{ item.discount }}</p>
+            <p class="text-xs text-gray-500">
+              {{ $t("TABLE.discount") }}: ${{ item.discount }}
+            </p>
           </div>
           <div class="text-right">
             <p class="text-md font-bold text-gray-900">
@@ -418,12 +447,12 @@ const closeModal = () => {
         <!-- Optional: Total -->
         <div class="flex justify-end mt-4">
           <p class="text-md font-bold text-gray-900">
-            Tax: ${{ objDetail["tax"] }}
+            {{ $t("TABLE.tax") }}: ${{ objDetail["tax"] }}
           </p>
         </div>
         <div class="flex justify-end mt-2">
           <p class="text-lg font-bold text-gray-900">
-            Total: ${{ objDetail["grand_total"].toFixed(2) }}
+            {{ $t("TABLE.total") }}: ${{ objDetail["grand_total"].toFixed(2) }}
           </p>
         </div>
       </div>

@@ -61,6 +61,17 @@ export function getOrdersPDF({ commit }, params) {
       console.log("Get Order PDF Fail", data);
     });
 }
+export function getOrdersReceitPDF({ commit }, params) {
+  return axiosClient
+    .get(`/order/receipt/${params?.orderID}`, { responseType: "blob" })
+    .then(({ data }) => {
+      console.log("data", data);
+      return data;
+    })
+    .catch(() => {
+      console.log("Get Order Receipt PDF Fail", data);
+    });
+}
 
 export function getOrdersExcel({ commit }, params) {
   return axiosClient

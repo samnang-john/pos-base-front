@@ -4,6 +4,8 @@ import store from "../../store";
 import ProductCard from "./ProductCard.vue";
 import { PRODUCTS_PER_PAGE } from "../../constants";
 import { toast } from "vue3-toastify";
+import { useI18n } from "vue-i18n";
+import CustomInput from "../../components/core/CustomInput.vue";
 
 const perPage = ref(PRODUCTS_PER_PAGE);
 const search = ref("");
@@ -54,7 +56,8 @@ function decreaseQty(item) {
 // Computed totals
 const subtotal = computed(() =>
   cart.value.reduce(
-    (sum, p) => sum - p.discount + Number(p.price_of_each || 0) * p.quantity,
+    (sum, p) =>
+      sum - Number(p.discount || 0) + Number(p.price_of_each || 0) * p.quantity,
     0
   )
 );
@@ -102,7 +105,7 @@ const getProducts = async (page = 1) => {
 };
 
 const completeOrder = async () => {
-  console.log("cart", cart.value, userItem.value.name);
+  console.log("cart", cart.value, customer.value);
   const objData = {
     customer: customer.value,
     discount: 0,
@@ -110,188 +113,316 @@ const completeOrder = async () => {
     items: cart.value,
   };
   const resOrder = await store.dispatch("createOrder", objData);
+  console.log("resOrder", resOrder);
 
   if (resOrder) {
+    downloadReceiptPDF(resOrder?.order?._id);
     cart.value = [];
-    toast.success("Order product successfully!");
+    // toast.success(this.$t("TOAST.order_success"));
   }
+};
+
+const downloadReceiptPDF = async (orderID) => {
+  const res = await store.dispatch("getOrdersReceitPDF", {
+    orderID: orderID,
+  });
+
+  // Create blob from binary data
+  const blob = new Blob([res], { type: "application/pdf" });
+
+  // Create download link
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `report-${new Date().toISOString().slice(0, 10)}.pdf`; // e.g., report-2025-12-20.pdf
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Clean up
+  window.URL.revokeObjectURL(url);
+};
+
+const { locale } = useI18n();
+
+const toggleLang = () => {
+  locale.value = locale.value === "en" ? "km" : "en";
+  localStorage.setItem("lang", locale.value);
 };
 </script>
 
 <template>
-  <div class="bg-[#0e0b16] text-white min-h-screen">
-    <div class="container mx-auto py-8 px-4 md:px-8">
-      <!-- Header -->
-      <div
-        class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="w-12 h-12 border-2 border-gray-400 flex items-center justify-center rounded-full shadow-lg bg-transparent overflow-hidden"
-          >
-            <img
-              src="../../assets/my-logo.png"
-              alt="Logo"
-              class="w-12 h-12 object-contain"
-            />
-          </div>
-
-          <h1 class="text-3xl font-extrabold tracking-wide text-yellow-400">
-            WOOD
-          </h1>
+  <div class="bg-[#0B0B15] text-white min-h-screen font-sans">
+    <!-- Navbar / Header -->
+    <div
+      class="px-6 py-4 flex justify-between items-center border-b border-white/5"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 bg-[#FFD700] rounded-lg flex items-center justify-center text-black font-bold"
+        >
+          <img
+            src="../../assets/my-logo.png"
+            alt="Logo"
+            class="w-8 h-8 object-contain"
+          />
         </div>
+        <h1 class="text-2xl font-black tracking-wider text-[#FFD700]">WOOD</h1>
+      </div>
 
-        <div class="flex items-center gap-4">
-          <p class="text-gray-400">
-            Welcome,
-            <span class="text-yellow-400 font-semibold">{{
-              userItem?.name
-            }}</span>
+      <div class="flex items-center gap-4">
+        <div class="text-right">
+          <p class="text-xs text-gray-400 mb-0.5">
+            {{ $t("BUTTON.welcome") }},
+          </p>
+          <p class="text-sm font-bold text-white leading-none">
+            {{ userItem?.name || $t("FORM.guest") }}
           </p>
         </div>
+        <div
+          class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-gray-400"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
       </div>
+    </div>
 
-      <!-- Search -->
-      <div class="mb-6">
-        <input
-          type="text"
-          placeholder="Search our luxury collection..."
-          class="w-full px-6 py-3 rounded-xl shadow-inner focus:ring-2 focus:ring-yellow-400 text-gray-700 bg-white"
-        />
-      </div>
-
-      <!-- Main Layout: Products + Cart -->
-      <div class="flex flex-col lg:flex-row gap-10">
-        <!-- LEFT SIDE: Products -->
-        <div class="flex-1 lg:order-1 order-2">
-          <!-- Product cards -->
-          <div class="max-h-[60vh] md:max-h-[80vh] overflow-y-auto">
-            <div
-              class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-            >
-              <ProductCard
-                v-for="product in products"
-                :key="product._id"
-                :product="product"
-                @add-to-cart="addToCart"
-              />
-            </div>
-          </div>
+    <!-- Main Content -->
+    <div
+      class="p-6 md:p-8 flex flex-col lg:flex-row gap-6 h-[calc(100vh-80px)]"
+    >
+      <!-- Left: Products Section -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Title & Subtitle -->
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-1">
+            {{ $t("Luxury_product_catalog") }}
+          </h2>
+          <p class="text-gray-400 text-sm">
+            {{ $t("Select_the_perfect_wood_for_your_project") }}
+          </p>
         </div>
 
-        <!-- RIGHT SIDE: Cart (fixed width on large screens, full on small) -->
+        <!-- Search is hidden in the design image but good to keep if needed, maybe cleaner -->
+        <!-- <div class="mb-6"> ... </div> -->
+
+        <!-- Scrollable Grid -->
+        <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+          <div
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20"
+          >
+            <ProductCard
+              v-for="product in products"
+              :key="product._id"
+              :product="product"
+              @add-to-cart="addToCart"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Cart / Order Summary -->
+      <div class="w-full lg:w-[400px] flex flex-col gap-4">
         <div
-          class="w-full lg:w-80 lg:border-l border-yellow-500/40 lg:pl-6 lg:order-2 order-1"
+          class="bg-[#13131F] rounded-2xl p-6 flex flex-col h-full border border-white/5 shadow-2xl relative overflow-hidden"
         >
-          <h2 class="font-semibold text-lg mb-4">
-            Your Selection
-            <span class="ml-2 text-yellow-400">
-              ({{ cart.length }} items)
+          <!-- Header -->
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-lg">{{ $t("BUTTON.your_selection") }}</h3>
+
+            <span
+              class="bg-[#FFD700] text-black text-xs font-bold px-2 py-1 rounded-full"
+            >
+              {{ cart.length }} {{ $t("BUTTON.item") }}
             </span>
-          </h2>
+          </div>
 
           <input
             id="customer-name"
             name="customer"
             type="string"
-            placeholder="Customer Name"
+            autocomplete="customer"
+            required
             v-model="customer"
-            class="w-full px-3 py-1 text-sm bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-yellow-400 mb-4"
+            class="text-white mb-6 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-[#986b41] sm:text-sm"
+            placeholder="Customer Name"
           />
 
-          <!-- Cart Items -->
-          <div class="space-y-4" v-if="cart.length > 0">
+          <!-- Empty State -->
+          <div
+            v-if="cart.length === 0"
+            class="flex-1 flex flex-col justify-center items-center border-2 border-dashed border-gray-700 rounded-xl p-8 text-center bg-white/5"
+          >
+            <div
+              class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-500"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-8 w-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+              </svg>
+            </div>
+            <p class="text-gray-400 text-sm max-w-[200px]">
+              {{ $t("No_items_selected_yet") }} <br />
+              {{ $t("Please_select_products_from_the_catalog") }}
+            </p>
+          </div>
+
+          <!-- Cart Items List -->
+          <div
+            v-else
+            class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3"
+          >
             <div
               v-for="item in cart"
-              :key="item.name"
-              class="flex justify-between items-center"
+              :key="item._id"
+              class="bg-[#1C1C28] p-3 rounded-lg flex gap-3 group relative"
             >
-              <div class="flex-1">
-                <p class="font-semibold">
-                  {{
-                    item.type_of_wood_Object.name +
-                    " " +
-                    item.end_grain_of_wood_Object.name +
-                    " x " +
-                    item.length_of_wood_Object.name
-                  }}
-                </p>
-                <p class="text-yellow-400">
-                  ${{ item.price_of_each.toFixed(2) * item.quantity }}
-                </p>
-                <div v-if="item.discount != 0">
-                  <p class="font-semibold mt-2">Price After Discount</p>
-                  <p class="text-yellow-400">
-                    ${{
-                      item.price_of_each.toFixed(2) * item.quantity -
-                      item.discount
-                    }}
+              <!-- Image thumb -->
+              <div
+                class="w-16 h-16 bg-gray-800 rounded-md overflow-hidden flex-shrink-0"
+              >
+                <img :src="item.image" class="w-full h-full object-cover" />
+              </div>
+
+              <div class="flex-1 flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h4 class="font-bold text-sm text-white">
+                      {{ item.type_of_wood_Object?.name }}
+                    </h4>
+                    <p class="text-xs text-gray-400">
+                      {{ item.length_of_wood_Object?.name }}
+                    </p>
+                  </div>
+                  <p class="font-bold text-[#FFD700]">
+                    ${{ (item.price_of_each * item.quantity).toFixed(2) }}
                   </p>
                 </div>
 
-                <!-- Discount Field Added Here -->
-                <div class="mt-2">
-                  <p>Discount:</p>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="Discount ($)"
-                    v-model="item.discount"
-                    class="w-full px-3 py-1 text-sm bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-yellow-400"
-                  />
+                <div class="flex justify-between items-center mt-2">
+                  <div
+                    class="flex items-center bg-[#2C2C3A] rounded overflow-hidden"
+                  >
+                    <button
+                      @click="decreaseQty(item)"
+                      class="px-2 py-1 hover:bg-gray-600 transition text-xs"
+                    >
+                      -
+                    </button>
+                    <span class="text-xs px-2 min-w-[20px] text-center">{{
+                      item.quantity
+                    }}</span>
+                    <button
+                      @click="increaseQty(item)"
+                      class="px-2 py-1 hover:bg-gray-600 transition text-xs"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <!-- Discount Input (Small) -->
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500"
+                      >{{ $t("FORM.discount_short") }}:</span
+                    >
+                    <input
+                      type="number"
+                      v-model="item.discount"
+                      min="0"
+                      class="w-16 bg-[#2C2C3A] border border-gray-700 rounded text-xs px-2 py-1 text-right text-white focus:outline-none focus:border-[#FFD700]"
+                    />
+                  </div>
+                </div>
+
+                <!-- Price Breakdown if Discounted -->
+                <div
+                  v-if="item.discount > 0"
+                  class="flex justify-between items-center mt-2 pt-2 border-t border-white/5"
+                >
+                  <span class="text-xs text-gray-400">Final:</span>
+                  <span class="text-sm font-bold text-[#FFD700]">
+                    ${{
+                      Math.max(
+                        0,
+                        item.price_of_each * item.quantity - item.discount
+                      ).toFixed(2)
+                    }}
+                  </span>
                 </div>
               </div>
-
-              <!-- Quantity Controls -->
-              <div class="flex items-center gap-2 ml-4">
-                <button
-                  class="w-7 h-7 rounded bg-gray-700 hover:bg-gray-600"
-                  @click="decreaseQty(item)"
-                >
-                  −
-                </button>
-
-                <span class="w-6 text-center">{{ item.quantity }}</span>
-
-                <button
-                  class="w-7 h-7 rounded bg-yellow-400 text-black font-bold hover:bg-yellow-300"
-                  @click="increaseQty(item)"
-                >
-                  +
-                </button>
-              </div>
             </div>
           </div>
 
-          <p v-else class="text-gray-500">No items added yet.</p>
+          <!-- Footer Area -->
+          <div class="mt-auto pt-6 border-t border-white/10">
+            <div
+              class="flex justify-between items-center mb-2 text-gray-400 text-sm"
+            >
+              <span>{{ $t("BUTTON.total") }}</span>
+              <span class="text-white text-xl font-bold"
+                >${{ total.toFixed(2) }}</span
+              >
+            </div>
 
-          <!-- Totals -->
-          <div
-            class="mt-8 space-y-2 border-t border-gray-700 pt-4"
-            v-if="cart.length > 0"
-          >
-            <div class="flex justify-between text-gray-400">
-              <p>Subtotal:</p>
-              <p>${{ subtotal.toFixed(2) }}</p>
-            </div>
-            <!-- <div class="flex justify-between text-gray-400">
-      <p>Tax (7.5%):</p>
-      <p>${{ tax.toFixed(2) }}</p>
-    </div> -->
-            <div class="flex justify-between font-bold text-yellow-400 text-xl">
-              <p>Total:</p>
-              <p>${{ total.toFixed(2) }}</p>
-            </div>
+            <button
+              @click="completeOrder"
+              :disabled="cart.length === 0"
+              class="w-full bg-[#2C2C3A] hover:bg-[#363645] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl mt-4 transition-all flex items-center justify-center gap-2"
+            >
+              <span>{{ $t("BUTTON.complete_purchase") }}</span>
+            </button>
           </div>
+        </div>
 
-          <!-- Purchase Button -->
+        <!-- Settings/Additional Actions (Bottom right icon in design) -->
+        <div class="flex justify-end">
           <button
-            class="mt-6 w-full bg-yellow-400 text-black font-semibold py-3 rounded-lg hover:bg-yellow-300 transition"
-            v-if="cart.length > 0"
-            @click="completeOrder()"
+            @click="toggleLang"
+            class="w-12 h-12 rounded-full bg-[#13131F] flex items-center justify-center hover:bg-[#1C1C28] transition text-[#FFD700]"
+            :title="locale === 'en' ? 'Switch to Khmer' : 'Switch to English'"
           >
-            Complete Purchase
+            <!-- Globe Icon -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <!-- Optional: Language Code Indicator -->
+            <span
+              class="absolute -top-1 -right-1 bg-[#FFD700] text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+            >
+              {{ locale === "en" ? "EN" : "KH" }}
+            </span>
           </button>
         </div>
       </div>
