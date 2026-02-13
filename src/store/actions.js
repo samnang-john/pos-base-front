@@ -6,8 +6,8 @@ export function getDashboard({ commit }, data) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Dashboard Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -42,8 +42,8 @@ export function getOrders({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Orders Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -54,11 +54,11 @@ export function getOrdersPDF({ commit }, params) {
       { responseType: "blob" }
     )
     .then(({ data }) => {
-      console.log("data", data);
+
       return data;
     })
-    .catch(() => {
-      console.log("Get Order PDF Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -71,8 +71,8 @@ export function getOrdersExcel({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Order Excel Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -82,8 +82,8 @@ export function getProducts({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Products Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -104,8 +104,8 @@ export function createProduct({ commit }, product) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Product Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -115,8 +115,8 @@ export function getProductDetail({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Products Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -132,14 +132,14 @@ export function updateProduct({ commit }, product) {
   form.append("price_of_each", product.price);
   form.append("car_fee", 5);
 
-  console.log("product", product);
+
   return axiosClient
     .put(`/product/update/${product?.id}`, form)
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Product Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -149,8 +149,8 @@ export function deleteProduct({ commit }, productId) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Delete Product Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -160,8 +160,8 @@ export function getWoodTypes({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Wood Types Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -171,8 +171,8 @@ export function createWoodType({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Wood Type Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -182,8 +182,8 @@ export function updateWoodType({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Update Wood Type Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -193,8 +193,8 @@ export function deleteWoodType({ commit }, woodTypeId) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Delete Wood Type Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -206,8 +206,8 @@ export function getWoodGrains({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Wood End Grain Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -217,8 +217,8 @@ export function createWoodGrain({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Wood End Grain Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -228,8 +228,8 @@ export function updateWoodGrain({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Update Wood End Grain Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -239,8 +239,8 @@ export function deleteWoodGrain({ commit }, woodLengthId) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Delete Wood End Grain Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -250,8 +250,8 @@ export function getWoodLengths({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Wood Length Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -261,8 +261,8 @@ export function createWoodLength({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Wood Length Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -272,8 +272,8 @@ export function updateWoodLength({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Update Wood Length Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -283,8 +283,8 @@ export function deleteWoodLength({ commit }, woodLengthId) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Delete Wood Length Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -294,8 +294,8 @@ export function getUsers({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Users Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -305,8 +305,8 @@ export function createOrder({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Order Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -316,8 +316,8 @@ export function createStockIn({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Stock Sync Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -327,8 +327,8 @@ export function downloadStockIn({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Download Stock In Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -340,8 +340,8 @@ export function getStockInHistory({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Stock In History Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -351,8 +351,8 @@ export function getStockInHistoryDetail({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Stock In History Detail Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -368,8 +368,8 @@ export function createUser({ commit }, user) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create User Fail", data);
+    .catch((err) => {
+
     });
 }
 

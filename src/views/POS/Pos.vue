@@ -75,7 +75,7 @@ const getUser = async () => {
     const resUser = await store.dispatch("getUser");
     userItem.value = resUser || null;
   } catch (error) {
-    console.log(error);
+    
   }
 };
 
@@ -87,7 +87,6 @@ const getProducts = async (page = 1) => {
       pageSize: pageSize.value,
     });
 
-    console.log("product", res.data.items);
 
     products.value = res.data.items || [];
 
@@ -95,29 +94,33 @@ const getProducts = async (page = 1) => {
     currentPage.value = res?.data?.pagination?.currentPage;
     totalPages.value = res?.data?.pagination?.totalPages;
   } catch (error) {
-    console.log(error);
+  
   } finally {
     isLoadingProduct.value = false;
   }
 };
 
 const completeOrder = async () => {
-  console.log("cart", cart.value, userItem.value.name);
   const objData = {
-    customer: userItem.value.name,
+    customer: userItem.value?.name || "Guest",
     discount: 0,
     tax: 0,
-    items: cart.value,
+    items: cart.value.map(item => ({
+      product_id: item.product_id || item._id,
+      quantity: item.quantity,
+      price: item.price_of_each,
+      discount: item.discount || 0
+    })),
   };
   const resOrder = await store.dispatch("createOrder", objData);
 
   if (resOrder) {
     cart.value = [];
-    toast.success(this.$t('TOAST.order_success'));
+    toast.success(t('TOAST.order_success'));
   }
 };
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 
 const toggleLang = () => {
   locale.value = locale.value === 'en' ? 'km' : 'en';
