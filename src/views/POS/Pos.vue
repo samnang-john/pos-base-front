@@ -5,6 +5,7 @@ import ProductCard from "./ProductCard.vue";
 import { PRODUCTS_PER_PAGE } from "../../constants";
 import { toast } from "vue3-toastify";
 import { useI18n } from "vue-i18n";
+import CustomInput from "../../components/core/CustomInput.vue";
 
 const perPage = ref(PRODUCTS_PER_PAGE);
 const search = ref("");
@@ -13,6 +14,7 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = ref(15);
 const isLoadingProduct = ref(false);
+const customer = ref("");
 
 // 🟡 CART
 const cart = ref([]);
@@ -54,7 +56,8 @@ function decreaseQty(item) {
 // Computed totals
 const subtotal = computed(() =>
   cart.value.reduce(
-    (sum, p) => sum - Number(p.discount || 0) + Number(p.price_of_each || 0) * p.quantity,
+    (sum, p) =>
+      sum - Number(p.discount || 0) + Number(p.price_of_each || 0) * p.quantity,
     0
   )
 );
@@ -75,7 +78,7 @@ const getUser = async () => {
     const resUser = await store.dispatch("getUser");
     userItem.value = resUser || null;
   } catch (error) {
-    
+
   }
 };
 
@@ -94,7 +97,7 @@ const getProducts = async (page = 1) => {
     currentPage.value = res?.data?.pagination?.currentPage;
     totalPages.value = res?.data?.pagination?.totalPages;
   } catch (error) {
-  
+
   } finally {
     isLoadingProduct.value = false;
   }
@@ -102,7 +105,7 @@ const getProducts = async (page = 1) => {
 
 const completeOrder = async () => {
   const objData = {
-    customer: userItem.value?.name || "Guest",
+    customer: customer.value || userItem.value?.name || "Guest",
     discount: 0,
     tax: 0,
     items: cart.value.map(item => ({
@@ -113,18 +116,41 @@ const completeOrder = async () => {
     })),
   };
   const resOrder = await store.dispatch("createOrder", objData);
+  console.log("resOrder", resOrder);
 
   if (resOrder) {
+    downloadReceiptPDF(resOrder?.order?._id);
     cart.value = [];
     toast.success(t('TOAST.order_success'));
   }
 };
 
+const downloadReceiptPDF = async (orderID) => {
+  const res = await store.dispatch("getOrdersReceitPDF", {
+    orderID: orderID,
+  });
+
+  // Create blob from binary data
+  const blob = new Blob([res], { type: "application/pdf" });
+
+  // Create download link
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `report-${new Date().toISOString().slice(0, 10)}.pdf`; // e.g., report-2025-12-20.pdf
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Clean up
+  window.URL.revokeObjectURL(url);
+};
+
 const { locale, t } = useI18n();
 
 const toggleLang = () => {
-  locale.value = locale.value === 'en' ? 'km' : 'en';
-  localStorage.setItem('lang', locale.value);
+  locale.value = locale.value === "en" ? "km" : "en";
+  localStorage.setItem("lang", locale.value);
 };
 </script>
 
@@ -141,8 +167,12 @@ const toggleLang = () => {
 
       <div class="flex items-center gap-4">
         <div class="text-right">
-          <p class="text-xs text-gray-400 mb-0.5">{{ $t('BUTTON.welcome') }},</p>
-          <p class="text-sm font-bold text-white leading-none">{{ userItem?.name || $t('FORM.guest') }}</p>
+          <p class="text-xs text-gray-400 mb-0.5">
+            {{ $t("BUTTON.welcome") }},
+          </p>
+          <p class="text-sm font-bold text-white leading-none">
+            {{ userItem?.name || $t("FORM.guest") }}
+          </p>
         </div>
         <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -154,13 +184,16 @@ const toggleLang = () => {
 
     <!-- Main Content -->
     <div class="p-6 md:p-8 flex flex-col lg:flex-row gap-6 h-[calc(100vh-80px)]">
-
       <!-- Left: Products Section -->
       <div class="flex-1 flex flex-col overflow-hidden">
         <!-- Title & Subtitle -->
         <div class="mb-6">
-          <h2 class="text-2xl font-bold mb-1">{{ $t('Luxury_product_catalog') }}</h2>
-          <p class="text-gray-400 text-sm">{{ $t('Select_the_perfect_wood_for_your_project') }}</p>
+          <h2 class="text-2xl font-bold mb-1">
+            {{ $t("Luxury_product_catalog") }}
+          </h2>
+          <p class="text-gray-400 text-sm">
+            {{ $t("Select_the_perfect_wood_for_your_project") }}
+          </p>
         </div>
 
         <!-- Search is hidden in the design image but good to keep if needed, maybe cleaner -->
@@ -178,14 +211,18 @@ const toggleLang = () => {
       <div class="w-full lg:w-[400px] flex flex-col gap-4">
         <div
           class="bg-[#13131F] rounded-2xl p-6 flex flex-col h-full border border-white/5 shadow-2xl relative overflow-hidden">
-
           <!-- Header -->
           <div class="flex justify-between items-center mb-6">
-            <h3 class="font-bold text-lg">{{ $t('BUTTON.your_selection') }}</h3>
+            <h3 class="font-bold text-lg">{{ $t("BUTTON.your_selection") }}</h3>
+
             <span class="bg-[#FFD700] text-black text-xs font-bold px-2 py-1 rounded-full">
-              {{ cart.length }} {{ $t('BUTTON.item') }}
+              {{ cart.length }} {{ $t("BUTTON.item") }}
             </span>
           </div>
+
+          <input id="customer-name" name="customer" type="string" autocomplete="customer" required v-model="customer"
+            class="text-white mb-6 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-[#986b41] sm:text-sm"
+            placeholder="Customer Name" />
 
           <!-- Empty State -->
           <div v-if="cart.length === 0"
@@ -198,7 +235,8 @@ const toggleLang = () => {
               </svg>
             </div>
             <p class="text-gray-400 text-sm max-w-[200px]">
-              {{ $t('No_items_selected_yet') }} <br> {{ $t('Please_select_products_from_the_catalog') }}
+              {{ $t("No_items_selected_yet") }} <br />
+              {{ $t("Please_select_products_from_the_catalog") }}
             </p>
           </div>
 
@@ -213,22 +251,34 @@ const toggleLang = () => {
               <div class="flex-1 flex flex-col justify-between">
                 <div class="flex justify-between items-start">
                   <div>
-                    <h4 class="font-bold text-sm text-white">{{ item.type_of_wood_Object?.name }}</h4>
-                    <p class="text-xs text-gray-400">{{ item.length_of_wood_Object?.name }}</p>
+                    <h4 class="font-bold text-sm text-white">
+                      {{ item.type_of_wood_Object?.name }}
+                    </h4>
+                    <p class="text-xs text-gray-400">
+                      {{ item.length_of_wood_Object?.name }}
+                    </p>
                   </div>
-                  <p class="font-bold text-[#FFD700]">${{ (item.price_of_each * item.quantity).toFixed(2) }}</p>
+                  <p class="font-bold text-[#FFD700]">
+                    ${{ (item.price_of_each * item.quantity).toFixed(2) }}
+                  </p>
                 </div>
 
                 <div class="flex justify-between items-center mt-2">
                   <div class="flex items-center bg-[#2C2C3A] rounded overflow-hidden">
-                    <button @click="decreaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">-</button>
-                    <span class="text-xs px-2 min-w-[20px] text-center">{{ item.quantity }}</span>
-                    <button @click="increaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">+</button>
+                    <button @click="decreaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">
+                      -
+                    </button>
+                    <span class="text-xs px-2 min-w-[20px] text-center">{{
+                      item.quantity
+                      }}</span>
+                    <button @click="increaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">
+                      +
+                    </button>
                   </div>
 
                   <!-- Discount Input (Small) -->
                   <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-500">{{ $t('FORM.discount_short') }}:</span>
+                    <span class="text-xs text-gray-500">{{ $t("FORM.discount_short") }}:</span>
                     <input type="number" v-model="item.discount" min="0"
                       class="w-16 bg-[#2C2C3A] border border-gray-700 rounded text-xs px-2 py-1 text-right text-white focus:outline-none focus:border-[#FFD700]" />
                   </div>
@@ -239,7 +289,12 @@ const toggleLang = () => {
                   class="flex justify-between items-center mt-2 pt-2 border-t border-white/5">
                   <span class="text-xs text-gray-400">Final:</span>
                   <span class="text-sm font-bold text-[#FFD700]">
-                    ${{ Math.max(0, (item.price_of_each * item.quantity) - item.discount).toFixed(2) }}
+                    ${{
+                      Math.max(
+                        0,
+                        item.price_of_each * item.quantity - item.discount
+                      ).toFixed(2)
+                    }}
                   </span>
                 </div>
               </div>
@@ -249,16 +304,15 @@ const toggleLang = () => {
           <!-- Footer Area -->
           <div class="mt-auto pt-6 border-t border-white/10">
             <div class="flex justify-between items-center mb-2 text-gray-400 text-sm">
-              <span>{{ $t('BUTTON.total') }}</span>
+              <span>{{ $t("BUTTON.total") }}</span>
               <span class="text-white text-xl font-bold">${{ total.toFixed(2) }}</span>
             </div>
 
             <button @click="completeOrder" :disabled="cart.length === 0"
               class="w-full bg-[#2C2C3A] hover:bg-[#363645] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl mt-4 transition-all flex items-center justify-center gap-2">
-              <span>{{ $t('BUTTON.complete_purchase') }}</span>
+              <span>{{ $t("BUTTON.complete_purchase") }}</span>
             </button>
           </div>
-
         </div>
 
         <!-- Settings/Additional Actions (Bottom right icon in design) -->
@@ -275,12 +329,11 @@ const toggleLang = () => {
             <!-- Optional: Language Code Indicator -->
             <span
               class="absolute -top-1 -right-1 bg-[#FFD700] text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-              {{ locale === 'en' ? 'EN' : 'KH' }}
+              {{ locale === "en" ? "EN" : "KH" }}
             </span>
           </button>
         </div>
       </div>
-
     </div>
   </div>
 </template>
