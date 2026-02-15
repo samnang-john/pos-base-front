@@ -111,7 +111,8 @@ export default {
         customer: 'Customer',
         payment_status: 'Payment Status',
         item: 'Item',
-        total: 'Total'
+        total: 'Total',
+        out_of_stock: 'Out of Stock'
     },
     Luxury_product_catalog: 'Luxury Product Catalog',
     Select_the_perfect_wood_for_your_project: 'Select the perfect product for your project',
@@ -155,7 +156,8 @@ export default {
         field_required: 'Field Required!',
         password_mismatch: 'Confirm password not match!',
         load_failed: 'Failed to load data',
-        product_not_found: 'Product not found'
+        product_not_found: 'Product not found',
+        out_of_stock: 'Product is out of stock'
     },
     MODAL: {
         confirm_delete_product_title: 'Delete Product!',

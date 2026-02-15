@@ -111,7 +111,8 @@ export default {
         customer: 'អតិថិជន',
         payment_status: 'ស្ថានភាពការបង់ប្រាក់',
         item: 'មុខទំនិញ',
-        total: 'សរុប'
+        total: 'សរុប',
+        out_of_stock: 'អស់ពីស្តុក'
     },
     Luxury_product_catalog: 'កាតាឡុកផលិតផលឈើប្រណិត',
     Select_the_perfect_wood_for_your_project: 'ជ្រើសរើសឈើដែលសមស្របបំផុតសម្រាប់គម្រោងរបស់អ្នក',
@@ -155,7 +156,8 @@ export default {
         field_required: 'សូមបំពេញព័ត៌មានដែលចាំបាច់!',
         password_mismatch: 'ពាក្យសម្ងាត់បញ្ជាក់មិនត្រឹមត្រូវ!',
         load_failed: 'ការទាញយកទិន្នន័យមិនបានជោគជ័យ',
-        product_not_found: 'រកមិនឃើញផលិតផលទេ'
+        product_not_found: 'រកមិនឃើញផលិតផលទេ',
+        out_of_stock: 'ផលិតផលអស់ពីស្តុកហើយ'
     },
     MODAL: {
         confirm_delete_product_title: 'លុបផលិតផល!',

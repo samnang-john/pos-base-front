@@ -9,16 +9,25 @@ const props = defineProps({
 const emit = defineEmits(["add-to-cart"]);
 
 function handleAddToCart() {
+  if (props.product.number_of_wood <= 0) return;
   emit("add-to-cart", props.product);
 }
 </script>
 
 <template>
-  <div
-    class="group relative bg-[#13131F] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#FFD700]/10 flex flex-col h-full"
-    @click="handleAddToCart">
+  <div class="group relative bg-[#13131F] rounded-2xl overflow-hidden transition-all duration-300 flex flex-col h-full"
+    :class="[
+      product.number_of_wood <= 0 ? 'opacity-50 cursor-not-allowed grayscale' : 'cursor-pointer hover:shadow-2xl hover:shadow-[#FFD700]/10'
+    ]" @click="handleAddToCart">
     <!-- Image Container -->
     <div class="h-45 sm:h-50 relative bg-[#1C1C28] overflow-hidden">
+      <!-- Out of Stock Badge -->
+      <div v-if="product.number_of_wood <= 0"
+        class="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+        <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+          {{ $t('TABLE.out_of_stock') || 'Out of Stock' }}
+        </span>
+      </div>
       <!-- Gradient overlay for better text contrast if needed, though image is top -->
       <img :src="product.image || '/fallback-image.jpg'"
         :alt="`${product.type_of_wood_Object?.name || 'Wood'} cutting board`"
@@ -57,8 +66,10 @@ function handleAddToCart() {
 
         <!-- Add Button -->
         <button
-          class="w-10 h-10 bg-[#1C1C28] group-hover:bg-[#FFD700] rounded-lg flex items-center justify-center transition-colors duration-300"
-          @click.stop="handleAddToCart">
+          class="w-10 h-10 bg-[#1C1C28] rounded-lg flex items-center justify-center transition-colors duration-300"
+          :class="[
+            product.number_of_wood <= 0 ? 'opacity-20 cursor-not-allowed' : 'group-hover:bg-[#FFD700]'
+          ]" @click.stop="handleAddToCart" :disabled="product.number_of_wood <= 0">
           <svg xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-[#FFD700] group-hover:text-black transition-colors" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">

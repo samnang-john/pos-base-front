@@ -22,6 +22,10 @@ const userItem = ref(null);
 
 // Add product to cart
 function addToCart(product) {
+  if (product.number_of_wood <= 0) {
+    toast.error(t('TOAST.out_of_stock') || "Product out of stock");
+    return;
+  }
   const existing = cart.value.find(
     (item) =>
       item?.type_of_wood_Object.name === product.type_of_wood_Object.name &&
@@ -121,6 +125,7 @@ const completeOrder = async () => {
   if (resOrder) {
     downloadReceiptPDF(resOrder?.order?._id);
     cart.value = [];
+    customer.value = "";
     toast.success(t('TOAST.order_success'));
   }
 };
@@ -157,7 +162,7 @@ const toggleLang = () => {
 <template>
   <div class="bg-[#0B0B15] text-white min-h-screen font-sans">
     <!-- Navbar / Header -->
-    <div class="px-6 py-4 flex justify-between items-center border-b border-white/5">
+    <div class="px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-white/5">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-[#FFD700] rounded-lg flex items-center justify-center text-black font-bold">
           <img src="../../assets/my-logo.png" alt="Logo" class="w-8 h-8 object-contain" />
@@ -183,9 +188,9 @@ const toggleLang = () => {
     </div>
 
     <!-- Main Content -->
-    <div class="p-6 md:p-8 flex flex-col lg:flex-row gap-6 h-[calc(100vh-80px)]">
+    <div class="p-6 md:p-8 flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-88px)] overflow-y-auto lg:overflow-hidden">
       <!-- Left: Products Section -->
-      <div class="flex-1 flex flex-col overflow-hidden">
+      <div class="flex-1 flex flex-col lg:overflow-hidden min-h-[500px] lg:min-h-0">
         <!-- Title & Subtitle -->
         <div class="mb-6">
           <h2 class="text-2xl font-bold mb-1">
@@ -220,9 +225,18 @@ const toggleLang = () => {
             </span>
           </div>
 
-          <input id="customer-name" name="customer" type="string" autocomplete="customer" required v-model="customer"
-            class="text-white mb-6 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-[#986b41] sm:text-sm"
-            placeholder="Customer Name" />
+          <!-- Customer Name Input -->
+          <div class="relative mb-6">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20"
+                fill="currentColor">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <input id="customer-name" name="customer" type="text" v-model="customer" required
+              class="block w-full pl-10 pr-3 py-3 bg-[#1C1C28] border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent transition-all duration-200 shadow-inner sm:text-sm"
+              :placeholder="$t('TABLE.customer') || 'Customer Name'" />
+          </div>
 
           <!-- Empty State -->
           <div v-if="cart.length === 0"
@@ -270,7 +284,7 @@ const toggleLang = () => {
                     </button>
                     <span class="text-xs px-2 min-w-[20px] text-center">{{
                       item.quantity
-                      }}</span>
+                    }}</span>
                     <button @click="increaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">
                       +
                     </button>
