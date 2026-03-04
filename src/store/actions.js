@@ -393,6 +393,7 @@ export function updateUser({ commit }, userObj) {
 
   const form = new FormData();
   form.append("id", userObj.id);
+  form.append("name", userObj.name);
   form.append("username", userObj.username);
   form.append("password", userObj.password);
   form.append("image", userObj.image);

@@ -6,6 +6,9 @@ import { PRODUCTS_PER_PAGE } from "../../constants";
 import { toast } from "vue3-toastify";
 import { useI18n } from "vue-i18n";
 import CustomInput from "../../components/core/CustomInput.vue";
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import { UserIcon, ArrowLeftOnRectangleIcon, ChevronDownIcon, HomeIcon } from "@heroicons/vue/24/solid";
+import router from "../../router";
 
 const perPage = ref(PRODUCTS_PER_PAGE);
 const search = ref("");
@@ -82,7 +85,7 @@ const getUser = async () => {
     const resUser = await store.dispatch("getUser");
     userItem.value = resUser || null;
   } catch (error) {
-
+    console.log("Error fetching user:", error);
   }
 };
 
@@ -179,11 +182,60 @@ const toggleLang = () => {
             {{ userItem?.name || $t("FORM.guest") }}
           </p>
         </div>
-        <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-          </svg>
-        </div>
+
+        <!-- Navigation Dropdown -->
+        <Menu as="div" class="relative inline-block text-left">
+          <MenuButton
+            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 hover:bg-gray-700 transition overflow-hidden">
+            <img v-if="userItem?.image" :src="userItem.image" class="w-full h-full object-cover" />
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20"
+              fill="currentColor">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+          </MenuButton>
+
+          <transition enter-active-class="transition duration-100 ease-out"
+            enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100"
+            leave-active-class="transition duration-75 ease-in" leave-from-class="transform scale-100 opacity-100"
+            leave-to-class="transform scale-95 opacity-0">
+            <MenuItems
+              class="absolute right-0 mt-2 w-48 origin-top-right divide-y divide-white/5 rounded-xl bg-[#13131F] border border-white/10 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden">
+              <div class="py-1">
+                <MenuItem v-slot="{ active }">
+                <button @click="router.push({ name: 'app.dashboard' })" :class="[
+                  active ? 'bg-white/10 text-white' : 'text-gray-300',
+                  'group flex w-full items-center px-4 py-3 text-sm transition-colors font-medium',
+                ]">
+                  <HomeIcon class="mr-3 h-5 w-5 text-[#FFD700]" aria-hidden="true" />
+                  {{ $t('MENU.dashboard') }}
+                </button>
+                </MenuItem>
+
+                <MenuItem v-slot="{ active }">
+                <button @click="router.push({ name: 'app.profile' })" :class="[
+                  active ? 'bg-white/10 text-white' : 'text-gray-300',
+                  'group flex w-full items-center px-4 py-3 text-sm transition-colors font-medium',
+                ]">
+                  <UserIcon class="mr-3 h-5 w-5 text-[#FFD700]" aria-hidden="true" />
+                  {{ $t('profile') }}
+                </button>
+                </MenuItem>
+              </div>
+
+              <div class="py-1">
+                <MenuItem v-slot="{ active }">
+                <button @click="store.dispatch('logout').then(() => router.push({ name: 'login' }))" :class="[
+                  active ? 'bg-red-500/20 text-red-500' : 'text-gray-400',
+                  'group flex w-full items-center px-4 py-3 text-sm transition-colors font-medium',
+                ]">
+                  <ArrowLeftOnRectangleIcon class="mr-3 h-5 w-5" aria-hidden="true" />
+                  {{ $t('logout') }}
+                </button>
+                </MenuItem>
+              </div>
+            </MenuItems>
+          </transition>
+        </Menu>
       </div>
     </div>
 
@@ -284,7 +336,7 @@ const toggleLang = () => {
                     </button>
                     <span class="text-xs px-2 min-w-[20px] text-center">{{
                       item.quantity
-                    }}</span>
+                      }}</span>
                     <button @click="increaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">
                       +
                     </button>
