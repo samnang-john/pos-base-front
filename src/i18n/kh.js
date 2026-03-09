@@ -14,7 +14,8 @@ export default {
         wood_type: 'ប្រភេទឈើ',
         wood_grain: 'ប្រភេទមុខកាត់',
         wood_length: 'ប្រវែងឈើ',
-        user: 'អ្នកប្រើប្រាស់'
+        user: 'អ្នកប្រើប្រាស់',
+        stock_in_history: 'ប្រវត្តិស្តុកចូល'
     },
     DASHBOARD: {
         total_product: 'ផលិតផលសរុប',
@@ -130,6 +131,7 @@ export default {
     add_new_wood_type: 'បន្ថែមប្រភេទឈើថ្មី',
     update_wood_grain: 'កែប្រែប្រភេទមុខកាត់',
     add_new_wood_grain: 'បន្ថែមប្រភេទមុខកាត់ថ្មី',
+    no_data_found: 'មិនមានទិន្នន័យទេ',
     TOAST: {
         wood_type_created: 'បានបង្កើតប្រភេទឈើដោយជោគជ័យ!',
         wood_type_unsuccessful: 'ការបង្កើតប្រភេទឈើមិនបានជោគជ័យ!',

@@ -14,7 +14,8 @@ export default {
         wood_type: 'Wood Type',
         wood_grain: 'Wood Grain',
         wood_length: 'Wood Length',
-        user: 'Users'
+        user: 'Users',
+        stock_in_history: 'Stock In History'
     },
     DASHBOARD: {
         total_product: 'Total Product',
@@ -130,6 +131,7 @@ export default {
     add_new_wood_type: 'Add New Wood Type',
     update_wood_grain: 'Update Wood End Grain',
     add_new_wood_grain: 'Add New Wood End Grain',
+    no_data_found: 'No data found',
     TOAST: {
         wood_type_created: 'Wood type created successfully!',
         wood_type_unsuccessful: 'Wood type unsuccessfully!',
