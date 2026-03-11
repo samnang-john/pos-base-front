@@ -214,7 +214,7 @@ const closeModal = () => {
             <!-- Order Rows -->
             <tr
               v-else
-              v-for="(order, index) in listOrder"
+              v-for="(order, index) in listOrder"     
               :key="order._id"
               class="hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
             >
