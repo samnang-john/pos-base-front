@@ -47,6 +47,17 @@ export function getOrders({ commit }, params) {
     });
 }
 
+export function getOrderDetail({ commit }, orderId) {
+  return axiosClient
+    .get(`/order/detail/${orderId}`)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+      console.error("Get Order Detail Fail", err);
+    });
+}
+
 export function getOrdersPDF({ commit }, params) {
   return axiosClient
     .get(

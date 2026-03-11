@@ -217,7 +217,6 @@ const closeModal = () => {
               v-for="(order, index) in listOrder"
               :key="order._id"
               class="hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
-              @click="openModal(order)"
             >
               <td class="px-4 py-4 font-medium text-gray-700 sm:px-6">
                 {{ String(index + 1).padStart(2, "0") }}
