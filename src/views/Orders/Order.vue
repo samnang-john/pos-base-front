@@ -281,7 +281,7 @@ const closeModal = () => {
               {{ "x" + order.items?.length }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ dayjs(order.order_date).format("DD/MM/YYYY - hh:MM A") }}
+              {{ dayjs(order.order_date).format("DD/MM/YYYY - hh:mm A") }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ "$" + order.grand_total }}

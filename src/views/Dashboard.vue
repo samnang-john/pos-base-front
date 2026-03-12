@@ -302,7 +302,7 @@ const closeModal = () => {
               </td>
 
               <td class="px-4 py-4 text-gray-900">
-                {{ dayjs(history.created_date).format("DD/MM/YYYY - hh:mm A") }}
+                {{ dayjs(history.createdAt).format("DD/MM/YYYY - hh:mm A") }}
               </td>
 
               <!-- <td class="px-4 py-4 text-gray-900">${{ order.grand_total }}</td> -->
