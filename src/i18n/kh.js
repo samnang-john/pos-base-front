@@ -113,7 +113,8 @@ export default {
         payment_status: 'ស្ថានភាពការបង់ប្រាក់',
         item: 'មុខទំនិញ',
         total: 'សរុប',
-        out_of_stock: 'អស់ពីស្តុក'
+        out_of_stock: 'អស់ពីស្តុក',
+        image: 'រូបភាព',
     },
     Luxury_product_catalog: 'កាតាឡុកផលិតផលឈើប្រណិត',
     Select_the_perfect_wood_for_your_project: 'ជ្រើសរើសឈើដែលសមស្របបំផុតសម្រាប់គម្រោងរបស់អ្នក',

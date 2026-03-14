@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import store from "../../store";
 import Spinner from "../../components/core/Spinner.vue";
 import TableHeaderCell from "../../components/core/Table/TableHeaderCell.vue";
@@ -34,6 +34,31 @@ const userForm = ref({
 const isUpdate = ref(false); // Control For Update
 const isErrorValue = ref(false);
 const objEdit = ref(null);
+
+const isFormValid = computed(() => {
+  if (!isUpdate.value) {
+    // Create Mode
+    return (
+      userForm.value.name.trim() !== "" &&
+      userForm.value.username.trim() !== "" &&
+      userForm.value.password.trim() !== "" &&
+      userForm.value.confir_pass.trim() !== "" &&
+      userForm.value.password === userForm.value.confir_pass
+    );
+  } else {
+    // Update Mode
+    const baseValid =
+      userForm.value.name.trim() !== "" &&
+      userForm.value.username.trim() !== "";
+    
+    // If password fields are used, they must match
+    if (userForm.value.password || userForm.value.confir_pass) {
+      return baseValid && userForm.value.password === userForm.value.confir_pass;
+    }
+    
+    return baseValid;
+  }
+});
 
 onMounted(async () => {
   try {
@@ -322,7 +347,7 @@ const handleImageUpload = (e) => {
   <!-- Modal -->
   <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center"
     style="background-color: rgba(0, 0, 0, 0.4)" @click="closeModal">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" @click.stop>
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl" @click.stop>
       <h2 v-if="isUpdate" class="text-lg font-bold text-gray-800 mb-4">
         {{ $t('TABLE.update_user') }}
       </h2>
@@ -394,11 +419,13 @@ const handleImageUpload = (e) => {
           {{ $t('BUTTON.cancel') }}
         </button>
         <button v-if="isUpdate" @click="onUpdate"
-          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none">
+          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!isFormValid">
           {{ $t('BUTTON.update') }}
         </button>
         <button v-else @click="submitUser"
-          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none">
+          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!isFormValid">
           {{ $t('BUTTON.save') }}
         </button>
       </div>

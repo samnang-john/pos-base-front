@@ -1,8 +1,7 @@
 <script setup>
-import { computed, onMounted } from "vue";
-import { ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import store from "../../store";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import { toast } from "vue3-toastify";
 import { useI18n } from "vue-i18n";
 
@@ -24,6 +23,18 @@ const formData = ref({
   cost: "0",
 });
 const loading = ref(false);
+
+const isFormValid = computed(() => {
+  return (
+    formData.value.image &&
+    formData.value.wood_type &&
+    formData.value.wood_length &&
+    formData.value.wood_grain &&
+    Number(formData.value.price) > 0 &&
+    Number(formData.value.quantity) > 0 &&
+    Number(formData.value.cost) > 0
+  );
+});
 
 onMounted(async () => {
   try {
@@ -254,8 +265,8 @@ const goBack = () => {
       <!-- Action Buttons -->
       <div class="mt-20 flex flex-col items-center gap-6">
         <button @click="onCreateProduct"
-          class="group relative w-full max-w-lg bg-[#9A6A3A] hover:bg-[#86592d] text-white py-5 rounded-[1.25rem] font-bold text-xl shadow-xl shadow-brown-200 transition-all flex items-center justify-center gap-3 overflow-hidden"
-          :disabled="loading">
+          class="group relative w-full max-w-lg bg-[#9A6A3A] hover:bg-[#86592d] text-white py-5 rounded-[1.25rem] font-bold text-xl shadow-xl shadow-brown-200 transition-all flex items-center justify-center gap-3 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="loading || !isFormValid">
           <div v-if="loading" class="animate-spin h-6 w-6 border-4 border-white border-t-transparent rounded-full">
           </div>
           <template v-else>

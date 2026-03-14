@@ -113,7 +113,8 @@ export default {
         payment_status: 'Payment Status',
         item: 'Item',
         total: 'Total',
-        out_of_stock: 'Out of Stock'
+        out_of_stock: 'Out of Stock',
+        image: 'Image',
     },
     Luxury_product_catalog: 'Luxury Product Catalog',
     Select_the_perfect_wood_for_your_project: 'Select the perfect product for your project',
