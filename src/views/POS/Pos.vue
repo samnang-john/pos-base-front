@@ -112,7 +112,7 @@ const getProducts = async (page = 1) => {
 
 const completeOrder = async () => {
   const objData = {
-    customer: customer.value || userItem.value?.name || "Guest",
+    customer: customer.value || "Guest",
     discount: 0,
     tax: 0,
     items: cart.value.map(item => ({
@@ -336,7 +336,7 @@ const toggleLang = () => {
                     </button>
                     <span class="text-xs px-2 min-w-[20px] text-center">{{
                       item.quantity
-                      }}</span>
+                    }}</span>
                     <button @click="increaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">
                       +
                     </button>
