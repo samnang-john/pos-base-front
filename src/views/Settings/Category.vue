@@ -1,9 +1,8 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import store from "../../store";
 import Spinner from "../../components/core/Spinner.vue";
 import TableHeaderCell from "../../components/core/Table/TableHeaderCell.vue";
-import ConfirmModal from "../../components/AlertConfirm.vue";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import {
   EllipsisVerticalIcon,
@@ -13,35 +12,45 @@ import {
 } from "@heroicons/vue/24/outline";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
-const router = useRouter();
-const listProduct = ref([]);
+const { t } = useI18n();
+const categories = ref([]);
 const search = ref("");
-const isLoadingProduct = ref(false);
+const isLoading = ref(false);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = ref(15);
 const isModalOpen = ref(false); // Control modal visibility
-const productID = ref(null);
+const categoryForm = ref({
+  name: "",
+  description: "",
+});
+const isUpdate = ref(false); // Control For Update
+const isErrorValue = ref(false);
+const objEdit = ref(null);
+
+const isFormValid = computed(() => {
+  return categoryForm.value.name.trim() !== "";
+});
 
 onMounted(async () => {
   try {
-    await Promise.all([getProducts()]);
+    await Promise.all([getCategories()]);
   } catch (error) {
     console.error("Error during initialization:", error);
   }
 });
 
-const getProducts = async (page = 1) => {
-  isLoadingProduct.value = true;
+const getCategories = async (page = 1) => {
+  isLoading.value = true;
   try {
-    const res = await store.dispatch("getProducts", {
+    const res = await store.dispatch("getCategories", {
       page,
       pageSize: pageSize.value,
     });
 
-    listProduct.value = res.data.items || [];
+    categories.value = res?.data?.items || [];
 
     // save pagination
     currentPage.value = res?.data?.pagination?.currentPage;
@@ -49,46 +58,90 @@ const getProducts = async (page = 1) => {
   } catch (error) {
     console.log(error);
   } finally {
-    isLoadingProduct.value = false;
+    isLoading.value = false;
   }
 };
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    getWoodTypes(currentPage.value + 1);
+    getCategories(currentPage.value + 1);
   }
 };
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    getWoodTypes(currentPage.value - 1);
+    getCategories(currentPage.value - 1);
   }
 };
 
-const onAddNew = () => {
-  router.push({ name: "app.createproduct" });
+const openModal = () => {
+  isModalOpen.value = true;
 };
 
-const openModal = (productItem) => {
-  isModalOpen.value = true;
-  productID.value = productItem?._id;
+const closeModal = () => {
+  isModalOpen.value = false;
+  categoryForm.value = {
+    name: "",
+    description: "",
+  }; // Reset input on close
+  isUpdate.value = false;
+  // objEdit.value = null;
+};
+
+const submitCategory = async () => {
+  if (categoryForm.value.name !== "") {
+    try {
+      await store.dispatch("createCategory", categoryForm.value);
+      getCategories();
+      closeModal();
+      toast.success(t('TOAST.category_created'));
+    } catch (error) {
+      closeModal();
+      console.log("Error=>", error);
+      toast.error(t('TOAST.category_unsuccessful'));
+    }
+  } else {
+    isErrorValue.value = true;
+    toast.error(this.$t('TOAST.field_required'));
+  }
 };
 
 // Handle Edit action
-const onEdit = (productItem) => {
-  router.push({
-    name: "app.productdetail",
-    params: { pro_id: productItem?._id },
-  });
+const onEdit = (wood_type) => {
+  isUpdate.value = true;
+  isModalOpen.value = true;
+  objEdit.value = wood_type;
+  categoryForm.value = {
+    name: wood_type?.name,
+    description: wood_type?.description,
+  };
 };
 
-const onDeleteProduct = async () => {
+const onUpdate = async () => {
   try {
-    await store.dispatch("deleteProduct", productID?.value);
-    getProducts();
-    toast.info(this.$t('TOAST.product_deleted'));
+    const obj = {
+      id: objEdit.value?._id,
+      name: categoryForm.value?.name,
+      description: categoryForm?.value?.description,
+    };
+    await store.dispatch("updateCategory", obj);
+    getCategories();
+    closeModal();
+    toast.success(t('TOAST.category_updated'));
   } catch (error) {
-    toast.error(this.$t('TOAST.product_unsuccessful'));
+    closeModal();
+    console.log("Error=>", error);
+    toast.error(t('TOAST.category_unsuccessful'));
+  }
+};
+
+const onDeleteCategory = async (woodTypeId) => {
+  try {
+    await store.dispatch("deleteCategory", woodTypeId);
+    getCategories();
+    toast.info(t('TOAST.category_deleted'));
+  } catch (error) {
+    toast.error(t('TOAST.category_delete_unsuccessful'));
   }
 };
 </script>
@@ -96,8 +149,8 @@ const onDeleteProduct = async () => {
 <template>
   <!-- Main Header -->
   <div class="flex items-center justify-between mb-3">
-    <h1 class="text-3xl font-semibold">{{ $t('MENU.product') }}</h1>
-    <button type="button" @click="onAddNew"
+    <h1 class="text-3xl font-semibold">{{ $t('MENU.category') }}</h1>
+    <button type="button" @click="openModal()"
       class="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#986b41] hover:bg-[#B68E65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
       {{ $t('BUTTON.add_new') }}
     </button>
@@ -114,7 +167,7 @@ const onDeleteProduct = async () => {
         </div>
         <input v-model="search" @change="getProducts(null)"
           class="block w-full md:w-64 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
-          :placeholder="$t('TABLE.search_product')" />
+          placeholder="Search category by name" />
       </div>
     </div>
 
@@ -126,26 +179,11 @@ const onDeleteProduct = async () => {
             <TableHeaderCell field="id" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
               {{ $t('TABLE.no') }}
             </TableHeaderCell>
-            <TableHeaderCell field="image" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ $t('TABLE.image') }}
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.name') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ $t('TABLE.wood_type') }}
-            </TableHeaderCell>
-            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ $t('TABLE.wood_grain') }}
-            </TableHeaderCell>
-            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ $t('TABLE.wood_length') }}
-            </TableHeaderCell>
-            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ $t('price') }}
-            </TableHeaderCell>
-            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ $t('TABLE.in_stock') }}
-            </TableHeaderCell>
-            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ "Total Meter Cube" }}
+              {{ $t('TABLE.description') }}
             </TableHeaderCell>
             <TableHeaderCell field="actions"
               class="py-3.5 pl-3 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6">
@@ -154,48 +192,26 @@ const onDeleteProduct = async () => {
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
-          <tr v-if="isLoadingProduct || !listProduct.length">
+          <tr v-if="isLoading || !categories.length">
             <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
-              <Spinner v-if="isLoadingProduct" class="mx-auto" />
+              <Spinner v-if="isLoading" class="mx-auto" />
               <p v-else class="text-center py-8 text-gray-500">
-                {{ $t('TABLE.no_product_found') }}
+                {{ $t('TABLE.no_wood_type_found') }}
               </p>
             </td>
           </tr>
-          <tr v-else v-for="(product, index) of listProduct" :key="product._id"
+          <tr v-else v-for="(wood, index) of categories" :key="wood._id"
             class="animate-fade-in-down hover:bg-gray-50 transition-colors duration-150"
             :style="{ 'animation-delay': index * 0.05 + 's' }">
             <td class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-medium text-gray-700 sm:pl-6">
               {{ (index + 1).toString().padStart(2, "0") }}
             </td>
-            <td class="whitespace-nowrap px-2 py-2 text-sm">
-              <div class="h-12 w-12 flex-shrink-0">
-                <img v-if="product.image" :src="product.image" :alt="product.type_of_wood_Object?.name" class="h-12 w-12 rounded-lg object-cover shadow-sm" />
-                <div v-else class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                   <svg class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              </div>
-            </td>
 
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.type_of_wood_Object?.name || 'N/A' }}
+              {{ wood.name }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.end_grain_of_wood_Object?.name || 'N/A' }}
-            </td>
-            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.length_of_wood_Object?.name || 'N/A' }}
-            </td>
-            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ "$" + product.price_of_each }}
-            </td>
-            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.number_of_wood }}
-            </td>
-            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.total_cube ? product.total_cube : '-' }}
+              {{ wood.description }}
             </td>
 
             <td class="relative whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm font-medium sm:pr-6">
@@ -221,7 +237,7 @@ const onDeleteProduct = async () => {
                           ? 'bg-indigo-50 text-indigo-700'
                           : 'text-gray-700',
                         'group flex w-full items-center px-4 py-2 text-sm',
-                      ]" @click="onEdit(product)">
+                      ]" @click="onEdit(wood)">
                         <PencilIcon class="mr-3 h-4 w-4 text-indigo-500 group-hover:text-indigo-700"
                           aria-hidden="true" />
                         {{ $t('BUTTON.edit') }}
@@ -231,7 +247,7 @@ const onDeleteProduct = async () => {
                       <button :class="[
                         active ? 'bg-red-50 text-red-700' : 'text-gray-700',
                         'group flex w-full items-center px-4 py-2 text-sm',
-                      ]" @click="openModal(product)">
+                      ]" @click="onDeleteCategory(wood._id)">
                         <TrashIcon class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-700" aria-hidden="true" />
                         {{ $t('BUTTON.delete') }}
                       </button>
@@ -262,9 +278,49 @@ const onDeleteProduct = async () => {
     </div>
   </div>
 
-  <!-- Modal Confirm -->
-  <ConfirmModal v-model:is-open="isModalOpen" :title="$t('MODAL.confirm_delete_product_title')"
-    :message="$t('MODAL.confirm_delete_product_msg')" @confirm="onDeleteProduct" @cancel="console.log('Cancelled')" />
+  <!-- Modal -->
+  <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center"
+    style="background-color: rgba(0, 0, 0, 0.4)" @click="closeModal">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" @click.stop>
+      <h2 v-if="isUpdate" class="text-lg font-bold text-gray-800 mb-4">
+        {{ $t('TABLE.update_category') }}
+      </h2>
+      <h2 v-else class="text-lg font-bold text-gray-800 mb-4">
+        {{ $t('TABLE.add_new_category') }}
+      </h2>
+      <div class="mb-4">
+        <label for="categoryName" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.name') }}
+          <span class="text-red-500">*</span>
+        </label>  
+        <input v-model="categoryForm.name" id="woodTypeName" type="text" :class="[
+          'mt-1 w-full p-2 border rounded-lg focus:ring-[#986b41] focus:border-[#986b41]',
+          isErrorValue ? 'border-red-500' : 'border-gray-300',
+        ]" :placeholder="$t('TABLE.name')" />
+      </div>
+      <div class="mb-4">
+        <label for="note" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.description') }}</label>
+        <input v-model="categoryForm.description" id="note" type="text"
+          class="mt-1 w-full p-2 border border-gray-300 rounded-lg focus:ring-[#986b41] focus:border-[#986b41]"
+          :placeholder="$t('TABLE.description')" />
+      </div>
+      <div class="flex justify-end space-x-2">
+        <button @click="closeModal"
+          class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none">
+          {{ $t('BUTTON.cancel') }}
+        </button>
+        <button v-if="isUpdate" @click="onUpdate"
+          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!isFormValid">
+          {{ $t('BUTTON.update') }}
+        </button>
+        <button v-else @click="submitCategory"
+          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!isFormValid">
+          {{ $t('BUTTON.add_new') }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>

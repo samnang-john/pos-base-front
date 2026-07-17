@@ -15,6 +15,7 @@ const image = ref(null); // for preview
 const listWoodTypes = ref([]);
 const listWoodLengths = ref([]);
 const listWoodGrains = ref([]);
+const listCategory = ref([]);
 
 const formData = ref({
   image: null,
@@ -25,6 +26,8 @@ const formData = ref({
   quantity: "0",
   total_price: "0",
   cost: "0",
+  category: "",
+  price_per_kube: "0",
 });
 
 const loading = ref(false);
@@ -32,7 +35,7 @@ const isEditMode = computed(() => !!proId);
 
 onMounted(async () => {
   try {
-    await Promise.all([getWoodTypes(), getWoodLengths(), getWoodGrains()]);
+    await Promise.all([getWoodTypes(), getWoodLengths(), getWoodGrains(), getCategory()]);
 
     if (isEditMode.value) {
       await getProductDetail();
@@ -52,6 +55,18 @@ const getProducts = async () => {
   } catch (error) {
     console.log(error);
   } finally {
+  }
+};
+
+const getCategory = async () => {
+  try {
+    const res = await store.dispatch("getCategories", {
+      page: 1,
+      pageSize: 20,
+    });
+    listCategory.value = res?.data?.items || [];
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -83,6 +98,8 @@ const getProductDetail = async () => {
       quantity: String(product.number_of_wood || 0),
       total_price: String(product.total_price_of_wood || 0),
       cost: String(product.cost_of_each || 0),
+      category: product.category_id || product.category_Object?._id || "",
+      price_per_kube: String(product.price_per_kube || 0),
     };
 
     // Show existing image in preview
@@ -181,30 +198,30 @@ const onTotalPrice = () => {
 
 <template>
   <!-- Main Container -->
-  <div class="min-h-screen bg-[#F8F9FA] p-8 md:p-12">
+  <div class="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
     <!-- Header -->
-    <div class="flex items-center gap-4 mb-8">
+    <div class="flex items-center gap-3 mb-6 max-w-5xl mx-auto">
       <button @click="goBack" class="p-2 rounded-full hover:bg-white hover:shadow transition-all bg-transparent group">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
-          class="w-6 h-6 text-gray-700 group-hover:text-black">
+          class="w-5 h-5 text-gray-700 group-hover:text-black">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
-      <h1 class="text-3xl font-bold text-[#1A1A1A]">{{ isEditMode ? $t('update_product') : $t('create_product') }}</h1>
+      <h1 class="text-xl font-bold text-[#1A1A1A]">{{ isEditMode ? $t('update_product') : $t('create_product') }}</h1>
     </div>
 
     <!-- Form Card -->
-    <div class="max-w-7xl mx-auto bg-white rounded-[2rem] shadow-2xl shadow-gray-200/50 p-10 md:p-16">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+    <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-md shadow-gray-200/60 p-6 md:p-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
         <!-- Left Column: Image Upload -->
-        <div class="lg:col-span-5 flex flex-col items-center">
+        <div class="lg:col-span-4 flex flex-col items-center">
           <label for="upload"
-            class="relative w-full aspect-[4/5] bg-[#1A3C34] rounded-[2.5rem] flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all hover:opacity-90 shadow-lg">
+            class="relative w-full aspect-square bg-[#1A3C34] rounded-2xl flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all hover:opacity-90 shadow-md">
 
             <!-- Default Placeholder (Plant Logo) -->
-            <div v-if="!image" class="flex flex-col items-center gap-6">
-              <div class="w-24 h-24 flex items-center justify-center">
+            <div v-if="!image" class="flex flex-col items-center gap-3">
+              <div class="w-14 h-14 flex items-center justify-center">
                 <svg viewBox="0 0 100 150" class="w-full h-full text-[#F8F9FA] opacity-80" fill="currentColor">
                   <path d="M50 140V100M50 100C30 90 20 70 20 50C20 30 35 15 50 15C65 15 80 30 80 50C80 70 70 90 50 100Z"
                     fill="none" stroke="currentColor" stroke-width="2" />
@@ -214,7 +231,7 @@ const onTotalPrice = () => {
                   <path d="M40 130L50 120L60 130" stroke="currentColor" stroke-width="2" fill="none" />
                 </svg>
               </div>
-              <span class="text-[#F8F9FA] text-2xl font-medium tracking-[0.2em]">PRODUCT</span>
+              <span class="text-[#F8F9FA] text-sm font-medium tracking-[0.2em]">PRODUCT</span>
             </div>
 
             <!-- Preview Image -->
@@ -223,97 +240,124 @@ const onTotalPrice = () => {
             <!-- Invisible Input -->
             <input id="upload" type="file" class="hidden" @change="handleImageUpload" accept="image/*" />
           </label>
+          <span class="text-xs text-gray-400 mt-2">{{ $t('FORM.upload_hint') || 'JPG or PNG, click to upload' }}</span>
         </div>
 
         <!-- Right Column: Form Fields -->
-        <div class="lg:col-span-7">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
+        <div class="lg:col-span-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+
+            <!-- Category -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm text-gray-700 font-medium">{{ "Category" }} <span
+                  class="text-red-500">*</span></label>
+              <select v-model="formData.category"
+                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
+                <option value="" disabled>{{ $t('FORM.select_category') }}</option>
+                <option v-for="item in listCategory" :key="item.name" :value="item._id">{{ item.name }}</option>
+              </select>
+            </div>
 
             <!-- Wood Type -->
-            <div class="flex flex-col gap-2">
-              <label class="text-gray-700 font-semibold">{{ $t('TABLE.wood_type') }} <span
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm text-gray-700 font-medium">{{ $t('TABLE.wood_type') }} <span
                   class="text-red-500">*</span></label>
               <select v-model="formData.wood_type"
-                class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all appearance-none cursor-pointer">
+                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
                 <option value="" disabled>{{ $t('FORM.select_wood_type') }}</option>
                 <option v-for="item in listWoodTypes" :key="item.name" :value="item._id">{{ item.name }}</option>
               </select>
             </div>
 
             <!-- Wood Length -->
-            <div class="flex flex-col gap-2">
-              <label class="text-gray-700 font-semibold">{{ $t('TABLE.wood_length') }} <span
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm text-gray-700 font-medium">{{ $t('TABLE.wood_length') }} <span
                   class="text-red-500">*</span></label>
               <select v-model="formData.wood_length"
-                class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all appearance-none cursor-pointer">
+                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
                 <option value="" disabled>{{ $t('FORM.select_wood_length') }}</option>
                 <option v-for="item in listWoodLengths" :key="item.name" :value="item._id">{{ item.name }}</option>
               </select>
             </div>
 
             <!-- Wood Grain -->
-            <div class="flex flex-col gap-2">
-              <label class="text-gray-700 font-semibold">{{ $t('TABLE.wood_grain') }} <span
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm text-gray-700 font-medium">{{ $t('TABLE.wood_grain') }} <span
                   class="text-red-500">*</span></label>
               <select v-model="formData.wood_grain"
-                class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all appearance-none cursor-pointer">
+                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
                 <option value="" disabled>{{ $t('FORM.select_wood_grain') }}</option>
                 <option v-for="item in listWoodGrains" :key="item.name" :value="item._id">{{ item.name }}</option>
               </select>
             </div>
 
+            <!-- Divider for pricing section -->
+            <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
+
             <!-- Price Per Piece -->
-            <div class="flex flex-col gap-2">
-              <label class="text-gray-700 font-semibold">{{ isEditMode ? $t('FORM.retail_price_per_piece') :
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm text-gray-700 font-medium">{{ isEditMode ? $t('FORM.retail_price_per_piece') :
                 $t('FORM.price_per_piece') }} <span class="text-red-500">*</span></label>
               <input type="number" v-model="formData.price" @input="onTotalPrice"
-                class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all" />
+                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
             </div>
 
             <!-- Quantity -->
-            <div class="flex flex-col gap-2">
-              <label class="text-gray-700 font-semibold">{{ $t('FORM.quantity_of_wood') }} <span
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm text-gray-700 font-medium">{{ $t('FORM.quantity_of_wood') }} <span
                   class="text-red-500">*</span></label>
               <input type="number" v-model="formData.quantity" @input="onTotalPrice"
-                class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all" />
-            </div>
-
-            <!-- Total Price -->
-            <div class="flex flex-col gap-2">
-              <label class="text-gray-700 font-semibold">{{ $t('FORM.total_price') }} <span
-                  class="text-red-500">*</span></label>
-              <input type="number" v-model="formData.total_price" disabled
-                class="w-full bg-[#f1f3f5] border-none p-4 rounded-xl text-gray-500 font-medium" />
+                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
             </div>
 
             <!-- Cost Per Piece -->
-            <div class="flex flex-col gap-2">
-              <label class="text-gray-700 font-semibold">{{ isEditMode ? $t('FORM.price_per_piece') :
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm text-gray-700 font-medium">{{ isEditMode ? $t('FORM.price_per_piece') :
                 $t('FORM.retail_price_per_piece') }} <span class="text-red-500">*</span></label>
               <input type="number" v-model="formData.cost"
-                class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all" />
+                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
+            </div>
+
+            <!-- Total Price (computed, read-only) -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm text-gray-700 font-medium">{{ $t('FORM.total_price') }}</label>
+              <div
+                class="w-full bg-[#FBF6EF] border border-dashed border-[#D9C2A0] px-3 py-2.5 rounded-lg text-sm text-[#9A6A3A] font-semibold">
+                {{ formData.total_price }}
+              </div>
+            </div>
+
+            <!-- Divider for kube pricing -->
+            <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
+
+            <!-- Price Per Kube -->
+            <div class="flex flex-col gap-1.5 md:col-span-2">
+              <label class="text-sm text-gray-700 font-medium">Price Per Kube</label>
+              <input type="number" v-model="formData.price_per_kube"
+                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="mt-20 flex flex-col items-center gap-6">
+      <div class="mt-10 flex items-center justify-end gap-3 border-t border-gray-100 pt-6">
+        <button @click="goBack"
+          class="px-5 py-2.5 rounded-lg font-medium text-sm text-gray-600 hover:bg-gray-50 transition-all">
+          {{ $t('BUTTON.cancel') }}
+        </button>
         <button @click="onSubmit"
-          class="group relative w-full max-w-lg bg-[#9A6A3A] hover:bg-[#86592d] text-white py-5 rounded-[1.25rem] font-bold text-xl shadow-xl shadow-brown-200 transition-all flex items-center justify-center gap-3 overflow-hidden"
+          class="group relative bg-[#9A6A3A] hover:bg-[#86592d] text-white px-6 py-2.5 rounded-lg font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="loading">
-          <div v-if="loading" class="animate-spin h-6 w-6 border-4 border-white border-t-transparent rounded-full">
+          <div v-if="loading" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full">
           </div>
           <template v-else>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
               <path
                 d="M18 3H6C4.89 3 4 3.9 4 5V19C4 20.1 4.89 21 6 21H18C19.1 21 20 20.1 20 19V5C20 3.9 19.1 3 18 3ZM12 19C10.34 19 9 17.66 9 16C9 14.34 10.34 13 12 13C13.66 13 15 14.34 15 16C15 17.66 13.66 19 12 19ZM16 10H8V5H16V10Z" />
             </svg>
             {{ isEditMode ? $t('FORM.edit_product') : $t('FORM.enter_product') }}
           </template>
-        </button>
-        <button @click="goBack" class="text-[#9A6A3A] font-semibold hover:underline decoration-2 underline-offset-4">
-          {{ $t('BUTTON.cancel') }}
         </button>
       </div>
     </div>
@@ -321,11 +365,6 @@ const onTotalPrice = () => {
 </template>
 
 <style scoped>
-/* Custom Shadow for the brown button */
-.shadow-brown-200 {
-  box-shadow: 0 10px 15px -3px rgba(154, 106, 58, 0.2), 0 4px 6px -4px rgba(154, 106, 58, 0.1);
-}
-
 /* Hide number input arrows */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -339,16 +378,11 @@ input[type=number] {
   appearance: textfield;
 }
 
-/* Transitions for rounded corners and focus */
-.rounded-xl {
-  transition: all 0.3s ease;
-}
-
 select {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 1rem center;
+  background-position: right 0.75rem center;
   background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
+  background-size: 1.25em 1.25em;
+  padding-right: 2.25rem;
 }
 </style>

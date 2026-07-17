@@ -15,7 +15,8 @@ export default {
         wood_grain: 'ប្រភេទមុខកាត់',
         wood_length: 'ប្រវែងឈើ',
         user: 'អ្នកប្រើប្រាស់',
-        stock_in_history: 'ប្រវត្តិស្តុកចូល'
+        stock_in_history: 'ប្រវត្តិស្តុកចូល',
+        category: 'ប្រភេទ'
     },
     DASHBOARD: {
         total_product: 'ផលិតផលសរុប',
@@ -50,7 +51,8 @@ export default {
         edit: 'កែប្រែ',
         delete: 'លុប',
         open_options: 'បើកជម្រើស',
-        create: 'បង្កើត'
+        create: 'បង្កើត',
+        add_to_cart: 'បន្ថែមទៅរទេះ'
     },
     TABLE: {
         no: 'ល.រ',
@@ -115,9 +117,12 @@ export default {
         total: 'សរុប',
         out_of_stock: 'អស់ពីស្តុក',
         image: 'រូបភាព',
+        add_new_category: 'បន្ថែមប្រភេទថ្មី',
+        update_category: 'កែប្រែប្រភេទ'  
     },
     Luxury_product_catalog: 'កាតាឡុកផលិតផលឈើប្រណិត',
     Select_the_perfect_wood_for_your_project: 'ជ្រើសរើសឈើដែលសមស្របបំផុតសម្រាប់គម្រោងរបស់អ្នក',
+    all_products: 'ផលិតផលទាំងអស់',
     No_items_selected_yet: 'មិនទាន់មានធាតុដែលបានជ្រើសរើសទេ។',
     Please_select_products_from_the_catalog: 'សូមជ្រើសរើសផលិតផលពីកាតាឡុក។',
     size: 'មុខកាត់',
@@ -160,7 +165,12 @@ export default {
         password_mismatch: 'ពាក្យសម្ងាត់បញ្ជាក់មិនត្រឹមត្រូវ!',
         load_failed: 'ការទាញយកទិន្នន័យមិនបានជោគជ័យ',
         product_not_found: 'រកមិនឃើញផលិតផលទេ',
-        out_of_stock: 'ផលិតផលអស់ពីស្តុកហើយ'
+        out_of_stock: 'ផលិតផលអស់ពីស្តុកហើយ',
+        category_created: 'បានបង្កើតប្រភេទដោយជោគជ័យ!',
+        category_unsuccessful: 'ការបង្កើតប្រភេទមិនបានជោគជ័យ!',
+        category_updated: 'បានកែប្រែប្រភេទដោយជោគជ័យ!',
+        category_deleted: 'បានលុបប្រភេទដោយជោគជ័យ!',
+        category_delete_unsuccessful: 'ការលុបប្រភេទមិនបានជោគជ័យ!'
     },
     MODAL: {
         confirm_delete_product_title: 'លុបផលិតផល!',
@@ -181,7 +191,11 @@ export default {
         enter_product: 'បញ្ចូលទំនិញ',
         edit_product: 'កែសម្រួលទំនិញ',
         guest: 'ភ្ញៀវ',
-        discount_short: 'បញ្ចុះតម្លៃ($)'
+        discount_short: 'បញ្ចុះតម្លៃ($)',
+        length: 'ប្រវែង',
+        width: 'ទទឹង',
+        thickness: 'កម្រាស់',
+        cubic_meters: 'ម៉ែត្រគូប'
     },
     LOGIN: {
         welcome_to: 'សូមស្វាគមន៍មកកាន់',

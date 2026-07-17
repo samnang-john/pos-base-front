@@ -425,7 +425,7 @@ const closeModal = () => {
                       </div>
                     </td>
                     <td class="px-6 py-5 text-right font-medium text-gray-700">${{ item.price.toFixed(2) }}</td>
-                    <td class="px-6 py-5 text-center font-bold text-gray-900">{{ item.quantity }}</td>
+                    <td class="px-6 py-5 text-center font-bold text-gray-900">{{ item.cubic_meters ?? item.quantity }}</td>
                     <td class="px-6 py-5 text-right font-medium text-red-500">-${{ item.discount.toFixed(2) }}</td>
                     <td class="px-6 py-5 text-right font-bold text-gray-900 text-[15px]">${{ item.total.toFixed(2) }}
                     </td>

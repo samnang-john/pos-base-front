@@ -19,6 +19,7 @@ import WoodGrain from "../views/Settings/WoodGrain.vue";
 import StockIn from "../views/Stock-In/StockIn.vue";
 import StockInHistory from "../views/Stock-In/StockInHistory.vue";
 import Profile from "../views/Profile.vue";
+import Category from "../views/Settings/Category.vue";
 
 const routes = [
   {
@@ -97,6 +98,11 @@ const routes = [
         path: "woodgrain",
         name: "app.woodgrain",
         component: WoodGrain,
+      },
+      {
+        path: "category",
+        name: "app.category",
+        component: Category,
       },
     ],
   },

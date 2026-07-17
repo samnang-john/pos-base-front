@@ -21,7 +21,7 @@ export function getUser({ commit }, data) {
 export function login({ commit }, data) {
   return axiosClient.post("/auth/login", data).then(({ data }) => {
     commit("setUser", data.user);
-    commit("setToken", data.token);
+    commit("setToken", data.accessToken || data.token);
     return data;
   });
 }
@@ -99,8 +99,12 @@ export function getOrdersExcel({ commit }, params) {
 }
 
 export function getProducts({ commit }, params) {
+  let url = `/product/list?page=${params?.page}&size=${params?.pageSize}`;
+  if (params?.category_id) {
+    url += `&category_id=${params.category_id}`;
+  }
   return axiosClient
-    .get(`/product/list?page=${params?.page}&size=${params?.pageSize}`)
+    .get(url)
     .then(({ data }) => {
       return data;
     })
@@ -112,6 +116,7 @@ export function getProducts({ commit }, params) {
 export function createProduct({ commit }, product) {
   const form = new FormData();
   form.append("image", product.image);
+  form.append("category_id", product.category)
   form.append("type_of_wood_id", product.wood_type);
   form.append("end_grain_of_wood_id", product.wood_grain);
   form.append("length_of_wood_id", product.wood_length);
@@ -119,6 +124,7 @@ export function createProduct({ commit }, product) {
   form.append("number_of_wood", product.quantity);
   form.append("total_price_of_wood", product.total_price);
   form.append("price_of_each", product.price);
+  form.append("price_per_kube", product.price_per_kube);
   form.append("car_fee", 5);
   product = form;
   return axiosClient
@@ -152,6 +158,7 @@ export function updateProduct({ commit }, product) {
   form.append("number_of_wood", product.quantity);
   form.append("total_price_of_wood", product.total_price);
   form.append("price_of_each", product.price);
+  form.append("price_per_kube", product.price_per_kube);
   form.append("car_fee", 5);
 
 
@@ -414,4 +421,48 @@ export function updateUser({ commit }, userObj) {
 
 export function deleteUser({ commit }, id) {
   return axiosClient.delete(`/user/delete/${id}`);
+}
+
+export function getCategories({ commit }, params) {
+  return axiosClient
+    .get(`/category/list?page=${params?.page}&size=${params?.pageSize}`)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+
+    });
+}
+
+export function createCategory({ commit }, params) {
+  return axiosClient
+    .post("/category/create", params)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+
+    });
+}
+
+export function updateCategory({ commit }, params) {
+  return axiosClient
+    .put(`/category/update/${params.id}`, params)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+
+    });
+}
+
+export function deleteCategory({ commit }, woodTypeId) {
+  return axiosClient
+    .delete(`/category/delete/${woodTypeId}`)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+
+    });
 }

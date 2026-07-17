@@ -87,117 +87,92 @@ const goBack = () => router.back();
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#F8F9FA] p-8 md:p-12">
+    <div class="min-h-screen bg-[#F8F9FA] p-6 md:p-10">
         <!-- Header -->
-        <div class="flex items-center gap-4 mb-8">
+        <div class="flex items-center gap-3 mb-6 max-w-2xl mx-auto">
             <button @click="goBack"
                 class="p-2 rounded-full hover:bg-white hover:shadow transition-all bg-transparent group">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                    stroke="currentColor" class="w-6 h-6 text-gray-700 group-hover:text-black">
+                    stroke="currentColor" class="w-5 h-5 text-gray-700 group-hover:text-black">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
-            <h1 class="text-3xl font-bold text-[#1A1A1A]">{{ $t('profile') }}</h1>
+            <h1 class="text-2xl font-bold text-[#1A1A1A]">{{ $t('profile') }}</h1>
         </div>
 
-        <!-- Profile Card -->
-        <div class="max-w-4xl mx-auto bg-white rounded-[2rem] shadow-2xl shadow-gray-200/50 p-10 md:p-16">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        <div class="max-w-2xl mx-auto space-y-5">
 
-                <!-- Left Column: Avatar Upload -->
-                <div class="lg:col-span-5 flex flex-col items-center">
-                    <label for="upload"
-                        class="relative w-48 h-48 bg-[#1A3C34] rounded-full flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all hover:opacity-90 shadow-lg border-4 border-white">
-
-                        <div v-if="!image" class="flex flex-col items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-white opacity-50" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <p class="text-white text-xs opacity-70 uppercase tracking-widest font-black">{{
-                                $t('TABLE.upload_image') }}</p>
-                        </div>
-
-                        <div v-else class="relative w-full h-full group/img">
-                            <img :src="image"
-                                class="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110" />
-                            <div
-                                class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover/img:opacity-100 transition-all duration-300 backdrop-blur-[2px]">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="w-8 h-8 text-white mb-2 transform translate-y-2 group-hover/img:translate-y-0 transition-transform duration-300"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <p
-                                    class="text-white text-[10px] font-black uppercase tracking-[0.2em] transform translate-y-2 group-hover/img:translate-y-0 transition-transform duration-300 delay-75">
-                                    {{ $t('BUTTON.update') }}</p>
-                            </div>
-                        </div>
-
-                        <input id="upload" type="file" class="hidden" @change="handleImageUpload" accept="image/*" />
-                    </label>
-                    <h2 class="mt-6 text-xl font-bold text-gray-800">{{ formData.name }}</h2>
-                    <p class="text-gray-400 font-medium">@{{ formData.username }}</p>
+            <!-- Avatar card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5">
+                <label for="upload"
+                    class="relative w-20 h-20 rounded-full flex-shrink-0 flex items-center justify-center cursor-pointer overflow-hidden bg-[#f8f9fa] border border-gray-200 hover:border-[#9A6A3A] transition-all">
+                    <div v-if="!image" class="flex flex-col items-center text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <img v-else :src="image" class="w-full h-full object-cover" />
+                    <input id="upload" type="file" class="hidden" @change="handleImageUpload" accept="image/*" />
+                </label>
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-base font-semibold text-gray-900 truncate">{{ formData.name || '—' }}</h2>
+                    <p class="text-sm text-gray-400 truncate">@{{ formData.username || '—' }}</p>
                 </div>
+                <label for="upload"
+                    class="text-xs font-medium text-[#9A6A3A] hover:text-[#7a5330] cursor-pointer px-3 py-1.5 rounded-lg border border-[#9A6A3A]/30 hover:bg-[#9A6A3A]/5 transition-all whitespace-nowrap">
+                    {{ $t('TABLE.upload_image') }}
+                </label>
+            </div>
 
-                <!-- Right Column: Form Fields -->
-                <div class="lg:col-span-7">
-                    <div class="space-y-6">
-                        <!-- Full Name -->
-                        <div class="flex flex-col gap-2">
-                            <label class="text-gray-700 font-semibold">{{ $t('TABLE.full_name') }} <span
-                                    class="text-red-500">*</span></label>
-                            <input type="text" v-model="formData.name"
-                                class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all" />
-                        </div>
-
-                        <!-- Username -->
-                        <div class="flex flex-col gap-2">
-                            <label class="text-gray-700 font-semibold">{{ $t('TABLE.username') }} <span
-                                    class="text-red-500">*</span></label>
-                            <input type="text" v-model="formData.username"
-                                class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all" />
-                        </div>
-
-                        <div class="pt-4 border-t border-gray-100">
-                            <p class="text-sm text-gray-400 mb-4">{{ $t('LOGIN.welcome_msg') }} (Optional to change
-                                password)</p>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Password -->
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-gray-700 font-semibold">{{ $t('TABLE.password') }}</label>
-                                    <input type="password" v-model="formData.password"
-                                        class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all" />
-                                </div>
-
-                                <!-- Confirm Password -->
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-gray-700 font-semibold">{{ $t('TABLE.confirm_password')
-                                    }}</label>
-                                    <input type="password" v-model="formData.confir_pass"
-                                        class="w-full bg-[#f8f9fa] border-none p-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#9A6A3A] transition-all" />
-                                </div>
-                            </div>
-                        </div>
+            <!-- Basic info card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-sm font-semibold text-gray-800 mb-4">{{ $t('TABLE.full_name') }} & {{ $t('TABLE.username') }}</h3>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-medium text-gray-600">{{ $t('TABLE.full_name') }}
+                            <span class="text-red-500">*</span></label>
+                        <input type="text" v-model="formData.name"
+                            class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#9A6A3A] focus:border-[#9A6A3A] transition-all" />
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-medium text-gray-600">{{ $t('TABLE.username') }}
+                            <span class="text-red-500">*</span></label>
+                        <input type="text" v-model="formData.username"
+                            class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#9A6A3A] focus:border-[#9A6A3A] transition-all" />
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="mt-16 flex flex-col items-center gap-6 border-t border-gray-100 pt-10">
+            <!-- Password card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-sm font-semibold text-gray-800">{{ $t('TABLE.password') }}</h3>
+                <p class="text-xs text-gray-400 mt-0.5 mb-4">Leave blank to keep your current password</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-medium text-gray-600">{{ $t('TABLE.password') }}</label>
+                        <input type="password" v-model="formData.password"
+                            class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#9A6A3A] focus:border-[#9A6A3A] transition-all" />
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-medium text-gray-600">{{ $t('TABLE.confirm_password') }}</label>
+                        <input type="password" v-model="formData.confir_pass"
+                            class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#9A6A3A] focus:border-[#9A6A3A] transition-all" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action -->
+            <div class="flex justify-end pb-4">
                 <button @click="onUpdateProfile"
-                    class="group relative w-full max-w-md bg-[#9A6A3A] hover:bg-[#86592d] text-white py-5 rounded-[1.25rem] font-bold text-xl shadow-xl shadow-brown-200 transition-all flex items-center justify-center gap-3"
+                    class="inline-flex items-center justify-center gap-2 bg-[#9A6A3A] hover:bg-[#86592d] text-white px-6 py-2.5 rounded-lg font-medium text-sm shadow-md shadow-brown-200 transition-all disabled:opacity-60"
                     :disabled="loading">
                     <div v-if="loading"
-                        class="animate-spin h-6 w-6 border-4 border-white border-t-transparent rounded-full"></div>
+                        class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
                     <template v-else>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                            class="w-6 h-6">
+                            class="w-4 h-4">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                         {{ $t('BUTTON.update') }}
@@ -210,7 +185,7 @@ const goBack = () => router.back();
 
 <style scoped>
 .shadow-brown-200 {
-    box-shadow: 0 10px 15px -3px rgba(154, 106, 58, 0.2), 0 4px 6px -4px rgba(154, 106, 58, 0.1);
+    box-shadow: 0 6px 12px -3px rgba(154, 106, 58, 0.25), 0 2px 4px -2px rgba(154, 106, 58, 0.1);
 }
 
 input {

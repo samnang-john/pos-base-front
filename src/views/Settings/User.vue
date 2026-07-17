@@ -1,4 +1,4 @@
-<script setup>
+=<script setup>
 import { onMounted, ref, computed } from "vue";
 import store from "../../store";
 import Spinner from "../../components/core/Spinner.vue";
@@ -6,6 +6,7 @@ import TableHeaderCell from "../../components/core/Table/TableHeaderCell.vue";
 import ConfirmModal from "../../components/AlertConfirm.vue";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import dayjs from "dayjs";
+import { useI18n } from "vue-i18n";
 import {
   EllipsisVerticalIcon,
   PencilIcon,
@@ -14,6 +15,8 @@ import {
 } from "@heroicons/vue/24/outline";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+
+const { t } = useI18n();
 
 const image = ref(null);
 const listUsers = ref([]);
@@ -50,12 +53,12 @@ const isFormValid = computed(() => {
     const baseValid =
       userForm.value.name.trim() !== "" &&
       userForm.value.username.trim() !== "";
-    
+
     // If password fields are used, they must match
     if (userForm.value.password || userForm.value.confir_pass) {
       return baseValid && userForm.value.password === userForm.value.confir_pass;
     }
-    
+
     return baseValid;
   }
 });
@@ -106,11 +109,16 @@ const openModal = () => {
 
 const closeModal = () => {
   isModalOpen.value = false;
+  image.value = null;
   userForm.value = {
     name: "",
     username: "",
+    password: "",
+    confir_pass: "",
+    image: "",
   }; // Reset input on close
   isUpdate.value = false;
+  isErrorValue.value = false;
   // objEdit.value = null;
 };
 
@@ -131,18 +139,18 @@ const submitUser = async () => {
         await store.dispatch("createUser", userForm.value);
         getUsers();
         closeModal();
-        toast.success(this.$t('TOAST.user_created'));
+        toast.success(t("TOAST.user_created"));
       } else {
-        toast.error(this.$t('TOAST.password_mismatch'));
+        toast.error(t("TOAST.password_mismatch"));
       }
     } catch (error) {
       closeModal();
       console.log("Error=>", error);
-      toast.error(this.$t('TOAST.user_unsuccessful'));
+      toast.error(t("TOAST.user_unsuccessful"));
     }
   } else {
     isErrorValue.value = true;
-    toast.error(this.$t('TOAST.field_required'));
+    toast.error(t("TOAST.field_required"));
   }
 };
 
@@ -176,13 +184,13 @@ const onUpdate = async () => {
       await store.dispatch("updateUser", obj);
       getUsers();
       closeModal();
-      toast.success(this.$t('TOAST.user_updated'));
+      toast.success(t("TOAST.user_updated"));
     } else {
-      toast.error(this.$t('TOAST.password_mismatch'));
+      toast.error(t("TOAST.password_mismatch"));
     }
   } catch (error) {
     console.log("Error=>", error);
-    toast.error(this.$t('TOAST.user_unsuccessful'));
+    toast.error(t("TOAST.user_unsuccessful"));
   }
 };
 
@@ -190,9 +198,9 @@ const onDeleteUser = async () => {
   try {
     await store.dispatch("deleteUser", objEdit.value?._id);
     getUsers();
-    toast.info(this.$t('TOAST.user_deleted'));
+    toast.info(t("TOAST.user_deleted"));
   } catch (error) {
-    toast.error(this.$t('TOAST.user_unsuccessful'));
+    toast.error(t("TOAST.user_unsuccessful"));
   }
 };
 
@@ -224,7 +232,7 @@ const handleImageUpload = (e) => {
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
         </div>
-        <input v-model="search" @change="getProducts(null)"
+        <input v-model="search" @change="getUsers(1)"
           class="block w-full md:w-64 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
           :placeholder="$t('TABLE.search_user')" />
       </div>
@@ -237,6 +245,9 @@ const handleImageUpload = (e) => {
           <tr>
             <TableHeaderCell field="id" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
               {{ $t('TABLE.no') }}
+            </TableHeaderCell>
+            <TableHeaderCell field="image" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.image') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
               {{ $t('TABLE.name') }}
@@ -256,7 +267,7 @@ const handleImageUpload = (e) => {
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
           <tr v-if="isLoadingUser || !listUsers.length">
-            <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
+            <td colspan="6" class="px-3 py-6 text-sm text-gray-500 text-center">
               <Spinner v-if="isLoadingUser" class="mx-auto" />
               <p v-else class="text-center py-8 text-gray-500">
                 {{ $t('TABLE.no_user_found') }}
@@ -269,6 +280,16 @@ const handleImageUpload = (e) => {
             <td class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-medium text-gray-700 sm:pl-6">
               {{ (index + 1).toString().padStart(2, "0") }}
             </td>
+            <td class="whitespace-nowrap px-2 py-2 text-sm">
+              <div class="h-12 w-12 flex-shrink-0">
+                <img v-if="user.image" :src="user.image" :alt="user.name" class="h-12 w-12 rounded-lg object-cover shadow-sm" />
+                <div v-else class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                   <svg class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
+            </td>
 
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ user.name }}
@@ -277,7 +298,7 @@ const handleImageUpload = (e) => {
               {{ user.username }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ dayjs(user.created_at).format("DD/MM/YYYY - HH:MM A") }}
+              {{ dayjs(user.created_at).format("DD/MM/YYYY - HH:mm A") }}
             </td>
 
             <td class="relative whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm font-medium sm:pr-6">
@@ -326,13 +347,13 @@ const handleImageUpload = (e) => {
           </tr>
         </tbody>
       </table>
-      <div class="flex justify-between items-center py-4">
+      <div class="flex justify-between items-center py-4 px-4">
         <button @click="prevPage" :disabled="currentPage === 1"
           class="px-4 py-2 rounded-lg border bg-white disabled:opacity-40">
           {{ $t('BUTTON.previous') }}
         </button>
 
-        <span class="text-gray-600">
+        <span class="text-gray-600 text-sm">
           {{ $t('BUTTON.page') }} {{ currentPage }} {{ $t('BUTTON.of') }} {{ totalPages }}
         </span>
 
@@ -345,92 +366,97 @@ const handleImageUpload = (e) => {
   </div>
 
   <!-- Modal -->
-  <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center"
-    style="background-color: rgba(0, 0, 0, 0.4)" @click="closeModal">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl" @click.stop>
-      <h2 v-if="isUpdate" class="text-lg font-bold text-gray-800 mb-4">
-        {{ $t('TABLE.update_user') }}
+  <!-- Modal -->
+<div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center"
+  style="background-color: rgba(0, 0, 0, 0.5)" @click="closeModal">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex" @click.stop>
+
+    <!-- Left panel: brand + avatar -->
+    <div class="w-2/5 bg-[#986b41] p-8 flex flex-col items-center justify-center text-white">
+      <label for="upload"
+        class="relative w-32 h-32 rounded-full border-4 border-white/30 flex items-center justify-center cursor-pointer bg-white/10 hover:bg-white/20 transition-colors overflow-hidden">
+        <div v-if="!image" class="flex flex-col items-center gap-1">
+          <svg class="w-7 h-7 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span class="text-[11px] text-white/80">{{ $t('TABLE.upload_image') }}</span>
+        </div>
+        <img v-else :src="image" class="w-full h-full object-cover" />
+        <input id="upload" type="file" class="hidden" @change="handleImageUpload" />
+      </label>
+
+      <h2 class="mt-5 text-lg font-semibold text-center">
+        {{ isUpdate ? $t('TABLE.update_user') : $t('TABLE.add_new_user') }}
       </h2>
-      <h2 v-else class="text-lg font-bold text-gray-800 mb-4">{{ $t('TABLE.add_new_user') }}</h2>
-      <div class="flex justify-center mb-4">
-        <label for="upload"
-          class="w-[160px] h-[200px] border border-gray-300 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer bg-white">
-          <div v-if="!image" class="flex flex-col items-center gap-2">
-            <img src="" class="w-10 opacity-50" />
-            <p class="text-gray-500">{{ $t('TABLE.upload_image') }}</p>
-          </div>
+      <p class="mt-1 text-xs text-white/70 text-center">
+        {{ userForm.name || userForm.username || '—' }}
+      </p>
+    </div>
 
-          <img v-else :src="image" class="w-full h-full object-cover rounded-xl" />
-
-          <input id="upload" type="file" class="hidden" @change="handleImageUpload" />
-        </label>
-      </div>
+    <!-- Right panel: form fields -->
+    <div class="w-3/5 p-8">
       <div class="mb-4">
-        <label for="name" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.full_name') }}
-          <span class="text-red-500">*</span>
+        <label for="name" class="block text-xs font-medium text-gray-600 mb-1">
+          {{ $t('TABLE.full_name') }} <span class="text-red-500">*</span>
         </label>
         <input v-model="userForm.name" id="name" type="text" :class="[
-          'mt-1 w-full p-2 border rounded-lg focus:ring-[#986b41] focus:border-[#986b41]',
-          isErrorValue ? 'border-red-500' : 'border-gray-300',
+          'w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#986b41] focus:border-[#986b41]',
+          isErrorValue && !userForm.name ? 'border-red-500' : 'border-gray-300',
         ]" :placeholder="$t('TABLE.enter_name')" required />
       </div>
+
       <div class="mb-4">
-        <label for="username" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.username') }}
-          <span class="text-red-500">*</span>
+        <label for="username" class="block text-xs font-medium text-gray-600 mb-1">
+          {{ $t('TABLE.username') }} <span class="text-red-500">*</span>
         </label>
         <input v-model="userForm.username" id="username" type="text" :class="[
-          'mt-1 w-full p-2 border rounded-lg focus:ring-[#986b41] focus:border-[#986b41]',
-          isErrorValue ? 'border-red-500' : 'border-gray-300',
+          'w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#986b41] focus:border-[#986b41]',
+          isErrorValue && !userForm.username ? 'border-red-500' : 'border-gray-300',
         ]" :placeholder="$t('TABLE.enter_username')" required />
       </div>
-      <div class="mb-4">
-        <label for="password" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.password') }}
-          <span class="text-red-500">*</span>
-        </label>
-        <input v-model="userForm.password" id="password" type="password" :class="[
-          'mt-1 w-full p-2 border rounded-lg focus:ring-[#986b41] focus:border-[#986b41]',
-          isErrorValue ? 'border-red-500' : 'border-gray-300',
-        ]" :placeholder="$t('TABLE.enter_password')" required />
+
+      <div class="h-px bg-gray-100 my-5"></div>
+
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <div>
+          <label for="password" class="block text-xs font-medium text-gray-600 mb-1">
+            {{ $t('TABLE.password') }} <span class="text-red-500">*</span>
+          </label>
+          <input v-model="userForm.password" id="password" type="password" :class="[
+            'w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#986b41] focus:border-[#986b41]',
+            isErrorValue && !userForm.password ? 'border-red-500' : 'border-gray-300',
+          ]" :placeholder="$t('TABLE.enter_password')" required />
+        </div>
+        <div>
+          <label for="confir_pass" class="block text-xs font-medium text-gray-600 mb-1">
+            {{ $t('TABLE.confirm_password') }} <span class="text-red-500">*</span>
+          </label>
+          <input v-model="userForm.confir_pass" id="confir_pass" type="password" :class="[
+            'w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#986b41] focus:border-[#986b41]',
+            isErrorValue && !userForm.confir_pass ? 'border-red-500' : 'border-gray-300',
+          ]" :placeholder="$t('TABLE.enter_confirm_password')" required />
+        </div>
       </div>
-      <div class="mb-4">
-        <label for="password" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.confirm_password') }}
-          <span class="text-red-500">*</span>
-        </label>
-        <input v-model="userForm.confir_pass" id="confir_pass" type="confir_pass" :class="[
-          'mt-1 w-full p-2 border rounded-lg focus:ring-[#986b41] focus:border-[#986b41]',
-          isErrorValue ? 'border-red-500' : 'border-gray-300',
-        ]" :placeholder="$t('TABLE.enter_confirm_password')" required />
-      </div>
-      <!-- <div class="mb-4">
-        <label for="note" class="block text-sm font-medium text-gray-700"
-          >Note</label
-        >
-        <input
-          v-model="userForm.description"
-          id="note"
-          type="text"
-          class="mt-1 w-full p-2 border border-gray-300 rounded-lg focus:ring-[#986b41] focus:border-[#986b41]"
-          placeholder="Enter wood type note"
-        />
-      </div> -->
-      <div class="flex justify-end space-x-2">
+
+      <div class="flex justify-end gap-2">
         <button @click="closeModal"
-          class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none">
+          class="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none">
           {{ $t('BUTTON.cancel') }}
         </button>
         <button v-if="isUpdate" @click="onUpdate"
-          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-5 py-2 text-sm text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="!isFormValid">
           {{ $t('BUTTON.update') }}
         </button>
         <button v-else @click="submitUser"
-          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-5 py-2 text-sm text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="!isFormValid">
           {{ $t('BUTTON.save') }}
         </button>
       </div>
     </div>
   </div>
+</div>
 
   <!-- Modal Confirm -->
   <ConfirmModal v-model:is-open="isModalConfirmOpen" :title="$t('MODAL.confirm_delete_user_title')"

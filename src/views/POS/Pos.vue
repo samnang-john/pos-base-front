@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, toRaw } from "vue";
 import store from "../../store";
 import ProductCard from "./ProductCard.vue";
 import { PRODUCTS_PER_PAGE } from "../../constants";
@@ -18,6 +18,8 @@ const totalPages = ref(1);
 const pageSize = ref(15);
 const isLoadingProduct = ref(false);
 const customer = ref("");
+const listCategory = ref([]);
+const selectedCategoryId = ref("");
 
 // 🟡 CART
 const cart = ref([]);
@@ -29,42 +31,65 @@ function addToCart(product) {
     toast.error(t('TOAST.out_of_stock') || "Product out of stock");
     return;
   }
-  const existing = cart.value.find(
-    (item) =>
-      item?.type_of_wood_Object.name === product.type_of_wood_Object.name &&
-      item?.price_of_each === product.price_of_each
-  );
+
+  const isCubicItem = !!product.cubic_meters;
+
+  // Cubic-meter items are kept as distinct line items since dimensions
+  // can differ per "add" action. Regular unit items still merge by match.
+  const existing = !isCubicItem
+    ? cart.value.find(
+        (item) =>
+          !item.cubic_meters &&
+          item?.type_of_wood_Object.name === product.type_of_wood_Object.name &&
+          item?.price_of_each === product.price_of_each
+      )
+    : null;
 
   if (existing) {
     existing.quantity += 1; // increase quantity
   } else {
     cart.value.push({
       ...product,
-      quantity: 1,
+      quantity: product.quantity || 1,
       product_id: product?._id,
-      discount: 0,
+      discount: product.discount || 0,
+      cubic_meters: product.cubic_meters || null,
+      length: product.length || null,
+      width: product.width || null,
+      thickness: product.thickness || null,
     });
   }
 }
 
 function increaseQty(item) {
+  if (item.cubic_meters) return; // qty is locked for cubic items, set via modal only
   item.quantity += 1;
 }
 
 function decreaseQty(item) {
+  if (item.cubic_meters) return; // qty is locked for cubic items, remove instead
   if (item.quantity > 1) {
     item.quantity -= 1;
   } else {
-    // remove item when qty = 0
     cart.value = cart.value.filter((i) => i !== item);
   }
+}
+
+function removeItem(item) {
+  cart.value = cart.value.filter((i) => i !== item);
+}
+
+function lineTotal(item) {
+  if (item.cubic_meters) {
+    return Number(item.price_per_kube || 0) * Number(item.cubic_meters || 0);
+  }
+  return Number(item.price_of_each || 0) * item.quantity;
 }
 
 // Computed totals
 const subtotal = computed(() =>
   cart.value.reduce(
-    (sum, p) =>
-      sum - Number(p.discount || 0) + Number(p.price_of_each || 0) * p.quantity,
+    (sum, p) => sum - Number(p.discount || 0) + lineTotal(p),
     0
   )
 );
@@ -74,7 +99,7 @@ const total = computed(() => subtotal.value);
 
 onMounted(async () => {
   try {
-    await Promise.all([getProducts(), getUser()]);
+    await Promise.all([getProducts(), getUser(), getCategory()]);
   } catch (error) {
     console.error("Error during initialization:", error);
   }
@@ -89,18 +114,34 @@ const getUser = async () => {
   }
 };
 
+const getCategory = async () => {
+  try {
+    const res = await store.dispatch("getCategories", {
+      page: 1,
+      pageSize: 50,
+    });
+    listCategory.value = res?.data?.items || [];
+  } catch (error) {
+    console.log("Error fetching categories:", error);
+  }
+};
+
+const selectCategory = (categoryId) => {
+  selectedCategoryId.value = categoryId;
+  getProducts(1);
+};
+
 const getProducts = async (page = 1) => {
   isLoadingProduct.value = true;
   try {
     const res = await store.dispatch("getProducts", {
       page,
       pageSize: pageSize.value,
+      category_id: selectedCategoryId.value || undefined,
     });
-
 
     products.value = res.data.items || [];
 
-    // save pagination
     currentPage.value = res?.data?.pagination?.currentPage;
     totalPages.value = res?.data?.pagination?.totalPages;
   } catch (error) {
@@ -118,8 +159,11 @@ const completeOrder = async () => {
     items: cart.value.map(item => ({
       product_id: item.product_id || item._id,
       quantity: item.quantity,
-      price: item.price_of_each,
-      discount: item.discount || 0
+      cubic_meters: item.cubic_meters || null,
+      length: item.length || null,
+      width: item.width || null,
+      thickness: item.thickness || null,
+      discount: item.discount || 0,
     })),
   };
   const resOrder = await store.dispatch("createOrder", objData);
@@ -138,19 +182,16 @@ const downloadReceiptPDF = async (orderID) => {
     orderID: orderID,
   });
 
-  // Create blob from binary data
   const blob = new Blob([res], { type: "application/pdf" });
 
-  // Create download link
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `report-${new Date().toISOString().slice(0, 10)}.pdf`; // e.g., report-2025-12-20.pdf
+  link.download = `report-${new Date().toISOString().slice(0, 10)}.pdf`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 
-  // Clean up
   window.URL.revokeObjectURL(url);
 };
 
@@ -183,7 +224,6 @@ const toggleLang = () => {
           </p>
         </div>
 
-        <!-- Navigation Dropdown -->
         <Menu as="div" class="relative inline-block text-left">
           <MenuButton
             class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 hover:bg-gray-700 transition overflow-hidden">
@@ -243,7 +283,6 @@ const toggleLang = () => {
     <div class="p-6 md:p-8 flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-88px)] overflow-y-auto lg:overflow-hidden">
       <!-- Left: Products Section -->
       <div class="flex-1 flex flex-col lg:overflow-hidden min-h-[500px] lg:min-h-0">
-        <!-- Title & Subtitle -->
         <div class="mb-6">
           <h2 class="text-2xl font-bold mb-1">
             {{ $t("Luxury_product_catalog") }}
@@ -253,8 +292,29 @@ const toggleLang = () => {
           </p>
         </div>
 
-        <!-- Search is hidden in the design image but good to keep if needed, maybe cleaner -->
-        <!-- <div class="mb-6"> ... </div> -->
+        <!-- Categories Filter -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+          <button
+            @click="selectCategory('')"
+            class="px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all whitespace-nowrap cursor-pointer"
+            :class="selectedCategoryId === '' 
+              ? 'bg-[#FFD700] text-black shadow-lg shadow-[#FFD700]/20' 
+              : 'bg-[#13131F] text-gray-300 hover:text-white border border-white/5 hover:border-white/10'"
+          >
+            {{ $t('all_products') }}
+          </button>
+          <button
+            v-for="category in listCategory"
+            :key="category._id"
+            @click="selectCategory(category._id)"
+            class="px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all whitespace-nowrap cursor-pointer"
+            :class="selectedCategoryId === category._id 
+              ? 'bg-[#FFD700] text-black shadow-lg shadow-[#FFD700]/20' 
+              : 'bg-[#13131F] text-gray-300 hover:text-white border border-white/5 hover:border-white/10'"
+          >
+            {{ category.name }}
+          </button>
+        </div>
 
         <!-- Scrollable Grid -->
         <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
@@ -308,7 +368,7 @@ const toggleLang = () => {
 
           <!-- Cart Items List -->
           <div v-else class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
-            <div v-for="item in cart" :key="item._id" class="bg-[#1C1C28] p-3 rounded-lg flex gap-3 group relative">
+            <div v-for="(item, index) in cart" :key="`${item._id}-${index}`" class="bg-[#1C1C28] p-3 rounded-lg flex gap-3 group relative">
               <!-- Image thumb -->
               <div class="w-16 h-16 bg-gray-800 rounded-md overflow-hidden flex-shrink-0">
                 <img :src="item.image" class="w-full h-full object-cover" />
@@ -320,17 +380,29 @@ const toggleLang = () => {
                     <h4 class="font-bold text-sm text-white">
                       {{ item.type_of_wood_Object?.name }}
                     </h4>
-                    <p class="text-xs text-gray-400">
-                      {{ item.length_of_wood_Object?.name }}
-                    </p>
+
+                    <!-- Cubic meter items: show dimensions -->
+                    <div v-if="item.cubic_meters" class="flex flex-wrap items-center gap-x-2 text-xs text-gray-400">
+                      <span>{{ item.length }}m × {{ item.width }}m × {{ item.thickness }}m</span>
+                      <span class="text-[#FFD700] font-semibold">{{ item.cubic_meters }} m³</span>
+                    </div>
+
+                    <!-- Regular unit items: show size label -->
+                    <div v-else class="flex items-center gap-2">
+                      <p class="text-xs text-gray-400">
+                        {{ item.length_of_wood_Object?.name }}
+                      </p>
+                    </div>
                   </div>
+
                   <p class="font-bold text-[#FFD700]">
-                    ${{ (item.price_of_each * item.quantity).toFixed(2) }}
+                    ${{ lineTotal(item).toFixed(2) }}
                   </p>
                 </div>
 
                 <div class="flex justify-between items-center mt-2">
-                  <div class="flex items-center bg-[#2C2C3A] rounded overflow-hidden">
+                  <!-- Quantity controls: disabled for cubic items (qty is locked from modal) -->
+                  <div v-if="!item.cubic_meters" class="flex items-center bg-[#2C2C3A] rounded overflow-hidden">
                     <button @click="decreaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">
                       -
                     </button>
@@ -339,6 +411,28 @@ const toggleLang = () => {
                     }}</span>
                     <button @click="increaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">
                       +
+                    </button>
+                  </div>
+                  <div v-else class="flex items-center gap-2">
+                    <span class="text-[#FFD700] font-semibold">
+                      {{ item.cubic_meters }} m³
+                    </span>
+
+                    <button
+                      @click="removeItem(item)"
+                      class="w-4 h-4 flex items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition"
+                      title="Remove"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-3 h-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
+                      </svg>
                     </button>
                   </div>
 
@@ -355,12 +449,7 @@ const toggleLang = () => {
                   class="flex justify-between items-center mt-2 pt-2 border-t border-white/5">
                   <span class="text-xs text-gray-400">Final:</span>
                   <span class="text-sm font-bold text-[#FFD700]">
-                    ${{
-                      Math.max(
-                        0,
-                        item.price_of_each * item.quantity - item.discount
-                      ).toFixed(2)
-                    }}
+                    ${{ Math.max(0, lineTotal(item) - item.discount).toFixed(2) }}
                   </span>
                 </div>
               </div>
@@ -381,18 +470,16 @@ const toggleLang = () => {
           </div>
         </div>
 
-        <!-- Settings/Additional Actions (Bottom right icon in design) -->
+        <!-- Settings/Additional Actions -->
         <div class="flex justify-end">
           <button @click="toggleLang"
             class="w-12 h-12 rounded-full bg-[#13131F] flex items-center justify-center hover:bg-[#1C1C28] transition text-[#FFD700]"
             :title="locale === 'en' ? 'Switch to Khmer' : 'Switch to English'">
-            <!-- Globe Icon -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <!-- Optional: Language Code Indicator -->
             <span
               class="absolute -top-1 -right-1 bg-[#FFD700] text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full">
               {{ locale === "en" ? "EN" : "KH" }}
@@ -404,4 +491,12 @@ const toggleLang = () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
