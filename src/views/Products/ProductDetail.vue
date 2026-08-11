@@ -16,6 +16,7 @@ const listWoodTypes = ref([]);
 const listWoodLengths = ref([]);
 const listWoodGrains = ref([]);
 const listCategory = ref([]);
+const selectedCategory = ref(null);
 
 const formData = ref({
   image: null,
@@ -28,10 +29,29 @@ const formData = ref({
   cost: "0",
   category: "",
   price_per_kube: "0",
+  cost_per_kube: "0",
+  total_cube: "0",
 });
 
 const loading = ref(false);
 const isEditMode = computed(() => !!proId);
+
+const isFormValid = computed(() => {
+  const baseValid = formData.value.image && formData.value.category;
+  // in edit mode we already have an existing image, so don't require a new one
+  const imageOk = isEditMode.value ? true : !!formData.value.image;
+
+  if (!formData.value.category || !imageOk) return false;
+
+  if (selectedCategory.value?.name?.toLowerCase() === 'short') {
+    return (
+      Number(formData.value.price) > 0 &&
+      Number(formData.value.quantity) > 0 &&
+      Number(formData.value.cost) > 0
+    );
+  }
+  return true;
+});
 
 onMounted(async () => {
   try {
@@ -54,7 +74,6 @@ const getProducts = async () => {
     });
   } catch (error) {
     console.log(error);
-  } finally {
   }
 };
 
@@ -68,6 +87,11 @@ const getCategory = async () => {
   } catch (error) {
     console.log(error);
   }
+};
+
+const onCategoryChange = () => {
+  selectedCategory.value =
+    listCategory.value.find((item) => item._id === formData.value.category) || null;
 };
 
 const getProductDetail = async () => {
@@ -100,7 +124,13 @@ const getProductDetail = async () => {
       cost: String(product.cost_of_each || 0),
       category: product.category_id || product.category_Object?._id || "",
       price_per_kube: String(product.price_per_kube || 0),
+      cost_per_kube: String(product.cost_per_kube || 0),
+      total_cube: String(product.total_cube || 0),
     };
+
+    // Now that category is set, resolve selectedCategory so the
+    // "Long" vs. other-category fields render correctly in edit mode.
+    onCategoryChange();
 
     // Show existing image in preview
     if (product.image) {
@@ -157,6 +187,19 @@ const handleImageUpload = (e) => {
 const onSubmit = async () => {
   loading.value = true;
   try {
+    // Clear whichever fields don't apply to the selected category so
+    // they're never sent as "" (fails the Mongoose ObjectId cast).
+    const isLong = selectedCategory.value?.name?.toLowerCase() === 'long';
+
+    if (isLong) {
+      formData.value.wood_length = "";
+      formData.value.wood_grain = "";
+    } else {
+      formData.value.price_per_kube = "0";
+      formData.value.cost_per_kube = "0";
+      formData.value.total_cube = "0";
+    }
+
     let res;
     if (isEditMode.value) {
       res = await store.dispatch("updateProduct", {
@@ -195,7 +238,6 @@ const onTotalPrice = () => {
   formData.value.total_price = totalPrice;
 };
 </script>
-
 <template>
   <!-- Main Container -->
   <div class="min-h-screen bg-[#F8F9FA] p-6 md:p-8">
@@ -251,7 +293,7 @@ const onTotalPrice = () => {
             <div class="flex flex-col gap-1.5">
               <label class="text-sm text-gray-700 font-medium">{{ "Category" }} <span
                   class="text-red-500">*</span></label>
-              <select v-model="formData.category"
+              <select v-model="formData.category" @change="onCategoryChange"
                 class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
                 <option value="" disabled>{{ $t('FORM.select_category') }}</option>
                 <option v-for="item in listCategory" :key="item.name" :value="item._id">{{ item.name }}</option>
@@ -269,73 +311,86 @@ const onTotalPrice = () => {
               </select>
             </div>
 
-            <!-- Wood Length -->
-            <div class="flex flex-col gap-1.5">
-              <label class="text-sm text-gray-700 font-medium">{{ $t('TABLE.wood_length') }} <span
-                  class="text-red-500">*</span></label>
-              <select v-model="formData.wood_length"
-                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
-                <option value="" disabled>{{ $t('FORM.select_wood_length') }}</option>
-                <option v-for="item in listWoodLengths" :key="item.name" :value="item._id">{{ item.name }}</option>
-              </select>
-            </div>
-
-            <!-- Wood Grain -->
-            <div class="flex flex-col gap-1.5">
-              <label class="text-sm text-gray-700 font-medium">{{ $t('TABLE.wood_grain') }} <span
-                  class="text-red-500">*</span></label>
-              <select v-model="formData.wood_grain"
-                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
-                <option value="" disabled>{{ $t('FORM.select_wood_grain') }}</option>
-                <option v-for="item in listWoodGrains" :key="item.name" :value="item._id">{{ item.name }}</option>
-              </select>
-            </div>
-
-            <!-- Divider for pricing section -->
-            <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
-
-            <!-- Price Per Piece -->
-            <div class="flex flex-col gap-1.5">
-              <label class="text-sm text-gray-700 font-medium">{{ isEditMode ? $t('FORM.retail_price_per_piece') :
-                $t('FORM.price_per_piece') }} <span class="text-red-500">*</span></label>
-              <input type="number" v-model="formData.price" @input="onTotalPrice"
-                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
-            </div>
-
-            <!-- Quantity -->
-            <div class="flex flex-col gap-1.5">
-              <label class="text-sm text-gray-700 font-medium">{{ $t('FORM.quantity_of_wood') }} <span
-                  class="text-red-500">*</span></label>
-              <input type="number" v-model="formData.quantity" @input="onTotalPrice"
-                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
-            </div>
-
-            <!-- Cost Per Piece -->
-            <div class="flex flex-col gap-1.5">
-              <label class="text-sm text-gray-700 font-medium">{{ isEditMode ? $t('FORM.price_per_piece') :
-                $t('FORM.retail_price_per_piece') }} <span class="text-red-500">*</span></label>
-              <input type="number" v-model="formData.cost"
-                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
-            </div>
-
-            <!-- Total Price (computed, read-only) -->
-            <div class="flex flex-col gap-1.5">
-              <label class="text-sm text-gray-700 font-medium">{{ $t('FORM.total_price') }}</label>
-              <div
-                class="w-full bg-[#FBF6EF] border border-dashed border-[#D9C2A0] px-3 py-2.5 rounded-lg text-sm text-[#9A6A3A] font-semibold">
-                {{ formData.total_price }}
+            <template v-if="selectedCategory?.name?.toLowerCase() !== 'long'">
+              <!-- Wood Length -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm text-gray-700 font-medium">{{ $t('TABLE.wood_length') }} <span
+                    class="text-red-500">*</span></label>
+                <select v-model="formData.wood_length"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
+                  <option value="" disabled>{{ $t('FORM.select_wood_length') }}</option>
+                  <option v-for="item in listWoodLengths" :key="item.name" :value="item._id">{{ item.name }}</option>
+                </select>
               </div>
-            </div>
 
-            <!-- Divider for kube pricing -->
-            <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
+              <!-- Wood Grain -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm text-gray-700 font-medium">{{ $t('TABLE.wood_grain') }} <span
+                    class="text-red-500">*</span></label>
+                <select v-model="formData.wood_grain"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
+                  <option value="" disabled>{{ $t('FORM.select_wood_grain') }}</option>
+                  <option v-for="item in listWoodGrains" :key="item.name" :value="item._id">{{ item.name }}</option>
+                </select>
+              </div>
 
-            <!-- Price Per Kube -->
-            <div class="flex flex-col gap-1.5 md:col-span-2">
-              <label class="text-sm text-gray-700 font-medium">Price Per Kube</label>
-              <input type="number" v-model="formData.price_per_kube"
-                class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
-            </div>
+              <!-- Divider for pricing section -->
+              <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
+
+              <!-- Price Per Piece -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm text-gray-700 font-medium">{{ isEditMode ? $t('FORM.retail_price_per_piece') :
+                  $t('FORM.price_per_piece') }} <span class="text-red-500">*</span></label>
+                <input type="number" v-model="formData.price" @input="onTotalPrice"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
+              </div>
+
+              <!-- Quantity -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm text-gray-700 font-medium">{{ $t('FORM.quantity_of_wood') }} <span
+                    class="text-red-500">*</span></label>
+                <input type="number" v-model="formData.quantity" @input="onTotalPrice"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
+              </div>
+
+              <!-- Cost Per Piece -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm text-gray-700 font-medium">{{ isEditMode ? $t('FORM.price_per_piece') :
+                  $t('FORM.retail_price_per_piece') }} <span class="text-red-500">*</span></label>
+                <input type="number" v-model="formData.cost"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
+              </div>
+
+              <!-- Total Price (computed, read-only) -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm text-gray-700 font-medium">{{ $t('FORM.total_price') }}</label>
+                <div
+                  class="w-full bg-[#FBF6EF] border border-dashed border-[#D9C2A0] px-3 py-2.5 rounded-lg text-sm text-[#9A6A3A] font-semibold">
+                  {{ formData.total_price }}
+                </div>
+              </div>
+            </template>
+
+            <template v-if="selectedCategory?.name?.toLowerCase() === 'long'">
+              <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
+              <div class="flex flex-col gap-1.5 md:col-span-2">
+                <label class="text-sm text-gray-700 font-medium">Total Cube</label>
+                <input type="number" v-model="formData.total_cube"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm text-gray-700 font-medium">Cost Per Kube</label>
+                <input type="number" v-model="formData.cost_per_kube"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm text-gray-700 font-medium">Price Per Kube</label>
+                <input type="number" v-model="formData.price_per_kube"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
+              </div>
+            </template>
+
           </div>
         </div>
       </div>
@@ -348,7 +403,7 @@ const onTotalPrice = () => {
         </button>
         <button @click="onSubmit"
           class="group relative bg-[#9A6A3A] hover:bg-[#86592d] text-white px-6 py-2.5 rounded-lg font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="loading">
+          :disabled="loading || !isFormValid">
           <div v-if="loading" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full">
           </div>
           <template v-else>

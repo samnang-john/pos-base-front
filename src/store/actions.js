@@ -113,30 +113,6 @@ export function getProducts({ commit }, params) {
     });
 }
 
-export function createProduct({ commit }, product) {
-  const form = new FormData();
-  form.append("image", product.image);
-  form.append("category_id", product.category)
-  form.append("type_of_wood_id", product.wood_type);
-  form.append("end_grain_of_wood_id", product.wood_grain);
-  form.append("length_of_wood_id", product.wood_length);
-  form.append("cost_of_each", product.cost);
-  form.append("number_of_wood", product.quantity);
-  form.append("total_price_of_wood", product.total_price);
-  form.append("price_of_each", product.price);
-  form.append("price_per_kube", product.price_per_kube);
-  form.append("car_fee", 5);
-  product = form;
-  return axiosClient
-    .post("/product/create", product)
-    .then(({ data }) => {
-      return data;
-    })
-    .catch((err) => {
-
-    });
-}
-
 export function getProductDetail({ commit }, params) {
   return axiosClient
     .get(`/product/detail/${params?.id}`)
@@ -148,19 +124,57 @@ export function getProductDetail({ commit }, params) {
     });
 }
 
-export function updateProduct({ commit }, product) {
+// Only appends a field if it has a real value — prevents "" from
+// being sent for ObjectId fields, which crashes the Mongoose cast.
+function appendIfPresent(form, key, value) {
+  if (value === null || value === undefined || value === "") {
+    return;
+  }
+  form.append(key, value);
+}
+
+export function createProduct({ commit }, product) {
   const form = new FormData();
-  form.append("image", product.image);
-  form.append("type_of_wood_id", product.wood_type);
-  form.append("end_grain_of_wood_id", product.wood_grain);
-  form.append("length_of_wood_id", product.wood_length);
-  form.append("cost_of_each", product.cost);
-  form.append("number_of_wood", product.quantity);
-  form.append("total_price_of_wood", product.total_price);
-  form.append("price_of_each", product.price);
-  form.append("price_per_kube", product.price_per_kube);
+  appendIfPresent(form, "image", product.image);
+  appendIfPresent(form, "category_id", product.category);
+  appendIfPresent(form, "type_of_wood_id", product.wood_type);
+  appendIfPresent(form, "end_grain_of_wood_id", product.wood_grain);
+  appendIfPresent(form, "length_of_wood_id", product.wood_length);
+  appendIfPresent(form, "cost_of_each", product.cost);
+  appendIfPresent(form, "number_of_wood", product.quantity);
+  appendIfPresent(form, "total_price_of_wood", product.total_price);
+  appendIfPresent(form, "price_of_each", product.price);
+  appendIfPresent(form, "price_per_kube", product.price_per_kube);
+  appendIfPresent(form, "cost_per_kube", product.cost_per_kube);
+  appendIfPresent(form, "total_cube", product.total_cube);
   form.append("car_fee", 5);
 
+  return axiosClient
+    .post("/product/create", form)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+      console.error("Create Product Fail", err);
+      throw err;
+    });
+}
+
+export function updateProduct({ commit }, product) {
+  const form = new FormData();
+  appendIfPresent(form, "image", product.image);
+  appendIfPresent(form, "category_id", product.category);
+  appendIfPresent(form, "type_of_wood_id", product.wood_type);
+  appendIfPresent(form, "end_grain_of_wood_id", product.wood_grain);
+  appendIfPresent(form, "length_of_wood_id", product.wood_length);
+  appendIfPresent(form, "cost_of_each", product.cost);
+  appendIfPresent(form, "number_of_wood", product.quantity);
+  appendIfPresent(form, "total_price_of_wood", product.total_price);
+  appendIfPresent(form, "price_of_each", product.price);
+  appendIfPresent(form, "price_per_kube", product.price_per_kube);
+  appendIfPresent(form, "cost_per_kube", product.cost_per_kube);
+  appendIfPresent(form, "total_cube", product.total_cube);
+  form.append("car_fee", 5);
 
   return axiosClient
     .put(`/product/update/${product?.id}`, form)
@@ -168,7 +182,8 @@ export function updateProduct({ commit }, product) {
       return data;
     })
     .catch((err) => {
-
+      console.error("Update Product Fail", err);
+      throw err;
     });
 }
 

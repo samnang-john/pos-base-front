@@ -130,6 +130,9 @@ const onDeleteProduct = async () => {
               {{ $t('TABLE.image') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ 'Category' }}
+            </TableHeaderCell>
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
               {{ $t('TABLE.wood_type') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
@@ -155,7 +158,7 @@ const onDeleteProduct = async () => {
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
           <tr v-if="isLoadingProduct || !listProduct.length">
-            <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
+            <td colspan="9" class="px-3 py-6 text-sm text-gray-500 text-center">
               <Spinner v-if="isLoadingProduct" class="mx-auto" />
               <p v-else class="text-center py-8 text-gray-500">
                 {{ $t('TABLE.no_product_found') }}
@@ -178,18 +181,20 @@ const onDeleteProduct = async () => {
                 </div>
               </div>
             </td>
-
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.type_of_wood_Object?.name || 'N/A' }}
+              {{ product.category_object?.name || '-' }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.end_grain_of_wood_Object?.name || 'N/A' }}
+              {{ product.type_of_wood_Object?.name || '-' }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.length_of_wood_Object?.name || 'N/A' }}
+              {{ product.end_grain_of_wood_Object?.name || '-' }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ "$" + product.price_of_each }}
+              {{ product.length_of_wood_Object?.name || '-' }}
+            </td>
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
+              ${{product.price_of_each  || product.price_per_kube}}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ product.number_of_wood }}

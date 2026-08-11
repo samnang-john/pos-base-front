@@ -27,10 +27,6 @@ const userItem = ref(null);
 
 // Add product to cart
 function addToCart(product) {
-  if (product.number_of_wood <= 0) {
-    toast.error(t('TOAST.out_of_stock') || "Product out of stock");
-    return;
-  }
 
   const isCubicItem = !!product.cubic_meters;
 

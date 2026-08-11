@@ -24,16 +24,15 @@ const formData = ref({
   total_price: "0",
   cost: "0",
   category: "",
-  price_per_kube: "0"
+  price_per_kube: "0",
+  cost_per_kube: "0",
+  total_cube: "0",
 });
 const loading = ref(false);
 
 const isFormValid = computed(() => {
   const baseValid =
     formData.value.image &&
-    formData.value.wood_type &&
-    formData.value.wood_length &&
-    formData.value.wood_grain &&
     formData.value.category;
 
   if (!baseValid) return false;
@@ -247,7 +246,8 @@ const onCategoryChange = () => {
               </select>
             </div>
 
-            <!-- Wood Length -->
+            <template v-if="selectedCategory?.name?.toLowerCase() !== 'long'">
+              <!-- Wood Length -->
             <div class="flex flex-col gap-1.5">
               <label class="text-sm text-gray-700 font-medium">{{ $t('TABLE.wood_length') }} <span
                   class="text-red-500">*</span></label>
@@ -269,6 +269,7 @@ const onCategoryChange = () => {
               </select>
             </div>
 
+            </template>
             <template v-if="selectedCategory?.name?.toLowerCase() !== 'long'">
               <!-- Divider for pricing section -->
             <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
@@ -307,11 +308,26 @@ const onCategoryChange = () => {
             <template v-if="selectedCategory?.name?.toLowerCase() === 'long'">
               <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
               <div class="flex flex-col gap-1.5 md:col-span-2">
+                <label class="text-sm text-gray-700 font-medium">Total Cube</label>
+                <input type="number" v-model="formData.total_cube"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
+              </div>
+            </template>
+
+            <template v-if="selectedCategory?.name?.toLowerCase() === 'long'">
+              <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm text-gray-700 font-medium">Cost Per Kube</label>
+                <input type="number" v-model="formData.cost_per_kube"
+                  class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
+              </div>
+              <div class="flex flex-col gap-1.5">
                 <label class="text-sm text-gray-700 font-medium">Price Per Kube</label>
                 <input type="number" v-model="formData.price_per_kube"
                   class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
               </div>
             </template>
+
 
           </div>
         </div>
