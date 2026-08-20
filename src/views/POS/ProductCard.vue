@@ -28,7 +28,7 @@ const cubicMeters = computed(() => {
   const w = Number(width.value) || 0;
   const t = Number(thickness.value) || 0;
   const q = Number(quantity.value) || 0;
-  return Number(((l * w * t * q) /10000).toFixed(4));
+  return Number(((l * w * t * q) / 10000).toFixed(4));
 });
 
 const estimatedPrice = computed(() => {
@@ -93,7 +93,8 @@ function confirmAddToCart() {
 </script>
 
 <template>
-  <div class="group relative bg-[#13131F] rounded-2xl overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer hover:shadow-2xl hover:shadow-[#FFD700]/10"
+  <div
+    class="group relative bg-[#13131F] rounded-2xl overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer hover:shadow-2xl hover:shadow-[#FFD700]/10"
     @click="handleCardClick">
     <!-- Image Container -->
     <div class="h-45 sm:h-50 relative bg-[#1C1C28] overflow-hidden">
@@ -109,7 +110,8 @@ function confirmAddToCart() {
       </h3>
 
       <div class="space-y-1 mb-4">
-        <p v-if="product.category_object?.name" class="text-gray-400 text-sm truncate" :title="product.category_object?.name">
+        <p v-if="product.category_object?.name" class="text-gray-400 text-sm truncate"
+          :title="product.category_object?.name">
           {{ $t('MENU.category') || 'Category' }}:
           <span class="text-white font-medium">
             {{ product.category_object?.name }}
@@ -138,8 +140,12 @@ function confirmAddToCart() {
       </div>
 
       <div class="mt-auto pt-4 flex items-end justify-between">
-        <p class="text-[#FFD700] text-2xl font-black">
+        <p v-if="product.category_object?.name !== 'Long'" class="text-[#FFD700] text-2xl font-black">
           ${{ Number(product.price_of_each || 0).toFixed(2) }}
+        </p>
+
+        <p v-if="product.category_object?.name === 'Long'" class="text-[#FFD700] text-2xl font-black">
+          ${{ Number(product.price_per_kube || 0).toFixed(2) }}
         </p>
 
         <button
@@ -158,33 +164,19 @@ function confirmAddToCart() {
     <!-- Product Detail Modal (only shown for long category names) -->
     <TransitionRoot appear :show="isOpen" as="template">
       <Dialog as="div" class="relative z-50" @close="closeModal">
-        <TransitionChild
-          as="template"
-          enter="duration-200 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-150 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
+        <TransitionChild as="template" enter="duration-200 ease-out" enter-from="opacity-0" enter-to="opacity-100"
+          leave="duration-150 ease-in" leave-from="opacity-100" leave-to="opacity-0">
           <div class="fixed inset-0 bg-black/70" @click.self="closeModal" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
           <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              as="template"
-              enter="duration-200 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-150 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
+            <TransitionChild as="template" enter="duration-200 ease-out" enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100" leave="duration-150 ease-in" leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95">
               <DialogPanel
                 class="w-full max-w-md transform overflow-hidden rounded-2xl bg-[#13131F] border border-white/10 text-left align-middle shadow-2xl"
-                @click.stop
-              >
+                @click.stop>
                 <div class="h-56 bg-[#1C1C28] overflow-hidden">
                   <img :src="product.image || '/fallback-image.jpg'"
                     :alt="`${product.type_of_wood_Object?.name || 'Wood'} cutting board`"
@@ -223,42 +215,24 @@ function confirmAddToCart() {
                       <label class="block text-xs text-gray-400 mb-1.5" for="modal-length">
                         {{ $t('FORM.length') }}
                       </label>
-                      <input
-                        id="modal-length"
-                        v-model.number="length"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        class="w-full bg-[#1C1C28] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent"
-                      />
+                      <input id="modal-length" v-model.number="length" type="number" min="0" step="0.01"
+                        class="w-full bg-[#1C1C28] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent" />
                     </div>
 
                     <div>
                       <label class="block text-xs text-gray-400 mb-1.5" for="modal-width">
                         {{ $t('FORM.width') }}
                       </label>
-                      <input
-                        id="modal-width"
-                        v-model.number="width"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        class="w-full bg-[#1C1C28] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent"
-                      />
+                      <input id="modal-width" v-model.number="width" type="number" min="0" step="0.01"
+                        class="w-full bg-[#1C1C28] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent" />
                     </div>
 
                     <div>
                       <label class="block text-xs text-gray-400 mb-1.5" for="modal-thickness">
                         {{ $t('FORM.thickness') }}
                       </label>
-                      <input
-                        id="modal-thickness"
-                        v-model.number="thickness"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        class="w-full bg-[#1C1C28] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent"
-                      />
+                      <input id="modal-thickness" v-model.number="thickness" type="number" min="0" step="0.01"
+                        class="w-full bg-[#1C1C28] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent" />
                     </div>
                   </div>
 
@@ -278,15 +252,12 @@ function confirmAddToCart() {
                   <div class="flex gap-3">
                     <button
                       class="flex-1 py-3 rounded-xl font-bold text-gray-300 bg-[#1C1C28] hover:bg-[#252535] transition"
-                      @click="closeModal"
-                    >
+                      @click="closeModal">
                       {{ $t('BUTTON.cancel') || 'Cancel' }}
                     </button>
                     <button
                       class="flex-1 py-3 rounded-xl font-bold text-black bg-[#FFD700] hover:bg-[#e6c200] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      :disabled="cubicMeters <= 0"
-                      @click="confirmAddToCart"
-                    >
+                      :disabled="cubicMeters <= 0" @click="confirmAddToCart">
                       {{ $t('BUTTON.add_to_cart') || 'Add to Cart' }}
                     </button>
                   </div>

@@ -75,7 +75,7 @@ function handleAddToCart() {
       <!-- Spacer -->
       <div class="mt-auto pt-1 flex flex-col gap-1">
         <!-- Costs/Prices Box (Compact) -->
-        <div class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
+        <div v-if="product.category_object?.name !== 'Long'" class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
           <div class="flex justify-between items-center text-[10px] mb-0.5">
             <span class="text-white/80 font-medium">{{ $t('cost') }}</span>
             <span class="text-white font-bold">${{ Number(product.cost_of_each || 0).toFixed(2) }}</span>
@@ -84,6 +84,18 @@ function handleAddToCart() {
             <span class="text-white/80 font-medium text-xs">{{ $t('price') }}</span>
             <span class="text-[#FFD700] text-lg font-black drop-shadow-md">
               ${{ Number(product.price_of_each || 0).toFixed(2) }}
+            </span>
+          </div>
+        </div>
+        <div v-if="product.category_object?.name === 'Long'" class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
+          <div class="flex justify-between items-center text-[10px] mb-0.5">
+            <span class="text-white/80 font-medium">{{ $t('cost') }}</span>
+            <span class="text-white font-bold">${{ Number(product.cost_per_kube || 0).toFixed(2) }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-white/80 font-medium text-xs">{{ $t('price') }}</span>
+            <span class="text-[#FFD700] text-lg font-black drop-shadow-md">
+              ${{ Number(product.price_per_kube || 0).toFixed(2) }}
             </span>
           </div>
         </div>

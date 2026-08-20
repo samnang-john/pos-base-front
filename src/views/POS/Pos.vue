@@ -48,7 +48,7 @@ function addToCart(product) {
       ...product,
       quantity: product.quantity || 1,
       product_id: product?._id,
-      discount: product.discount || 0,
+      discount: Number(product.discount) || 0,
       cubic_meters: product.cubic_meters || null,
       length: product.length || null,
       width: product.width || null,
@@ -147,19 +147,44 @@ const getProducts = async (page = 1) => {
   }
 };
 
+// Mirrors the backend's per-category validation so bad cart state
+// is caught with a friendly toast instead of a raw API error.
+function validateCart() {
+  for (const item of cart.value) {
+    const label = item.type_of_wood_Object?.name || "Item";
+
+    if (item.cubic_meters) {
+      if (isNaN(item.cubic_meters) || Number(item.cubic_meters) <= 0) {
+        toast.error(`${label}: cubic meters must be greater than 0`);
+        return false;
+      }
+    } else {
+      if (!item.quantity || isNaN(item.quantity) || Number(item.quantity) <= 0) {
+        toast.error(`${label}: quantity must be greater than 0`);
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 const completeOrder = async () => {
+  if (cart.value.length === 0) return;
+
+  if (!validateCart()) return;
+
   const objData = {
-    customer: customer.value || "Guest",
+    customer: customer.value.trim() || "Guest",
     discount: 0,
     tax: 0,
     items: cart.value.map(item => ({
       product_id: item.product_id || item._id,
-      quantity: item.quantity,
-      cubic_meters: item.cubic_meters || null,
-      length: item.length || null,
-      width: item.width || null,
-      thickness: item.thickness || null,
-      discount: item.discount || 0,
+      quantity: item.cubic_meters ? (Number(item.quantity) || 0) : Number(item.quantity),
+      cubic_meters: item.cubic_meters ? Number(item.cubic_meters) : null,
+      length: item.length ? Number(item.length) : null,
+      width: item.width ? Number(item.width) : null,
+      thickness: item.thickness ? Number(item.thickness) : null,
+      discount: Number(item.discount) || 0,
     })),
   };
   const resOrder = await store.dispatch("createOrder", objData);
