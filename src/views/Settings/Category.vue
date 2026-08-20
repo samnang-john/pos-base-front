@@ -12,15 +12,17 @@ import {
 } from "@heroicons/vue/24/outline";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { useI18n } from "vue-i18n";
 
-const listWoodGrains = ref([]);
+const { t } = useI18n();
+const categories = ref([]);
 const search = ref("");
-const isLoadingWoodGrain = ref(false);
+const isLoading = ref(false);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = ref(15);
 const isModalOpen = ref(false); // Control modal visibility
-const woodGrainNameForm = ref({
+const categoryForm = ref({
   name: "",
   description: "",
 });
@@ -29,26 +31,26 @@ const isErrorValue = ref(false);
 const objEdit = ref(null);
 
 const isFormValid = computed(() => {
-  return woodGrainNameForm.value.name.trim() !== "";
+  return categoryForm.value.name.trim() !== "";
 });
 
 onMounted(async () => {
   try {
-    await Promise.all([getWoodGrains()]);
+    await Promise.all([getCategories()]);
   } catch (error) {
     console.error("Error during initialization:", error);
   }
 });
 
-const getWoodGrains = async (page = 1) => {
-  isLoadingWoodGrain.value = true;
+const getCategories = async (page = 1) => {
+  isLoading.value = true;
   try {
-    const res = await store.dispatch("getWoodGrains", {
+    const res = await store.dispatch("getCategories", {
       page,
       pageSize: pageSize.value,
     });
 
-    listWoodGrains.value = res?.data?.items || [];
+    categories.value = res?.data?.items || [];
 
     // save pagination
     currentPage.value = res?.data?.pagination?.currentPage;
@@ -56,19 +58,19 @@ const getWoodGrains = async (page = 1) => {
   } catch (error) {
     console.log(error);
   } finally {
-    isLoadingWoodGrain.value = false;
+    isLoading.value = false;
   }
 };
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    getWoodGrains(currentPage.value + 1);
+    getCategories(currentPage.value + 1);
   }
 };
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    getWoodGrains(currentPage.value - 1);
+    getCategories(currentPage.value - 1);
   }
 };
 
@@ -78,7 +80,7 @@ const openModal = () => {
 
 const closeModal = () => {
   isModalOpen.value = false;
-  woodGrainNameForm.value = {
+  categoryForm.value = {
     name: "",
     description: "",
   }; // Reset input on close
@@ -86,17 +88,17 @@ const closeModal = () => {
   // objEdit.value = null;
 };
 
-const submitWoodGrain = async () => {
-  if (woodGrainNameForm.value.name !== "") {
+const submitCategory = async () => {
+  if (categoryForm.value.name !== "") {
     try {
-      await store.dispatch("createWoodGrain", woodGrainNameForm.value);
-      getWoodGrains();
+      await store.dispatch("createCategory", categoryForm.value);
+      getCategories();
       closeModal();
-      toast.success(this.$t('TOAST.wood_grain_created'));
+      toast.success(t('TOAST.category_created'));
     } catch (error) {
       closeModal();
       console.log("Error=>", error);
-      toast.error(this.$t('TOAST.wood_grain_unsuccessful'));
+      toast.error(t('TOAST.category_unsuccessful'));
     }
   } else {
     isErrorValue.value = true;
@@ -109,7 +111,7 @@ const onEdit = (wood_type) => {
   isUpdate.value = true;
   isModalOpen.value = true;
   objEdit.value = wood_type;
-  woodGrainNameForm.value = {
+  categoryForm.value = {
     name: wood_type?.name,
     description: wood_type?.description,
   };
@@ -119,26 +121,27 @@ const onUpdate = async () => {
   try {
     const obj = {
       id: objEdit.value?._id,
-      name: woodGrainNameForm.value?.name,
-      description: woodGrainNameForm?.value?.description,
+      name: categoryForm.value?.name,
+      description: categoryForm?.value?.description,
     };
-    await store.dispatch("updateWoodGrain", obj);
-    getWoodGrains();
+    await store.dispatch("updateCategory", obj);
+    getCategories();
     closeModal();
-    toast.success(this.$t('TOAST.wood_grain_updated'));
+    toast.success(t('TOAST.category_updated'));
   } catch (error) {
+    closeModal();
     console.log("Error=>", error);
-    toast.error(this.$t('TOAST.wood_grain_unsuccessful'));
+    toast.error(t('TOAST.category_unsuccessful'));
   }
 };
 
-const onDeleteWoodGrain = async (woodGrainId) => {
+const onDeleteCategory = async (woodTypeId) => {
   try {
-    await store.dispatch("deleteWoodGrain", woodGrainId);
-    getWoodGrains();
-    toast.info(this.$t('TOAST.wood_grain_deleted'));
+    await store.dispatch("deleteCategory", woodTypeId);
+    getCategories();
+    toast.info(t('TOAST.category_deleted'));
   } catch (error) {
-    toast.error(this.$t('TOAST.wood_grain_unsuccessful'));
+    toast.error(t('TOAST.category_delete_unsuccessful'));
   }
 };
 </script>
@@ -146,7 +149,7 @@ const onDeleteWoodGrain = async (woodGrainId) => {
 <template>
   <!-- Main Header -->
   <div class="flex items-center justify-between mb-3">
-    <h1 class="text-3xl font-semibold">{{ $t('MENU.wood_grain') }}</h1>
+    <h1 class="text-3xl font-semibold">{{ $t('MENU.category') }}</h1>
     <button type="button" @click="openModal()"
       class="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#986b41] hover:bg-[#B68E65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
       {{ $t('BUTTON.add_new') }}
@@ -164,7 +167,7 @@ const onDeleteWoodGrain = async (woodGrainId) => {
         </div>
         <input v-model="search" @change="getProducts(null)"
           class="block w-full md:w-64 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
-          :placeholder="$t('TABLE.search_wood_grain')" />
+          placeholder="Search category by name" />
       </div>
     </div>
 
@@ -189,15 +192,15 @@ const onDeleteWoodGrain = async (woodGrainId) => {
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
-          <tr v-if="isLoadingWoodGrain || !listWoodGrains.length">
+          <tr v-if="isLoading || !categories.length">
             <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
-              <Spinner v-if="isLoadingWoodGrain" class="mx-auto" />
+              <Spinner v-if="isLoading" class="mx-auto" />
               <p v-else class="text-center py-8 text-gray-500">
-                {{ $t('TABLE.no_wood_grain_found') }}
+                {{ $t('TABLE.no_wood_type_found') }}
               </p>
             </td>
           </tr>
-          <tr v-else v-for="(wood, index) of listWoodGrains" :key="wood._id"
+          <tr v-else v-for="(wood, index) of categories" :key="wood._id"
             class="animate-fade-in-down hover:bg-gray-50 transition-colors duration-150"
             :style="{ 'animation-delay': index * 0.05 + 's' }">
             <td class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-medium text-gray-700 sm:pl-6">
@@ -244,7 +247,7 @@ const onDeleteWoodGrain = async (woodGrainId) => {
                       <button :class="[
                         active ? 'bg-red-50 text-red-700' : 'text-gray-700',
                         'group flex w-full items-center px-4 py-2 text-sm',
-                      ]" @click="onDeleteWoodGrain(wood._id)">
+                      ]" @click="onDeleteCategory(wood._id)">
                         <TrashIcon class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-700" aria-hidden="true" />
                         {{ $t('BUTTON.delete') }}
                       </button>
@@ -280,25 +283,25 @@ const onDeleteWoodGrain = async (woodGrainId) => {
     style="background-color: rgba(0, 0, 0, 0.4)" @click="closeModal">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" @click.stop>
       <h2 v-if="isUpdate" class="text-lg font-bold text-gray-800 mb-4">
-        {{ $t('update_wood_grain') }}
+        {{ $t('TABLE.update_category') }}
       </h2>
       <h2 v-else class="text-lg font-bold text-gray-800 mb-4">
-        {{ $t('add_new_wood_grain') }}
+        {{ $t('TABLE.add_new_category') }}
       </h2>
       <div class="mb-4">
-        <label for="woodGrainName" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.wood_grain') }}
+        <label for="categoryName" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.name') }}
           <span class="text-red-500">*</span>
-        </label>
-        <input v-model="woodGrainNameForm.name" id="woodGrainName" type="text" :class="[
+        </label>  
+        <input v-model="categoryForm.name" id="woodTypeName" type="text" :class="[
           'mt-1 w-full p-2 border rounded-lg focus:ring-[#986b41] focus:border-[#986b41]',
           isErrorValue ? 'border-red-500' : 'border-gray-300',
-        ]" :placeholder="$t('TABLE.search_wood_grain')" />
+        ]" :placeholder="$t('TABLE.name')" />
       </div>
       <div class="mb-4">
-        <label for="note" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.note') }}</label>
-        <input v-model="woodGrainNameForm.description" id="note" type="text"
+        <label for="note" class="block text-sm font-medium text-gray-700">{{ $t('TABLE.description') }}</label>
+        <input v-model="categoryForm.description" id="note" type="text"
           class="mt-1 w-full p-2 border border-gray-300 rounded-lg focus:ring-[#986b41] focus:border-[#986b41]"
-          :placeholder="$t('TABLE.enter_wood_note')" />
+          :placeholder="$t('TABLE.description')" />
       </div>
       <div class="flex justify-end space-x-2">
         <button @click="closeModal"
@@ -310,7 +313,7 @@ const onDeleteWoodGrain = async (woodGrainId) => {
           :disabled="!isFormValid">
           {{ $t('BUTTON.update') }}
         </button>
-        <button v-else @click="submitWoodGrain"
+        <button v-else @click="submitCategory"
           class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="!isFormValid">
           {{ $t('BUTTON.add_new') }}

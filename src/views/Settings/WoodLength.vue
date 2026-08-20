@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import store from "../../store";
 import Spinner from "../../components/core/Spinner.vue";
 import TableHeaderCell from "../../components/core/Table/TableHeaderCell.vue";
@@ -27,6 +27,10 @@ const woodLengthNameForm = ref({
 const isUpdate = ref(false); // Control For Update
 const isErrorValue = ref(false);
 const objEdit = ref(null);
+
+const isFormValid = computed(() => {
+  return woodLengthNameForm.value.name.trim() !== "";
+});
 
 onMounted(async () => {
   try {
@@ -302,11 +306,13 @@ const onDeleteWoodLength = async (woodLengthId) => {
           {{ $t('BUTTON.cancel') }}
         </button>
         <button v-if="isUpdate" @click="onUpdate"
-          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none">
+          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!isFormValid">
           {{ $t('BUTTON.update') }}
         </button>
         <button v-else @click="submitWoodLength"
-          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none">
+          class="px-4 py-2 text-white bg-[#986b41] rounded-lg hover:bg-[#B68E65] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!isFormValid">
           {{ $t('BUTTON.create') }}
         </button>
       </div>

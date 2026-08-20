@@ -40,7 +40,14 @@ function handleAddToCart() {
       <div class="w-8 h-1 bg-[#FFD700] rounded-full mb-2 opacity-80"></div>
 
       <!-- Specs list (Compact) -->
-      <div class="space-y-0.5 mb-2 grid grid-cols-2 gap-x-2">
+       <div class="flex flex-col gap-2">
+        <p class="text-white/70 text-sm">
+          Category:
+          <span class="text-white font-medium">
+            {{ product.category_object?.name }}
+          </span>
+        </p>
+      <div v-if="product.category_object?.name !== 'Long'" class="space-y-0.5 mb-2 grid grid-cols-2 gap-x-2">
         <div class="flex flex-col">
           <span class="text-white/70 text-[10px] uppercase font-bold tracking-wider">{{ $t('size') }}</span>
           <span class="text-white font-semibold text-xs truncate">
@@ -55,10 +62,20 @@ function handleAddToCart() {
         </div>
       </div>
 
+      <div v-if="product.category_object?.name === 'Long'" class="space-y-0.5 mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-white/70 text-[10px] uppercase font-bold tracking-wider">{{ 'Total Meter Cube' }}:</span>
+          <span class="text-white font-semibold text-xs truncate">
+            {{ product.total_cube }}
+          </span>
+        </div>
+      </div>
+       </div>
+
       <!-- Spacer -->
       <div class="mt-auto pt-1 flex flex-col gap-1">
         <!-- Costs/Prices Box (Compact) -->
-        <div class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
+        <div v-if="product.category_object?.name !== 'Long'" class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
           <div class="flex justify-between items-center text-[10px] mb-0.5">
             <span class="text-white/80 font-medium">{{ $t('cost') }}</span>
             <span class="text-white font-bold">${{ Number(product.cost_of_each || 0).toFixed(2) }}</span>
@@ -67,6 +84,18 @@ function handleAddToCart() {
             <span class="text-white/80 font-medium text-xs">{{ $t('price') }}</span>
             <span class="text-[#FFD700] text-lg font-black drop-shadow-md">
               ${{ Number(product.price_of_each || 0).toFixed(2) }}
+            </span>
+          </div>
+        </div>
+        <div v-if="product.category_object?.name === 'Long'" class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
+          <div class="flex justify-between items-center text-[10px] mb-0.5">
+            <span class="text-white/80 font-medium">{{ $t('cost') }}</span>
+            <span class="text-white font-bold">${{ Number(product.cost_per_kube || 0).toFixed(2) }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-white/80 font-medium text-xs">{{ $t('price') }}</span>
+            <span class="text-[#FFD700] text-lg font-black drop-shadow-md">
+              ${{ Number(product.price_per_kube || 0).toFixed(2) }}
             </span>
           </div>
         </div>

@@ -214,10 +214,9 @@ const closeModal = () => {
             <!-- Order Rows -->
             <tr
               v-else
-              v-for="(order, index) in listOrder"
+              v-for="(order, index) in listOrder"     
               :key="order._id"
               class="hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
-              @click="openModal(order)"
             >
               <td class="px-4 py-4 font-medium text-gray-700 sm:px-6">
                 {{ String(index + 1).padStart(2, "0") }}
@@ -303,7 +302,7 @@ const closeModal = () => {
               </td>
 
               <td class="px-4 py-4 text-gray-900">
-                {{ dayjs(history.created_date).format("DD/MM/YYYY - hh:mm A") }}
+                {{ dayjs(history.createdAt).format("DD/MM/YYYY - hh:mm A") }}
               </td>
 
               <!-- <td class="px-4 py-4 text-gray-900">${{ order.grand_total }}</td> -->

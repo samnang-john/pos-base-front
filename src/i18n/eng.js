@@ -14,7 +14,9 @@ export default {
         wood_type: 'Wood Type',
         wood_grain: 'Wood Grain',
         wood_length: 'Wood Length',
-        user: 'Users'
+        user: 'Users',
+        stock_in_history: 'Stock In History',
+        category: 'Category'
     },
     DASHBOARD: {
         total_product: 'Total Product',
@@ -49,7 +51,8 @@ export default {
         edit: 'Edit',
         delete: 'Delete',
         open_options: 'Open Options',
-        create: 'Create'
+        create: 'Create',
+        add_to_cart: 'Add to Cart'
     },
     TABLE: {
         no: 'No',
@@ -111,10 +114,15 @@ export default {
         customer: 'Customer',
         payment_status: 'Payment Status',
         item: 'Item',
-        total: 'Total'
+        total: 'Total',
+        out_of_stock: 'Out of Stock',
+        image: 'Image',
+        add_new_category: 'Add New Category',
+        update_category: 'Update Category'
     },
     Luxury_product_catalog: 'Luxury Product Catalog',
     Select_the_perfect_wood_for_your_project: 'Select the perfect product for your project',
+    all_products: 'All Products',
     No_items_selected_yet: 'No items selected yet.',
     Please_select_products_from_the_catalog: 'Please select products from the catalog.',
     size: 'Size',
@@ -129,6 +137,7 @@ export default {
     add_new_wood_type: 'Add New Wood Type',
     update_wood_grain: 'Update Wood End Grain',
     add_new_wood_grain: 'Add New Wood End Grain',
+    no_data_found: 'No data found',
     TOAST: {
         wood_type_created: 'Wood type created successfully!',
         wood_type_unsuccessful: 'Wood type unsuccessfully!',
@@ -155,7 +164,13 @@ export default {
         field_required: 'Field Required!',
         password_mismatch: 'Confirm password not match!',
         load_failed: 'Failed to load data',
-        product_not_found: 'Product not found'
+        product_not_found: 'Product not found',
+        out_of_stock: 'Product is out of stock',
+        category_created: 'Category created successfully!',
+        category_unsuccessful: 'Category unsuccessfully!',
+        category_updated: 'Category updated successfully!',
+        category_deleted: 'Category deleted successfully!',
+        category_delete_unsuccessful: 'Category delete unsuccessful!',
     },
     MODAL: {
         confirm_delete_product_title: 'Delete Product!',
@@ -176,7 +191,11 @@ export default {
         enter_product: 'Enter product',
         edit_product: 'Edit Product',
         guest: 'Guest',
-        discount_short: 'Disc($)'
+        discount_short: 'Disc($)',
+        length: 'Length',
+        width: 'Width',
+        thickness: 'Thickness',
+        cubic_meters: 'Meter Cube'
     },
     LOGIN: {
         welcome_to: 'Welcome To',

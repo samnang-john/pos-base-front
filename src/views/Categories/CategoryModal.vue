@@ -29,7 +29,7 @@
                   </svg>
                 </button>
               </header>
-              <form @submit.prevent="onSubmit">
+              <form @submit.prevent="onSubmit"> 
                 <div class="bg-white px-4 pt-5 pb-4">
                   <CustomInput class="mb-2" v-model="category.name" label="Category Title" />
                   <CustomInput type="textarea" class="mb-2" v-model="category.description" label="Description" />

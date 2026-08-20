@@ -194,7 +194,10 @@ const goBack = () => {
               {{ $t('TABLE.sync_invoice') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ $t('TABLE.item') }}
+              {{ "Total Item Stock In" }}
+            </TableHeaderCell>
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ "Total Meter Cube" }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
               {{ $t('TABLE.created_date') }}
@@ -212,7 +215,7 @@ const goBack = () => {
             <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
               <Spinner v-if="isLoadingProduct" class="mx-auto" />
               <p v-else class="text-center py-8 text-gray-500">
-                No wood type found
+                {{ $t('no_data_found') }}
               </p>
             </td>
           </tr>
@@ -232,7 +235,10 @@ const goBack = () => {
               {{ history.total_items }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ dayjs(history.createdAt).format("DD/MM/YYYY - hh:MM A") }}
+              {{ history.totalCube ? history.totalCube : '-' }}
+            </td>
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
+              {{ dayjs(history.createdAt).format("DD/MM/YYYY - hh:mm A") }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ history.note }}
@@ -241,7 +247,7 @@ const goBack = () => {
               <button @click="downloadPDF(history._id)"
                 class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm">
                 <DocumentTextIcon class="h-4 w-4 mr-2" />
-                {{ $t('BUTTON.download_pdf') }}
+                {{ $t('TABLE.download_pdf') }}
               </button>
             </td>
           </tr>

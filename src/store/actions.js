@@ -6,8 +6,8 @@ export function getDashboard({ commit }, data) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Dashboard Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -21,7 +21,7 @@ export function getUser({ commit }, data) {
 export function login({ commit }, data) {
   return axiosClient.post("/auth/login", data).then(({ data }) => {
     commit("setUser", data.user);
-    commit("setToken", data.token);
+    commit("setToken", data.accessToken || data.token);
     return data;
   });
 }
@@ -42,8 +42,19 @@ export function getOrders({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Orders Fail", data);
+    .catch((err) => {
+
+    });
+}
+
+export function getOrderDetail({ commit }, orderId) {
+  return axiosClient
+    .get(`/order/detail/${orderId}`)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+      console.error("Get Order Detail Fail", err);
     });
 }
 
@@ -54,11 +65,11 @@ export function getOrdersPDF({ commit }, params) {
       { responseType: "blob" }
     )
     .then(({ data }) => {
-      console.log("data", data);
+
       return data;
     })
-    .catch(() => {
-      console.log("Get Order PDF Fail", data);
+    .catch((err) => {
+
     });
 }
 export function getOrdersReceitPDF({ commit }, params) {
@@ -82,41 +93,23 @@ export function getOrdersExcel({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Order Excel Fail", data);
+    .catch((err) => {
+
     });
 }
 
 export function getProducts({ commit }, params) {
+  let url = `/product/list?page=${params?.page}&size=${params?.pageSize}`;
+  if (params?.category_id) {
+    url += `&category_id=${params.category_id}`;
+  }
   return axiosClient
-    .get(`/product/list?page=${params?.page}&size=${params?.pageSize}`)
+    .get(url)
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Products Fail", data);
-    });
-}
+    .catch((err) => {
 
-export function createProduct({ commit }, product) {
-  const form = new FormData();
-  form.append("image", product.image);
-  form.append("type_of_wood_id", product.wood_type);
-  form.append("end_grain_of_wood_id", product.wood_grain);
-  form.append("length_of_wood_id", product.wood_length);
-  form.append("cost_of_each", product.cost);
-  form.append("number_of_wood", product.quantity);
-  form.append("total_price_of_wood", product.total_price);
-  form.append("price_of_each", product.price);
-  form.append("car_fee", 5);
-  product = form;
-  return axiosClient
-    .post("/product/create", product)
-    .then(({ data }) => {
-      return data;
-    })
-    .catch(() => {
-      console.log("Create Product Fail", data);
     });
 }
 
@@ -126,31 +119,71 @@ export function getProductDetail({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Products Fail", data);
+    .catch((err) => {
+
+    });
+}
+
+// Only appends a field if it has a real value — prevents "" from
+// being sent for ObjectId fields, which crashes the Mongoose cast.
+function appendIfPresent(form, key, value) {
+  if (value === null || value === undefined || value === "") {
+    return;
+  }
+  form.append(key, value);
+}
+
+export function createProduct({ commit }, product) {
+  const form = new FormData();
+  appendIfPresent(form, "image", product.image);
+  appendIfPresent(form, "category_id", product.category);
+  appendIfPresent(form, "type_of_wood_id", product.wood_type);
+  appendIfPresent(form, "end_grain_of_wood_id", product.wood_grain);
+  appendIfPresent(form, "length_of_wood_id", product.wood_length);
+  appendIfPresent(form, "cost_of_each", product.cost);
+  appendIfPresent(form, "number_of_wood", product.quantity);
+  appendIfPresent(form, "total_price_of_wood", product.total_price);
+  appendIfPresent(form, "price_of_each", product.price);
+  appendIfPresent(form, "price_per_kube", product.price_per_kube);
+  appendIfPresent(form, "cost_per_kube", product.cost_per_kube);
+  appendIfPresent(form, "total_cube", product.total_cube);
+  form.append("car_fee", 5);
+
+  return axiosClient
+    .post("/product/create", form)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+      console.error("Create Product Fail", err);
+      throw err;
     });
 }
 
 export function updateProduct({ commit }, product) {
   const form = new FormData();
-  form.append("image", product.image);
-  form.append("type_of_wood_id", product.wood_type);
-  form.append("end_grain_of_wood_id", product.wood_grain);
-  form.append("length_of_wood_id", product.wood_length);
-  form.append("cost_of_each", product.cost);
-  form.append("number_of_wood", product.quantity);
-  form.append("total_price_of_wood", product.total_price);
-  form.append("price_of_each", product.price);
+  appendIfPresent(form, "image", product.image);
+  appendIfPresent(form, "category_id", product.category);
+  appendIfPresent(form, "type_of_wood_id", product.wood_type);
+  appendIfPresent(form, "end_grain_of_wood_id", product.wood_grain);
+  appendIfPresent(form, "length_of_wood_id", product.wood_length);
+  appendIfPresent(form, "cost_of_each", product.cost);
+  appendIfPresent(form, "number_of_wood", product.quantity);
+  appendIfPresent(form, "total_price_of_wood", product.total_price);
+  appendIfPresent(form, "price_of_each", product.price);
+  appendIfPresent(form, "price_per_kube", product.price_per_kube);
+  appendIfPresent(form, "cost_per_kube", product.cost_per_kube);
+  appendIfPresent(form, "total_cube", product.total_cube);
   form.append("car_fee", 5);
 
-  console.log("product", product);
   return axiosClient
     .put(`/product/update/${product?.id}`, form)
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Product Fail", data);
+    .catch((err) => {
+      console.error("Update Product Fail", err);
+      throw err;
     });
 }
 
@@ -160,8 +193,8 @@ export function deleteProduct({ commit }, productId) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Delete Product Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -171,8 +204,8 @@ export function getWoodTypes({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Wood Types Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -182,8 +215,8 @@ export function createWoodType({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Wood Type Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -193,8 +226,8 @@ export function updateWoodType({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Update Wood Type Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -204,8 +237,8 @@ export function deleteWoodType({ commit }, woodTypeId) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Delete Wood Type Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -217,8 +250,8 @@ export function getWoodGrains({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Wood End Grain Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -228,8 +261,8 @@ export function createWoodGrain({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Wood End Grain Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -239,8 +272,8 @@ export function updateWoodGrain({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Update Wood End Grain Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -250,8 +283,8 @@ export function deleteWoodGrain({ commit }, woodLengthId) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Delete Wood End Grain Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -261,8 +294,8 @@ export function getWoodLengths({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get All Wood Length Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -272,8 +305,8 @@ export function createWoodLength({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Wood Length Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -283,8 +316,8 @@ export function updateWoodLength({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Update Wood Length Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -294,8 +327,8 @@ export function deleteWoodLength({ commit }, woodLengthId) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Delete Wood Length Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -305,8 +338,8 @@ export function getUsers({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Users Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -316,8 +349,8 @@ export function createOrder({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Order Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -327,8 +360,8 @@ export function createStockIn({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create Stock Sync Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -338,8 +371,8 @@ export function downloadStockIn({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Download Stock In Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -351,8 +384,8 @@ export function getStockInHistory({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Stock In History Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -362,8 +395,8 @@ export function getStockInHistoryDetail({ commit }, params) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Get Stock In History Detail Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -379,8 +412,8 @@ export function createUser({ commit }, user) {
     .then(({ data }) => {
       return data;
     })
-    .catch(() => {
-      console.log("Create User Fail", data);
+    .catch((err) => {
+
     });
 }
 
@@ -393,6 +426,7 @@ export function updateUser({ commit }, userObj) {
 
   const form = new FormData();
   form.append("id", userObj.id);
+  form.append("name", userObj.name);
   form.append("username", userObj.username);
   form.append("password", userObj.password);
   form.append("image", userObj.image);
@@ -402,4 +436,48 @@ export function updateUser({ commit }, userObj) {
 
 export function deleteUser({ commit }, id) {
   return axiosClient.delete(`/user/delete/${id}`);
+}
+
+export function getCategories({ commit }, params) {
+  return axiosClient
+    .get(`/category/list?page=${params?.page}&size=${params?.pageSize}`)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+
+    });
+}
+
+export function createCategory({ commit }, params) {
+  return axiosClient
+    .post("/category/create", params)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+
+    });
+}
+
+export function updateCategory({ commit }, params) {
+  return axiosClient
+    .put(`/category/update/${params.id}`, params)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+
+    });
+}
+
+export function deleteCategory({ commit }, woodTypeId) {
+  return axiosClient
+    .delete(`/category/delete/${woodTypeId}`)
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+
+    });
 }

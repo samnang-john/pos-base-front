@@ -126,6 +126,12 @@ const onDeleteProduct = async () => {
             <TableHeaderCell field="id" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
               {{ $t('TABLE.no') }}
             </TableHeaderCell>
+            <TableHeaderCell field="image" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ $t('TABLE.image') }}
+            </TableHeaderCell>
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ 'Category' }}
+            </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
               {{ $t('TABLE.wood_type') }}
             </TableHeaderCell>
@@ -141,6 +147,9 @@ const onDeleteProduct = async () => {
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
               {{ $t('TABLE.in_stock') }}
             </TableHeaderCell>
+            <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+              {{ "Total Meter Cube" }}
+            </TableHeaderCell>
             <TableHeaderCell field="actions"
               class="py-3.5 pl-3 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6">
               {{ $t('TABLE.action') }}
@@ -149,7 +158,7 @@ const onDeleteProduct = async () => {
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
           <tr v-if="isLoadingProduct || !listProduct.length">
-            <td colspan="8" class="px-3 py-6 text-sm text-gray-500 text-center">
+            <td colspan="9" class="px-3 py-6 text-sm text-gray-500 text-center">
               <Spinner v-if="isLoadingProduct" class="mx-auto" />
               <p v-else class="text-center py-8 text-gray-500">
                 {{ $t('TABLE.no_product_found') }}
@@ -162,21 +171,36 @@ const onDeleteProduct = async () => {
             <td class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-medium text-gray-700 sm:pl-6">
               {{ (index + 1).toString().padStart(2, "0") }}
             </td>
-
-            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.type_of_wood_Object?.name || 'N/A' }}
+            <td class="whitespace-nowrap px-2 py-2 text-sm">
+              <div class="h-12 w-12 flex-shrink-0">
+                <img v-if="product.image" :src="product.image" :alt="product.type_of_wood_Object?.name" class="h-12 w-12 rounded-lg object-cover shadow-sm" />
+                <div v-else class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                   <svg class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.end_grain_of_wood_Object?.name || 'N/A' }}
+              {{ product.category_object?.name || '-' }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ product.length_of_wood_Object?.name || 'N/A' }}
+              {{ product.type_of_wood_Object?.name || '-' }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              {{ "$" + product.price_of_each }}
+              {{ product.end_grain_of_wood_Object?.name || '-' }}
+            </td>
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
+              {{ product.length_of_wood_Object?.name || '-' }}
+            </td>
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
+              ${{product.price_of_each  || product.price_per_kube}}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
               {{ product.number_of_wood }}
+            </td>
+            <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
+              {{ product.total_cube ? product.total_cube : '-' }}
             </td>
 
             <td class="relative whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm font-medium sm:pr-6">

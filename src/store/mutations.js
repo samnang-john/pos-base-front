@@ -1,13 +1,19 @@
 export function setUser(state, user) {
+  if (user && user.image && typeof user.image === 'string' && !user.image.startsWith('http') && !user.image.startsWith('blob:')) {
+    user.image = `${import.meta.env.VITE_API_BASE_URL}${user.image}`;
+  } else if (user && !user.image) {
+    // Default avatar based on name
+    user.image = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random&color=fff`;
+  }
   state.user.data = user;
 }
 
 export function setToken(state, token) {
   state.user.token = token;
   if (token) {
-    sessionStorage.setItem('TOKEN', token);
+    localStorage.setItem('TOKEN', token);
   } else {
-    sessionStorage.removeItem('TOKEN')
+    localStorage.removeItem('TOKEN')
   }
 }
 
