@@ -208,7 +208,7 @@ const onCategoryChange = () => {
                   <path d="M40 130L50 120L60 130" stroke="currentColor" stroke-width="2" fill="none" />
                 </svg>
               </div>
-              <span class="text-[#F8F9FA] text-sm font-medium tracking-[0.2em]">PRODUCT</span>
+              <span class="text-[#F8F9FA] text-sm font-medium tracking-[0.2em]">{{ $t('MENU.product') }}</span>
             </div>
 
             <!-- Preview Image -->
