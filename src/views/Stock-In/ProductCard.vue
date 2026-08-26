@@ -42,7 +42,7 @@ function handleAddToCart() {
       <!-- Specs list (Compact) -->
        <div class="flex flex-col gap-2">
         <p class="text-white/70 text-sm">
-          Category:
+          {{ $t('TABLE.category') }}:
           <span class="text-white font-medium">
             {{ product.category_object?.name }}
           </span>
@@ -64,7 +64,7 @@ function handleAddToCart() {
 
       <div v-if="product.category_object?.name === 'Long'" class="space-y-0.5 mb-2">
         <div class="flex items-center gap-2">
-          <span class="text-white/70 text-[10px] uppercase font-bold tracking-wider">{{ 'Total Meter Cube' }}:</span>
+          <span class="text-white/70 text-[10px] uppercase font-bold tracking-wider">{{ $t('FORM.total_cube') }}:</span>
           <span class="text-white font-semibold text-xs truncate">
             {{ product.total_cube }}
           </span>

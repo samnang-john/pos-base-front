@@ -194,10 +194,10 @@ const goBack = () => {
               {{ $t('TABLE.sync_invoice') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ "Total Item Stock In" }}
+              {{ $t('TABLE.total_item_stock_in') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ "Total Meter Cube" }}
+              {{ $t('TABLE.total_meter_cube') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
               {{ $t('TABLE.created_date') }}

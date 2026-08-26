@@ -130,7 +130,7 @@ const onDeleteProduct = async () => {
               {{ $t('TABLE.image') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ 'Category' }}
+              {{ $t('TABLE.category') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
               {{ $t('TABLE.wood_type') }}
@@ -148,7 +148,7 @@ const onDeleteProduct = async () => {
               {{ $t('TABLE.in_stock') }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              {{ "Total Meter Cube" }}
+              {{ $t('TABLE.total_meter_cube') }}
             </TableHeaderCell>
             <TableHeaderCell field="actions"
               class="py-3.5 pl-3 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6">

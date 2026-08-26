@@ -193,7 +193,7 @@ const onCategoryChange = () => {
         <!-- Left Column: Image Upload -->
         <div class="lg:col-span-4 flex flex-col items-center">
           <label for="upload"
-            class="relative w-full aspect-square bg-[#1A3C34] rounded-2xl flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all hover:opacity-90 shadow-md">
+            class="relative w-full aspect-square bg-[#986b41] rounded-2xl flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all hover:opacity-90 shadow-md">
 
             <!-- Default Placeholder (Plant Logo) -->
             <div v-if="!image" class="flex flex-col items-center gap-3">
@@ -226,7 +226,7 @@ const onCategoryChange = () => {
 
             <!-- Category -->
             <div class="flex flex-col gap-1.5">
-              <label class="text-sm text-gray-700 font-medium">{{ "Category" }} <span
+              <label class="text-sm text-gray-700 font-medium">{{ $t('TABLE.category') }} <span
                   class="text-red-500">*</span></label>
               <select v-model="formData.category" @change="onCategoryChange"
                 class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all appearance-none cursor-pointer">
@@ -308,7 +308,7 @@ const onCategoryChange = () => {
             <template v-if="selectedCategory?.name?.toLowerCase() === 'long'">
               <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
               <div class="flex flex-col gap-1.5 md:col-span-2">
-                <label class="text-sm text-gray-700 font-medium">Total Cube</label>
+                <label class="text-sm text-gray-700 font-medium">{{ $t('FORM.total_cube') }}</label>
                 <input type="number" v-model="formData.total_cube"
                   class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
               </div>
@@ -317,12 +317,12 @@ const onCategoryChange = () => {
             <template v-if="selectedCategory?.name?.toLowerCase() === 'long'">
               <div class="md:col-span-2 border-t border-gray-100 my-1"></div>
               <div class="flex flex-col gap-1.5">
-                <label class="text-sm text-gray-700 font-medium">Cost Per Kube</label>
+                <label class="text-sm text-gray-700 font-medium">{{ $t('FORM.cost_per_cube') }}</label>
                 <input type="number" v-model="formData.cost_per_kube"
                   class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
               </div>
               <div class="flex flex-col gap-1.5">
-                <label class="text-sm text-gray-700 font-medium">Price Per Kube</label>
+                <label class="text-sm text-gray-700 font-medium">{{ $t('FORM.price_per_cube') }}</label>
                 <input type="number" v-model="formData.price_per_kube"
                   class="w-full bg-[#f8f9fa] border border-gray-200 px-3 py-2.5 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9A6A3A] focus:border-transparent transition-all" />
               </div>

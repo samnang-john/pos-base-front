@@ -132,7 +132,7 @@ function confirmAddToCart() {
         </p>
 
         <p v-if="product.category_object?.name === 'Long'" class="text-gray-400 text-sm">
-          Total Meter Cube:
+          {{ $t('TABLE.total_meter_cube') }}:
           <span class="text-white font-medium">
             {{ product.total_cube }} m³
           </span>
@@ -193,18 +193,6 @@ function confirmAddToCart() {
                       {{ $t('MENU.category') || 'Category' }}:
                       <span class="text-white font-medium">
                         {{ product.category_object?.name }}
-                      </span>
-                    </p>
-                    <p class="text-gray-400 text-sm">
-                      {{ $t('size') }}:
-                      <span class="text-white font-medium">
-                        {{ product.length_of_wood_Object?.name || "-" }}
-                      </span>
-                    </p>
-                    <p class="text-gray-400 text-sm">
-                      {{ $t('thickness') }}:
-                      <span class="text-white font-medium">
-                        {{ product.end_grain_of_wood_Object?.name || "-" }}
                       </span>
                     </p>
                   </div>

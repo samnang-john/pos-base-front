@@ -52,7 +52,8 @@ export default {
         delete: 'លុប',
         open_options: 'បើកជម្រើស',
         create: 'បង្កើត',
-        add_to_cart: 'បន្ថែមទៅរទេះ'
+        add_to_cart: 'បន្ថែមទៅរទេះ',
+        confirm: 'បញ្ជាក់'
     },
     TABLE: {
         no: 'ល.រ',
@@ -118,7 +119,10 @@ export default {
         out_of_stock: 'អស់ពីស្តុក',
         image: 'រូបភាព',
         add_new_category: 'បន្ថែមប្រភេទថ្មី',
-        update_category: 'កែប្រែប្រភេទ'  
+        update_category: 'កែប្រែប្រភេទ',
+        category: 'ប្រភេទ',
+        total_meter_cube: 'ចំនួនម៉ែត្រគូបសរុប',
+        total_item_stock_in: 'ចំនួនមុខទំនិញចូលស្តុកសរុប'
     },
     Luxury_product_catalog: 'កាតាឡុកផលិតផលឈើប្រណិត',
     Select_the_perfect_wood_for_your_project: 'ជ្រើសរើសឈើដែលសមស្របបំផុតសម្រាប់គម្រោងរបស់អ្នក',
@@ -138,6 +142,7 @@ export default {
     update_wood_grain: 'កែប្រែប្រភេទមុខកាត់',
     add_new_wood_grain: 'បន្ថែមប្រភេទមុខកាត់ថ្មី',
     no_data_found: 'មិនមានទិន្នន័យទេ',
+    enter_total_cube: 'បញ្ចូលចំនួនម៉ែត្រគូបសរុប',
     TOAST: {
         wood_type_created: 'បានបង្កើតប្រភេទឈើដោយជោគជ័យ!',
         wood_type_unsuccessful: 'ការបង្កើតប្រភេទឈើមិនបានជោគជ័យ!',
@@ -195,7 +200,12 @@ export default {
         length: 'ប្រវែង',
         width: 'ទទឹង',
         thickness: 'កម្រាស់',
-        cubic_meters: 'ម៉ែត្រគូប'
+        cubic_meters: 'ម៉ែត្រគូប',
+        select_category: 'ជ្រើសរើសប្រភេទ',
+        upload_hint: 'អាប់ឡូតរូបភាព',
+        total_cube: 'ចំនួនម៉ែត្រគូបសរុប',
+        cost_per_cube: 'តម្លៃដើមក្នុងមួយម៉ែត្រគូប',
+        price_per_cube: 'តម្លៃលក់ចេញក្នុងមួយម៉ែត្រគូប',
     },
     LOGIN: {
         welcome_to: 'សូមស្វាគមន៍មកកាន់',

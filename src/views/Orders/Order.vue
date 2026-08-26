@@ -254,7 +254,7 @@ const closeModal = () => {
               {{ $t("TABLE.total") }}
             </TableHeaderCell>
             <TableHeaderCell field="title" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-              Action
+              {{ $t("TABLE.action") }}
             </TableHeaderCell>
           </tr>
         </thead>

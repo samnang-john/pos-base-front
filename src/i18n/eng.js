@@ -52,7 +52,8 @@ export default {
         delete: 'Delete',
         open_options: 'Open Options',
         create: 'Create',
-        add_to_cart: 'Add to Cart'
+        add_to_cart: 'Add to Cart',
+        confirm: 'Confirm'
     },
     TABLE: {
         no: 'No',
@@ -118,7 +119,10 @@ export default {
         out_of_stock: 'Out of Stock',
         image: 'Image',
         add_new_category: 'Add New Category',
-        update_category: 'Update Category'
+        update_category: 'Update Category',
+        category: 'Category',
+        total_meter_cube: 'Total Meter Cube',
+        total_item_stock_in: 'Total Item Stock In'
     },
     Luxury_product_catalog: 'Luxury Product Catalog',
     Select_the_perfect_wood_for_your_project: 'Select the perfect product for your project',
@@ -138,6 +142,7 @@ export default {
     update_wood_grain: 'Update Wood End Grain',
     add_new_wood_grain: 'Add New Wood End Grain',
     no_data_found: 'No data found',
+    enter_total_cube: 'Enter Total Cube',
     TOAST: {
         wood_type_created: 'Wood type created successfully!',
         wood_type_unsuccessful: 'Wood type unsuccessfully!',
@@ -195,7 +200,12 @@ export default {
         length: 'Length',
         width: 'Width',
         thickness: 'Thickness',
-        cubic_meters: 'Meter Cube'
+        cubic_meters: 'Meter Cube',
+        select_category: 'Select Category',
+        upload_hint: 'Upload Hint',
+        total_cube: 'Total Cube',
+        cost_per_cube: 'Cost per Cube',
+        price_per_cube: 'Price per Cube'
     },
     LOGIN: {
         welcome_to: 'Welcome To',

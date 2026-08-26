@@ -404,7 +404,7 @@ const toggleLang = () => {
 
                     <!-- Cubic meter items: show dimensions -->
                     <div v-if="item.cubic_meters" class="flex flex-wrap items-center gap-x-2 text-xs text-gray-400">
-                      <span>{{ item.length }}m × {{ item.width }}m × {{ item.thickness }}m</span>
+                      <span>{{ item.length }} × {{ item.width }} × {{ item.thickness }}</span>
                       <span class="text-[#FFD700] font-semibold">{{ item.cubic_meters }} m³</span>
                     </div>
 
