@@ -200,6 +200,7 @@ export default {
         length: 'Length',
         width: 'Width',
         thickness: 'Thickness',
+        long_qty: 'Long Qty',
         cubic_meters: 'Meter Cube',
         select_category: 'Select Category',
         upload_hint: 'Upload Hint',

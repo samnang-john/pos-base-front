@@ -14,7 +14,7 @@ const emit = defineEmits(["add-to-cart"]);
 const isOpen = ref(false);
 
 // Dialog form fields
-const quantity = ref(1);
+const longQty = ref(1);
 const discount = ref(0);
 const note = ref("");
 
@@ -27,7 +27,7 @@ const cubicMeters = computed(() => {
   const l = Number(length.value) || 0;
   const w = Number(width.value) || 0;
   const t = Number(thickness.value) || 0;
-  const q = Number(quantity.value) || 0;
+  const q = Number(longQty.value) || 0;
   return Number(((l * w * t * q) / 10000).toFixed(4));
 });
 
@@ -37,13 +37,13 @@ const estimatedPrice = computed(() => {
   if (props.product?.price_per_kube) {
     price = cubicMeters.value * Number(props.product.price_per_kube || 0);
   } else {
-    price = Number(props.product?.price_of_each || 0) * (Number(quantity.value) || 0);
+    price = Number(props.product?.price_of_each || 0) * (Number(longQty.value) || 0);
   }
   return price;
 });
 
 function resetFormFields() {
-  quantity.value = 1;
+  longQty.value = 1;
   discount.value = 0;
   note.value = "";
   length.value = 0;
@@ -52,7 +52,7 @@ function resetFormFields() {
 }
 
 function handleCardClick() {
-  if (props.product?.category_object?.name === "Long") {
+  if (props.product?.category_object?.name?.toLowerCase() === "long") {
     resetFormFields();
     isOpen.value = true;
   } else {
@@ -65,6 +65,7 @@ function handleCardClick() {
       length: null,
       width: null,
       thickness: null,
+      long_qty: null,
     });
   }
 }
@@ -80,7 +81,8 @@ function confirmAddToCart() {
 
   emit("add-to-cart", {
     ...props.product,
-    quantity: Number(quantity.value) || 1,
+    long_qty: Number(longQty.value) || 1,
+    quantity: Number(longQty.value) || 1,
     discount: Number(discount.value) || 0,
     note: note.value.trim(),
     length: Number(length.value) || 0,
@@ -118,20 +120,20 @@ function confirmAddToCart() {
           </span>
         </p>
 
-        <p v-if="product.category_object?.name !== 'Long'" class="text-gray-400 text-sm">
+        <p v-if="product.category_object?.name?.toLowerCase() !== 'long'" class="text-gray-400 text-sm">
           {{ $t('size') }}:
           <span class="text-white font-medium">
             {{ product.length_of_wood_Object?.name || "-" }}
           </span>
         </p>
-        <p v-if="product.category_object?.name !== 'Long'" class="text-gray-400 text-sm">
+        <p v-if="product.category_object?.name?.toLowerCase() !== 'long'" class="text-gray-400 text-sm">
           {{ $t('thickness') }}:
           <span class="text-white font-medium">
             {{ product.end_grain_of_wood_Object?.name || "-" }}
           </span>
         </p>
 
-        <p v-if="product.category_object?.name === 'Long'" class="text-gray-400 text-sm">
+        <p v-if="product.category_object?.name?.toLowerCase() === 'long'" class="text-gray-400 text-sm">
           {{ $t('TABLE.total_meter_cube') }}:
           <span class="text-white font-medium">
             {{ product.total_cube }} m³
@@ -140,11 +142,11 @@ function confirmAddToCart() {
       </div>
 
       <div class="mt-auto pt-4 flex items-end justify-between">
-        <p v-if="product.category_object?.name !== 'Long'" class="text-[#FFD700] text-2xl font-black">
+        <p v-if="product.category_object?.name?.toLowerCase() !== 'long'" class="text-[#FFD700] text-2xl font-black">
           ${{ Number(product.price_of_each || 0).toFixed(2) }}
         </p>
 
-        <p v-if="product.category_object?.name === 'Long'" class="text-[#FFD700] text-2xl font-black">
+        <p v-if="product.category_object?.name?.toLowerCase() === 'long'" class="text-[#FFD700] text-2xl font-black">
           ${{ Number(product.price_per_kube || 0).toFixed(2) }}
         </p>
 
@@ -198,7 +200,7 @@ function confirmAddToCart() {
                   </div>
 
                   <!-- Cubic meter dimension inputs -->
-                  <div class="grid grid-cols-3 gap-3 mb-4">
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                     <div>
                       <label class="block text-xs text-gray-400 mb-1.5" for="modal-length">
                         {{ $t('FORM.length') }}
@@ -220,6 +222,14 @@ function confirmAddToCart() {
                         {{ $t('FORM.thickness') }}
                       </label>
                       <input id="modal-thickness" v-model.number="thickness" type="number" min="0" step="0.01"
+                        class="w-full bg-[#1C1C28] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent" />
+                    </div>
+
+                    <div>
+                      <label class="block text-xs text-gray-400 mb-1.5" for="modal-long-qty">
+                        {{ $t('FORM.long_qty') || 'Long Qty' }}
+                      </label>
+                      <input id="modal-long-qty" v-model.number="longQty" type="number" min="1" step="1"
                         class="w-full bg-[#1C1C28] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent" />
                     </div>
                   </div>

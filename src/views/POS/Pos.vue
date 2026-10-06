@@ -47,6 +47,7 @@ function addToCart(product) {
     cart.value.push({
       ...product,
       quantity: product.quantity || 1,
+      long_qty: product.long_qty || (isCubicItem ? (product.quantity || 1) : null),
       product_id: product?._id,
       discount: Number(product.discount) || 0,
       cubic_meters: product.cubic_meters || null,
@@ -158,6 +159,11 @@ function validateCart() {
         toast.error(`${label}: cubic meters must be greater than 0`);
         return false;
       }
+      const longQtyVal = Number(item.long_qty || item.quantity);
+      if (!longQtyVal || isNaN(longQtyVal) || longQtyVal <= 0) {
+        toast.error(`${label}: quantity must be greater than 0`);
+        return false;
+      }
     } else {
       if (!item.quantity || isNaN(item.quantity) || Number(item.quantity) <= 0) {
         toast.error(`${label}: quantity must be greater than 0`);
@@ -177,15 +183,24 @@ const completeOrder = async () => {
     customer: customer.value.trim() || "Guest",
     discount: 0,
     tax: 0,
-    items: cart.value.map(item => ({
-      product_id: item.product_id || item._id,
-      quantity: item.cubic_meters ? (Number(item.quantity) || 0) : Number(item.quantity),
-      cubic_meters: item.cubic_meters ? Number(item.cubic_meters) : null,
-      length: item.length ? Number(item.length) : null,
-      width: item.width ? Number(item.width) : null,
-      thickness: item.thickness ? Number(item.thickness) : null,
-      discount: Number(item.discount) || 0,
-    })),
+    items: cart.value.map(item => {
+      if (item.cubic_meters) {
+        return {
+          product_id: item.product_id || item._id,
+          cubic_meters: Number(item.cubic_meters),
+          length: Number(item.length),
+          width: Number(item.width),
+          thickness: Number(item.thickness),
+          long_qty: Number(item.long_qty || item.quantity || 1),
+          discount: Number(item.discount) || 0,
+        };
+      }
+      return {
+        product_id: item.product_id || item._id,
+        quantity: Number(item.quantity) || 1,
+        discount: Number(item.discount) || 0,
+      };
+    }),
   };
   const resOrder = await store.dispatch("createOrder", objData);
   console.log("resOrder", resOrder);
@@ -405,6 +420,7 @@ const toggleLang = () => {
                     <!-- Cubic meter items: show dimensions -->
                     <div v-if="item.cubic_meters" class="flex flex-wrap items-center gap-x-2 text-xs text-gray-400">
                       <span>{{ item.length }} × {{ item.width }} × {{ item.thickness }}</span>
+                      <span v-if="item.long_qty" class="text-gray-300 font-medium">× {{ item.long_qty }}</span>
                       <span class="text-[#FFD700] font-semibold">{{ item.cubic_meters }} m³</span>
                     </div>
 
@@ -435,7 +451,10 @@ const toggleLang = () => {
                     </button>
                   </div>
                   <div v-else class="flex items-center gap-2">
-                    <span class="text-[#FFD700] font-semibold">
+                    <span v-if="item.long_qty" class="text-xs text-gray-400">
+                      Qty: <span class="text-white font-medium">{{ item.long_qty }}</span>
+                    </span>
+                    <span class="text-[#FFD700] font-semibold text-xs">
                       {{ item.cubic_meters }} m³
                     </span>
 

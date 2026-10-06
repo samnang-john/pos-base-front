@@ -200,6 +200,7 @@ export default {
         length: 'ប្រវែង',
         width: 'ទទឹង',
         thickness: 'កម្រាស់',
+        long_qty: 'ចំនួន (Long Qty)',
         cubic_meters: 'ម៉ែត្រគូប',
         select_category: 'ជ្រើសរើសប្រភេទ',
         upload_hint: 'អាប់ឡូតរូបភាព',
