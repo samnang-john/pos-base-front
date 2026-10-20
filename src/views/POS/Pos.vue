@@ -404,91 +404,101 @@ const toggleLang = () => {
 
           <!-- Cart Items List -->
           <div v-else class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
-            <div v-for="(item, index) in cart" :key="`${item._id}-${index}`" class="bg-[#1C1C28] p-3 rounded-lg flex gap-3 group relative">
+            <div v-for="(item, index) in cart" :key="`${item._id}-${index}`" 
+              class="bg-[#1C1C28] p-3.5 rounded-xl flex gap-3 border border-white/5 hover:border-white/10 transition-all">
               <!-- Image thumb -->
-              <div class="w-16 h-16 bg-gray-800 rounded-md overflow-hidden flex-shrink-0">
-                <img :src="item.image" class="w-full h-full object-cover" />
+              <div class="w-16 h-16 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
+                <img :src="item.image || '/fallback-image.jpg'" class="w-full h-full object-cover" />
               </div>
 
-              <div class="flex-1 flex flex-col justify-between">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h4 class="font-bold text-sm text-white">
+              <div class="flex-1 flex flex-col justify-between min-w-0">
+                <!-- Header: Name + Specs + Price + Remove button -->
+                <div class="flex justify-between items-start gap-2">
+                  <div class="min-w-0 flex-1">
+                    <h4 class="font-bold text-sm text-white truncate" :title="item.type_of_wood_Object?.name">
                       {{ item.type_of_wood_Object?.name }}
                     </h4>
 
-                    <!-- Cubic meter items: show dimensions -->
-                    <div v-if="item.cubic_meters" class="flex flex-wrap items-center gap-x-2 text-xs text-gray-400">
-                      <span>{{ item.length }} × {{ item.width }} × {{ item.thickness }}</span>
-                      <span v-if="item.long_qty" class="text-gray-300 font-medium">× {{ item.long_qty }}</span>
-                      <span class="text-[#FFD700] font-semibold">{{ item.cubic_meters }} m³</span>
+                    <!-- Cubic meter items: dimension badges -->
+                    <div v-if="item.cubic_meters" class="flex flex-wrap items-center gap-1.5 mt-1">
+                      <span v-if="item.length || item.width || item.thickness" 
+                        class="text-[11px] bg-white/5 text-gray-300 px-1.5 py-0.5 rounded font-mono">
+                        {{ item.length }}×{{ item.width }}×{{ item.thickness }}
+                      </span>
+                      <span v-if="item.long_qty" 
+                        class="text-[11px] bg-amber-500/10 text-amber-300 font-semibold px-1.5 py-0.5 rounded">
+                        {{ item.long_qty }} {{ $t('BUTTON.item') || 'pcs' }}
+                      </span>
+                      <span class="text-[11px] bg-[#FFD700]/15 text-[#FFD700] font-bold px-1.5 py-0.5 rounded">
+                        {{ item.cubic_meters }} m³
+                      </span>
                     </div>
 
                     <!-- Regular unit items: show size label -->
-                    <div v-else class="flex items-center gap-2">
-                      <p class="text-xs text-gray-400">
-                        {{ item.length_of_wood_Object?.name }}
+                    <div v-else class="flex items-center gap-2 mt-0.5">
+                      <p class="text-xs text-gray-400 truncate">
+                        {{ item.length_of_wood_Object?.name || "-" }}
                       </p>
                     </div>
                   </div>
 
-                  <p class="font-bold text-[#FFD700]">
-                    ${{ lineTotal(item).toFixed(2) }}
-                  </p>
-                </div>
-
-                <div class="flex justify-between items-center mt-2">
-                  <!-- Quantity controls: disabled for cubic items (qty is locked from modal) -->
-                  <div v-if="!item.cubic_meters" class="flex items-center bg-[#2C2C3A] rounded overflow-hidden">
-                    <button @click="decreaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">
-                      -
-                    </button>
-                    <span class="text-xs px-2 min-w-[20px] text-center">{{
-                      item.quantity
-                    }}</span>
-                    <button @click="increaseQty(item)" class="px-2 py-1 hover:bg-gray-600 transition text-xs">
-                      +
-                    </button>
-                  </div>
-                  <div v-else class="flex items-center gap-2">
-                    <span v-if="item.long_qty" class="text-xs text-gray-400">
-                      Qty: <span class="text-white font-medium">{{ item.long_qty }}</span>
-                    </span>
-                    <span class="text-[#FFD700] font-semibold text-xs">
-                      {{ item.cubic_meters }} m³
-                    </span>
-
+                  <!-- Price & Remove button -->
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <p class="font-black text-[#FFD700] text-base">
+                      ${{ lineTotal(item).toFixed(2) }}
+                    </p>
                     <button
                       @click="removeItem(item)"
-                      class="w-4 h-4 flex items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition"
+                      class="text-gray-400 hover:text-red-400 hover:bg-red-500/10 p-1 rounded-lg transition-colors"
                       title="Remove"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="w-3 h-3"
+                        class="w-4 h-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
-                        stroke-width="2.5"
+                        stroke-width="2"
                       >
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
+                </div>
 
-                  <!-- Discount Input (Small) -->
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-500">{{ $t("FORM.discount_short") }}:</span>
-                    <input type="number" v-model="item.discount" min="0"
-                      class="w-16 bg-[#2C2C3A] border border-gray-700 rounded text-xs px-2 py-1 text-right text-white focus:outline-none focus:border-[#FFD700]" />
+                <!-- Bottom Controls: Qty / Rate info on left, Discount on right -->
+                <div class="flex justify-between items-center mt-3 pt-2 border-t border-white/5 gap-2">
+                  <!-- Quantity controls for regular items -->
+                  <div v-if="!item.cubic_meters" class="flex items-center bg-[#2C2C3A] rounded-lg overflow-hidden border border-white/5">
+                    <button @click="decreaseQty(item)" class="px-2.5 py-1 hover:bg-gray-600 transition text-xs text-gray-300 font-bold">
+                      −
+                    </button>
+                    <span class="text-xs px-2 min-w-[24px] text-center font-semibold text-white">
+                      {{ item.quantity }}
+                    </span>
+                    <button @click="increaseQty(item)" class="px-2.5 py-1 hover:bg-gray-600 transition text-xs text-gray-300 font-bold">
+                      +
+                    </button>
+                  </div>
+
+                  <!-- Rate info for cubic items -->
+                  <div v-else class="text-[11px] text-gray-400">
+                    <span v-if="item.price_per_kube">${{ Number(item.price_per_kube).toFixed(2) }}/m³</span>
+                  </div>
+
+                  <!-- Discount Input -->
+                  <div class="flex items-center gap-1.5 ml-auto flex-shrink-0">
+                    <span class="text-[11px] text-gray-400 whitespace-nowrap">{{ $t("FORM.discount_short") }}:</span>
+                    <input type="number" v-model.number="item.discount" min="0" placeholder="0"
+                      class="w-16 bg-[#2C2C3A] border border-white/10 rounded-lg text-xs px-2 py-1 text-right text-white focus:outline-none focus:border-[#FFD700] transition" />
                   </div>
                 </div>
 
                 <!-- Price Breakdown if Discounted -->
                 <div v-if="item.discount > 0"
-                  class="flex justify-between items-center mt-2 pt-2 border-t border-white/5">
-                  <span class="text-xs text-gray-400">Final:</span>
-                  <span class="text-sm font-bold text-[#FFD700]">
+                  class="flex justify-between items-center mt-2 pt-1.5 border-t border-dashed border-white/10 text-xs">
+                  <span class="text-gray-400">Final:</span>
+                  <span class="font-bold text-[#FFD700]">
                     ${{ Math.max(0, lineTotal(item) - item.discount).toFixed(2) }}
                   </span>
                 </div>

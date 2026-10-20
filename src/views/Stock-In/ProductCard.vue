@@ -8,6 +8,11 @@ const props = defineProps({
 
 const emit = defineEmits(["add-to-cart"]);
 
+function isLongCategory(product) {
+  const categoryName = product?.category_object?.name || "";
+  return categoryName.toLowerCase().includes("long");
+}
+
 function handleAddToCart() {
   emit("add-to-cart", props.product);
 }
@@ -47,7 +52,7 @@ function handleAddToCart() {
             {{ product.category_object?.name }}
           </span>
         </p>
-      <div v-if="product.category_object?.name !== 'Long'" class="space-y-0.5 mb-2 grid grid-cols-2 gap-x-2">
+      <div v-if="!isLongCategory(product)" class="space-y-0.5 mb-2 grid grid-cols-2 gap-x-2">
         <div class="flex flex-col">
           <span class="text-white/70 text-[10px] uppercase font-bold tracking-wider">{{ $t('size') }}</span>
           <span class="text-white font-semibold text-xs truncate">
@@ -62,7 +67,7 @@ function handleAddToCart() {
         </div>
       </div>
 
-      <div v-if="product.category_object?.name === 'Long'" class="space-y-0.5 mb-2">
+      <div v-if="isLongCategory(product)" class="space-y-0.5 mb-2">
         <div class="flex items-center gap-2">
           <span class="text-white/70 text-[10px] uppercase font-bold tracking-wider">{{ $t('FORM.total_cube') }}:</span>
           <span class="text-white font-semibold text-xs truncate">
@@ -75,7 +80,7 @@ function handleAddToCart() {
       <!-- Spacer -->
       <div class="mt-auto pt-1 flex flex-col gap-1">
         <!-- Costs/Prices Box (Compact) -->
-        <div v-if="product.category_object?.name !== 'Long'" class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
+        <div v-if="!isLongCategory(product)" class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
           <div class="flex justify-between items-center text-[10px] mb-0.5">
             <span class="text-white/80 font-medium">{{ $t('cost') }}</span>
             <span class="text-white font-bold">${{ Number(product.cost_of_each || 0).toFixed(2) }}</span>
@@ -87,7 +92,7 @@ function handleAddToCart() {
             </span>
           </div>
         </div>
-        <div v-if="product.category_object?.name === 'Long'" class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
+        <div v-if="isLongCategory(product)" class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
           <div class="flex justify-between items-center text-[10px] mb-0.5">
             <span class="text-white/80 font-medium">{{ $t('cost') }}</span>
             <span class="text-white font-bold">${{ Number(product.cost_per_kube || 0).toFixed(2) }}</span>
