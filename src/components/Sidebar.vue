@@ -94,6 +94,16 @@ const openSettings = ref(false);
 
     <div v-if="openSettings" class="mt-1">
       <router-link
+        :to="{ name: 'app.category' }"
+        class="flex items-center ml-6 p-2 rounded hover:bg-black/20 text-xs cursor-pointer"
+      >
+        <span class="mr-2 text-gray-300">
+          <ListBulletIcon class="w-5" />
+        </span>
+        <span class="text-xs">{{ $t('MENU.category') }}</span>
+      </router-link>
+
+      <router-link
         :to="{ name: 'app.woodtype' }"
         class="flex items-center ml-6 p-2 rounded hover:bg-black/20 text-xs cursor-pointer"
       >
