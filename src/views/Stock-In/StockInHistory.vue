@@ -7,7 +7,7 @@ import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
 import "vue3-toastify/dist/index.css";
 import { useRouter } from "vue-router";
 import dayjs from "dayjs";
-import { DocumentTextIcon } from "@heroicons/vue/24/solid";
+import { DocumentIcon, DocumentTextIcon } from "@heroicons/vue/24/solid";
 
 const router = useRouter();
 const listHistory = ref([]);
@@ -39,6 +39,7 @@ const getStockInHistory = async (page = 1) => {
       pageSize: pageSize.value,
       startDate: startDate.value,
       endDate: endDate.value,
+      search: search.value,
     });
 
     listHistory.value = res.data.items || [];
@@ -55,13 +56,13 @@ const getStockInHistory = async (page = 1) => {
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    getWoodTypes(currentPage.value + 1);
+    getStockInHistory(currentPage.value + 1);
   }
 };
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    getWoodTypes(currentPage.value - 1);
+    getStockInHistory(currentPage.value - 1);
   }
 };
 
@@ -78,7 +79,7 @@ const getStockInHistoryDetail = async (stockInID) => {
     });
     objDetail.value = res?.data;
     const total = res?.data.items.reduce(
-      (sum, p) => sum + Number(p.product_id.cost_of_each || 0) * p.quantity,
+      (sum, p) => sum + Number(p.product_id?.cost_of_each || 0) * p.quantity,
       0
     );
     totalPrice.value = total;
@@ -93,11 +94,57 @@ const closeModal = () => {
   isModalOpen.value = false;
 };
 
-const downloadPDF = async (stockInID) => {
+const downloadPDF = async () => {
+  const res = await store.dispatch("getStockPDF", {
+    startDate: startDate.value,
+    endDate: endDate.value,
+  });
+
+  if (!res) return;
+
+  // Create blob from binary data
+  const blob = new Blob([res], { type: "application/pdf" });
+
+  // Create download link
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `stock-report-${new Date().toISOString().slice(0, 10)}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Clean up
+  window.URL.revokeObjectURL(url);
+};
+
+const downloadExcel = async () => {
+  const res = await store.dispatch("getStockExcel", {
+    startDate: startDate.value,
+    endDate: endDate.value,
+  });
+
+  if (!res) return;
+
+  // Trigger download
+  const blob = res instanceof Blob ? res : new Blob([res], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `stock-report-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
+const downloadReceiptPDF = async (stockInID) => {
   console.log("stockInID", stockInID);
   const res = await store.dispatch("downloadStockIn", {
     stockInID: stockInID,
   });
+
+  if (!res) return;
 
   // Create blob from binary data
   const blob = new Blob([res], { type: "application/pdf" });
@@ -156,7 +203,7 @@ const goBack = () => {
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
         </div>
-        <input v-model="search" @change="getProducts(null)"
+        <input v-model="search" @change="getStockInHistory(1)"
           class="block w-full md:w-64 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
           :placeholder="$t('TABLE.search_wood_type')" />
       </div>
@@ -167,14 +214,28 @@ const goBack = () => {
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex flex-col">
             <label for="startDate" class="text-sm font-medium text-gray-700 mb-1">{{ $t('TABLE.start_date') }}</label>
-            <input id="startDate" v-model="startDate" @change="getStockInHistory" type="date"
+            <input id="startDate" v-model="startDate" @change="getStockInHistory(1)" type="date"
               class="block w-full px-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm" />
           </div>
           <div class="flex flex-col">
             <label for="endDate" class="text-sm font-medium text-gray-700 mb-1">{{ $t('TABLE.end_date') }}</label>
-            <input id="endDate" v-model="endDate" @change="getStockInHistory" type="date"
+            <input id="endDate" v-model="endDate" @change="getStockInHistory(1)" type="date"
               class="block w-full px-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm" />
           </div>
+        </div>
+
+        <!-- Download Buttons -->
+        <div class="flex gap-3 mt-4 lg:mt-0">
+          <button @click="downloadPDF"
+            class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm">
+            <DocumentTextIcon class="h-4 w-4 mr-2" />
+            {{ $t("TABLE.download_pdf") }}
+          </button>
+          <button @click="downloadExcel"
+            class="inline-flex items-center px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 shadow-sm">
+            <DocumentIcon class="h-4 w-4 mr-2" />
+            {{ $t("TABLE.download_excel") }}
+          </button>
         </div>
       </div>
     </div>
@@ -244,7 +305,7 @@ const goBack = () => {
               {{ history.note }}
             </td>
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              <button @click="downloadPDF(history._id)"
+              <button @click.stop="downloadReceiptPDF(history._id)"
                 class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm">
                 <DocumentTextIcon class="h-4 w-4 mr-2" />
                 {{ $t('TABLE.download_pdf') }}
@@ -347,7 +408,7 @@ const goBack = () => {
           </div>
         </div>
         <div class="mt-6 flex justify-end">
-          <button @click="downloadPDF(objDetail._id)"
+          <button @click="downloadReceiptPDF(objDetail._id)"
             class="mt-2 inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm">
             <DocumentTextIcon class="h-4 w-4 mr-2" />
             {{ $t('TABLE.download_pdf') }}

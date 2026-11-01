@@ -376,11 +376,47 @@ export function downloadStockIn({ commit }, params) {
     });
 }
 
-export function getStockInHistory({ commit }, params) {
+export function getStockPDF({ commit }, params) {
+  const queryParams = new URLSearchParams();
+  if (params?.startDate) queryParams.append("startDate", params.startDate);
+  if (params?.endDate) queryParams.append("endDate", params.endDate);
+  const queryStr = queryParams.toString() ? `?${queryParams.toString()}` : "";
   return axiosClient
-    .get(
-      `/stock/stock-syncs?page=${params?.page}&size=${params?.pageSize}&startDate=${params?.startDate}&endDate=${params?.endDate}`
-    )
+    .get(`/stock/pdf${queryStr}`, { responseType: "blob" })
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+      console.error("Get Stock PDF Fail", err);
+    });
+}
+export const getStockInPDF = getStockPDF;
+export const getStockSyncPDF = getStockPDF;
+
+export function getStockExcel({ commit }, params) {
+  const queryParams = new URLSearchParams();
+  if (params?.startDate) queryParams.append("startDate", params.startDate);
+  if (params?.endDate) queryParams.append("endDate", params.endDate);
+  const queryStr = queryParams.toString() ? `?${queryParams.toString()}` : "";
+  return axiosClient
+    .get(`/stock/excel${queryStr}`, { responseType: "blob" })
+    .then(({ data }) => {
+      return data;
+    })
+    .catch((err) => {
+      console.error("Get Stock Excel Fail", err);
+    });
+}
+export const getStockInExcel = getStockExcel;
+export const getStockSyncExcel = getStockExcel;
+
+export function getStockInHistory({ commit }, params) {
+  let url = `/stock/stock-syncs?page=${params?.page}&size=${params?.pageSize}&startDate=${params?.startDate}&endDate=${params?.endDate}`;
+  if (params?.search) {
+    url += `&search=${encodeURIComponent(params.search)}`;
+  }
+  return axiosClient
+    .get(url)
     .then(({ data }) => {
       return data;
     })
