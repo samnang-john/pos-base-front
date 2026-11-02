@@ -103,6 +103,9 @@ export function getProducts({ commit }, params) {
   if (params?.category_id) {
     url += `&category_id=${params.category_id}`;
   }
+  if (params?.search) {
+    url += `&search=${encodeURIComponent(params.search)}`;
+  }
   return axiosClient
     .get(url)
     .then(({ data }) => {

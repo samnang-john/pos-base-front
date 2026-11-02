@@ -4,15 +4,18 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 mb-5 border-b border-gray-100">
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div class="flex items-center">
-                    <span class="text-sm font-medium text-gray-700 whitespace-nowrap mr-2">Per Page</span>
-                    <select @change="getCategories(null)" v-model="perPage"
-                        class="appearance-none relative block w-20 px-3 py-2 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm">
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
+                    <span class="text-sm font-medium text-gray-700 whitespace-nowrap mr-2">{{ $t('TABLE.per_page') }}</span>
+                    <div class="relative">
+                        <select @change="getCategories(null)" v-model="perPage"
+                            class="appearance-none block w-[84px] pl-3 pr-8 py-2 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm bg-white cursor-pointer">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <ChevronDownIcon class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                    </div>
                 </div>
                 <span class="text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg">
                     Found <span class="font-semibold text-indigo-600">{{ categories.total }}</span> categories
@@ -112,10 +115,10 @@
                                             <button :class="[
                                                 active ? 'bg-red-50 text-red-700' : 'text-gray-700',
                                                 'group flex w-full items-center px-4 py-2 text-sm',
-                                            ]" @click="deleteCategory(category)">
+                                            ]" @click="openModalConfirm(category)">
                                                 <TrashIcon class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-700"
                                                     aria-hidden="true" />
-                                                Delete
+                                                {{ $t('BUTTON.delete') }}
                                             </button>
                                             </MenuItem>
                                         </div>
@@ -160,6 +163,10 @@
             </nav>
         </div>
     </div>
+
+    <!-- Modal Confirm -->
+    <ConfirmModal v-model:is-open="isModalConfirmOpen" :title="$t('MODAL.confirm_delete_category_title')"
+        :message="$t('MODAL.confirm_delete_category_msg')" @confirm="deleteCategory" @cancel="console.log('Cancelled')" />
 </template>
 
 <script setup>
@@ -173,8 +180,10 @@ import {
   EllipsisVerticalIcon,
   PencilIcon,
   TrashIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  ChevronDownIcon
 } from '@heroicons/vue/24/outline'
+import ConfirmModal from "../../components/AlertConfirm.vue";
 
 const perPage = ref(PRODUCTS_PER_PAGE);
 const search = ref('');
@@ -184,6 +193,8 @@ const sortDirection = ref('desc');
 
 const category = ref({});
 const showCategoryModal = ref(false);
+const isModalConfirmOpen = ref(false);
+const categoryToDelete = ref(null);
 
 const emit = defineEmits(['clickEdit'])
 
@@ -222,11 +233,14 @@ function sortCategories(field) {
     getCategories();
 }
 
-function deleteCategory(category) {
-    if (!confirm(`Are you sure you want to delete "${category.name}"`)) {
-        return;
-    }
-    store.dispatch('deleteCategory', category._id)
+function openModalConfirm(cate) {
+    isModalConfirmOpen.value = true;
+    categoryToDelete.value = cate;
+}
+
+function deleteCategory() {
+    if (!categoryToDelete.value?._id) return;
+    store.dispatch('deleteCategory', categoryToDelete.value._id)
         .then(res => {
             store.dispatch('getCategories');
         });

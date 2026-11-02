@@ -25,13 +25,13 @@
               class="px-4 py-2 text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
               @click="cancel"
             >
-              Cancel
+              {{ cancelText || $t('BUTTON.cancel') }}
             </button>
             <button
               class="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700"
               @click="confirm"
             >
-              Delete
+              {{ confirmText || $t('BUTTON.delete') }}
             </button>
           </div>
         </div>
@@ -52,6 +52,14 @@ const props = defineProps({
   title: {
     type: String,
     default: "Alert Title",
+  },
+  cancelText: {
+    type: String,
+    default: "",
+  },
+  confirmText: {
+    type: String,
+    default: "",
   },
 });
 

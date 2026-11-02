@@ -9,17 +9,23 @@ import {
   PencilIcon,
   TrashIcon,
   MagnifyingGlassIcon,
+  ChevronDownIcon,
 } from "@heroicons/vue/24/outline";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { useI18n } from "vue-i18n";
+import ConfirmModal from "../../components/AlertConfirm.vue";
 
+const { t } = useI18n();
 const listWoodLengths = ref([]);
 const search = ref("");
 const isLoadingWoodLength = ref(false);
 const currentPage = ref(1);
 const totalPages = ref(1);
-const pageSize = ref(15);
+const pageSize = ref(10);
 const isModalOpen = ref(false); // Control modal visibility
+const isModalConfirmOpen = ref(false); // Control delete confirm modal
+const deleteWoodLengthId = ref(null);
 const woodLengthNameForm = ref({
   name: "",
   description: "",
@@ -92,15 +98,15 @@ const submitWoodLength = async () => {
       await store.dispatch("createWoodLength", woodLengthNameForm.value);
       getWoodLengths();
       closeModal();
-      toast.success(this.$t('TOAST.wood_length_created'));
+      toast.success(t('TOAST.wood_length_created'));
     } catch (error) {
       closeModal();
       console.log("Error=>", error);
-      toast.error(this.$t('TOAST.wood_length_unsuccessful'));
+      toast.error(t('TOAST.wood_length_unsuccessful'));
     }
   } else {
     isErrorValue.value = true;
-    toast.error(this.$t('TOAST.field_required'));
+    toast.error(t('TOAST.field_required'));
   }
 };
 
@@ -125,20 +131,25 @@ const onUpdate = async () => {
     await store.dispatch("updateWoodLength", obj);
     getWoodLengths();
     closeModal();
-    toast.success(this.$t('TOAST.wood_length_updated'));
+    toast.success(t('TOAST.wood_length_updated'));
   } catch (error) {
     console.log("Error=>", error);
-    toast.error(this.$t('TOAST.wood_length_unsuccessful'));
+    toast.error(t('TOAST.wood_length_unsuccessful'));
   }
 };
 
-const onDeleteWoodLength = async (woodLengthId) => {
+const openModalConfirm = (wood_length) => {
+  isModalConfirmOpen.value = true;
+  deleteWoodLengthId.value = wood_length?._id;
+};
+
+const onDeleteWoodLength = async () => {
   try {
-    await store.dispatch("deleteWoodLength", woodLengthId);
+    await store.dispatch("deleteWoodLength", deleteWoodLengthId.value);
     getWoodLengths();
-    toast.info(this.$t('TOAST.wood_length_deleted'));
+    toast.info(t('TOAST.wood_length_deleted'));
   } catch (error) {
-    toast.error(this.$t('TOAST.wood_length_unsuccessful'));
+    toast.error(t('TOAST.wood_length_unsuccessful'));
   }
 };
 </script>
@@ -158,11 +169,27 @@ const onDeleteWoodLength = async (woodLengthId) => {
     <!-- Header Section -->
     <div
       class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 mb-5 border-b border-gray-100">
+      <div class="flex items-center">
+        <span class="text-sm font-medium text-gray-700 whitespace-nowrap mr-2">{{ $t('TABLE.per_page') }}</span>
+        <div class="relative">
+          <select v-model="pageSize" @change="getWoodLengths(1)"
+            class="appearance-none block w-[84px] pl-3 pr-8 py-2 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm bg-white cursor-pointer">
+            <option :value="5">5</option>
+            <option :value="10">10</option>
+            <option :value="15">15</option>
+            <option :value="20">20</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+          </select>
+          <ChevronDownIcon class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+        </div>
+      </div>
+
       <div class="relative w-full md:w-auto">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
         </div>
-        <input v-model="search" @change="getProducts(null)"
+        <input v-model="search" @change="getWoodLengths(1)"
           class="block w-full md:w-64 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
           :placeholder="$t('TABLE.search_wood_length')" />
       </div>
@@ -244,7 +271,7 @@ const onDeleteWoodLength = async (woodLengthId) => {
                       <button :class="[
                         active ? 'bg-red-50 text-red-700' : 'text-gray-700',
                         'group flex w-full items-center px-4 py-2 text-sm',
-                      ]" @click="onDeleteWoodLength(wood._id)">
+                      ]" @click="openModalConfirm(wood)">
                         <TrashIcon class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-700" aria-hidden="true" />
                         {{ $t('BUTTON.delete') }}
                       </button>
@@ -318,6 +345,10 @@ const onDeleteWoodLength = async (woodLengthId) => {
       </div>
     </div>
   </div>
+
+  <!-- Modal Confirm -->
+  <ConfirmModal v-model:is-open="isModalConfirmOpen" :title="$t('MODAL.confirm_delete_wood_length_title')"
+    :message="$t('MODAL.confirm_delete_wood_length_msg')" @confirm="onDeleteWoodLength" @cancel="console.log('Cancelled')" />
 </template>
 
 <style scoped>
