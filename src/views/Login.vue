@@ -37,8 +37,8 @@ function setLanguage(lang) {
 }
 
 const user = {
-  username: "samnang",
-  password: "admin123",
+  username: "",
+  password: "",
 };
 
 function login() {

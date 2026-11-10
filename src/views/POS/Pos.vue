@@ -316,7 +316,7 @@ const toggleLang = () => {
     </div>
 
     <!-- Main Content -->
-    <div class="p-6 md:p-8 flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-88px)] overflow-y-auto lg:overflow-hidden">
+    <div class="p-6 md:p-8 flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-88px)] overflow-y-auto lg:overflow-hidden scrollbar-hide">
       <!-- Left: Products Section -->
       <div class="flex-1 flex flex-col lg:overflow-hidden min-h-[500px] lg:min-h-0">
         <div class="mb-6">
@@ -353,7 +353,7 @@ const toggleLang = () => {
         </div>
 
         <!-- Scrollable Grid -->
-        <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+        <div class="flex-1 overflow-y-auto pr-2 scrollbar-hide custom-scrollbar">
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
             <ProductCard v-for="product in products" :key="product._id" :product="product" @add-to-cart="addToCart" />
           </div>
@@ -403,7 +403,7 @@ const toggleLang = () => {
           </div>
 
           <!-- Cart Items List -->
-          <div v-else class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+          <div v-else class="flex-1 overflow-y-auto pr-2 scrollbar-hide custom-scrollbar space-y-3">
             <div v-for="(item, index) in cart" :key="`${item._id}-${index}`" 
               class="bg-[#1C1C28] p-3.5 rounded-xl flex gap-3 border border-white/5 hover:border-white/10 transition-all">
               <!-- Image thumb -->
@@ -542,10 +542,15 @@ const toggleLang = () => {
 </template>
 
 <style scoped>
-.scrollbar-hide::-webkit-scrollbar {
+.scrollbar-hide::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
   display: none;
+  width: 0;
+  height: 0;
 }
-.scrollbar-hide {
+
+.scrollbar-hide,
+.custom-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
