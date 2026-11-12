@@ -1,19 +1,32 @@
 <script setup>
 import { onMounted, ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import store from "../store";
 import dayjs from "dayjs";
+import {
+  CubeIcon,
+  ShoppingCartIcon,
+  BanknotesIcon,
+  ArrowTrendingDownIcon,
+  ArrowUpRightIcon,
+  ScaleIcon,
+} from "@heroicons/vue/24/outline";
 
+const router = useRouter();
 const listProduct = ref([]);
 const listOrder = ref([]);
 const listHistory = ref([]);
 const startDate = ref(dayjs().format("YYYY-MM-DD"));
 const endDate = ref(dayjs().format("YYYY-MM-DD"));
 const isLoadingProduct = ref(false);
+const isLoadingDashboard = ref(false);
 const isLoadingOrder = ref(false);
 const isLoadingHistory = ref(false);
 const isModalOpen = ref(false);
 const objDetail = ref(null);
 const dashboardData = ref(null); 
+
+const overview = computed(() => dashboardData.value?.data || dashboardData.value || {});
 
 // Computed totals
 const subtotal = computed(() =>
@@ -29,14 +42,14 @@ onMounted(async () => {
 });
 
 const getDasboard = async () => {
-  isLoadingProduct.value = true;
+  isLoadingDashboard.value = true;
   try {
     const res = await store.dispatch("getDashboard");
-    dashboardData.value = res?.data;
+    dashboardData.value = res?.data || res;
   } catch (error) {
     console.log(error);
   } finally {
-    isLoadingProduct.value = false;
+    isLoadingDashboard.value = false;
   }
 };
 
@@ -97,76 +110,143 @@ const closeModal = () => {
 </script>
 
 <template>
-  <div class="p-6 rounded-xl min-h-screen text-gray-100">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- Total Products -->
+  <div class="p-6 rounded-xl min-h-screen text-gray-800">
+    <!-- Top Row: Modern KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- 1. Total Products -->
       <div
-        class="bg-white rounded-lg p-6 border border-[#9A6A3A] hover:border-yellow-500/50 transition"
+        @click="router.push({ name: 'app.product' })"
+        class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200 cursor-pointer group flex flex-col justify-between"
       >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-400 text-sm">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-500">
               {{ $t("DASHBOARD.total_product") }}
             </p>
-            <p class="text-3xl font-bold mt-2 text-black">
-              {{ dashboardData?.total_products }}
-            </p>
+            <div v-if="isLoadingDashboard" class="h-9 w-24 bg-gray-100 rounded-lg animate-pulse mt-3"></div>
+            <h3 v-else class="text-3xl font-extrabold text-gray-900 tracking-tight mt-3">
+              {{ overview.total_products ?? 0 }}
+            </h3>
           </div>
-          <div class="text-yellow-400 text-4xl opacity-70">
-            <!-- You can replace with an icon library like Heroicons or FontAwesome -->
-            📦
+          <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 shadow-xs">
+            <CubeIcon class="w-6 h-6" />
           </div>
         </div>
+
+<div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
+  <span class="font-medium text-blue-600 group-hover:underline flex items-center gap-1">
+    {{ $t("DASHBOARD.view_catalog") }}
+    <ArrowUpRightIcon class="w-3.5 h-3.5" />
+  </span>
+  <template v-if="overview.total_stock_qty !== undefined || overview.total_stock_cube !== undefined">
+    <div class="flex space-x-2">
+      <span v-if="overview.total_stock_qty !== undefined" class="text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded-md">
+        {{ overview.total_stock_qty }} pcs
+      </span>
+      <span v-if="overview.total_stock_cube !== undefined" class="text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded-md">
+        {{ overview.total_stock_cube }} m³
+      </span>
+    </div>
+  </template>
+  <template v-else>
+    <span class="text-gray-400 font-medium">{{ $t("DASHBOARD.inventory") }}</span>
+  </template>
+</div>
       </div>
 
-      <!-- Orders Today -->
+      <!-- 2. Orders Today -->
       <div
-        class="bg-white rounded-lg p-6 border border-[#9A6A3A] hover:border-yellow-500/50 transition"
+        @click="router.push({ name: 'app.order' })"
+        class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-200 cursor-pointer group flex flex-col justify-between"
       >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-400 text-sm">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-500">
               {{ $t("DASHBOARD.order_today") }}
             </p>
-            <p class="text-3xl font-bold mt-2 text-black">
-              {{ dashboardData?.orders_today }}
-            </p>
+            <div v-if="isLoadingDashboard" class="h-9 w-24 bg-gray-100 rounded-lg animate-pulse mt-3"></div>
+            <h3 v-else class="text-3xl font-extrabold text-gray-900 tracking-tight mt-3">
+              {{ overview.orders_today ?? 0 }}
+            </h3>
           </div>
-          <div class="text-yellow-400 text-4xl opacity-70">🛒</div>
+          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 shadow-xs">
+            <ShoppingCartIcon class="w-6 h-6" />
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
+          <span class="font-medium text-amber-600 group-hover:underline flex items-center gap-1">
+            {{ $t("DASHBOARD.view_orders") }}
+            <ArrowUpRightIcon class="w-3.5 h-3.5" />
+          </span>
+          <span v-if="overview.total_sale_cube !== undefined || overview.total_cube_sale !== undefined" class="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded-md">
+            {{ overview.total_sale_qty !== undefined ? overview.total_sale_qty + ' pcs' : '' }}
+          {{ overview.total_sale_cube ?? overview.total_cube_sale }} m³
+          </span>
+          <span v-else class="text-gray-400 font-medium">{{ $t("DASHBOARD.today") }}</span>
         </div>
       </div>
 
-      <!-- Total Income -->
+      <!-- 3. Total Income (Today) -->
       <div
-        class="bg-white rounded-lg p-6 border border-[#9A6A3A] hover:border-yellow-500/50 transition"
+        class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-200 group flex flex-col justify-between"
       >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-400 text-sm">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-500">
               {{ $t("DASHBOARD.income_today") }}
             </p>
-            <p class="text-3xl font-bold mt-2 text-green-400">
-              ${{ dashboardData?.total_profit?.toFixed(2) }}
-            </p>
+            <div v-if="isLoadingDashboard" class="h-9 w-32 bg-gray-100 rounded-lg animate-pulse mt-3"></div>
+            <h3 v-else class="text-3xl font-extrabold text-emerald-600 tracking-tight mt-3">
+              ${{ Number(overview.income_today ?? overview.total_revenue ?? 0).toFixed(2) }}
+            </h3>
           </div>
-          <div class="text-green-400 text-4xl opacity-70">↑</div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 shadow-xs">
+            <BanknotesIcon class="w-6 h-6" />
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
+          <span class="inline-flex items-center text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-md">
+            {{ $t("DASHBOARD.revenue") }}
+          </span>
+          <span
+            v-if="overview.total_profit !== undefined"
+            class="font-semibold"
+            :class="Number(overview.total_profit) >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+            :title="$t('DASHBOARD.net_profit')"
+          >
+            {{ $t("DASHBOARD.net") }}: ${{ Number(overview.total_profit).toFixed(2) }}
+          </span>
         </div>
       </div>
 
-      <!-- Total Expenses -->
+      <!-- 4. Total Expenses (Today) -->
       <div
-        class="bg-white rounded-lg p-6 border border-[#9A6A3A] hover:border-yellow-500/50 transition"
+        @click="router.push({ name: 'app.stockinhistory' })"
+        class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-rose-200 transition-all duration-200 cursor-pointer group flex flex-col justify-between"
       >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-400 text-sm">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-500">
               {{ $t("DASHBOARD.expense_today") }}
             </p>
-            <p class="text-3xl font-bold mt-2 text-red-400">
-              ${{ dashboardData?.expense_today?.toFixed(2) }}
-            </p>
+            <div v-if="isLoadingDashboard" class="h-9 w-32 bg-gray-100 rounded-lg animate-pulse mt-3"></div>
+            <h3 v-else class="text-3xl font-extrabold text-rose-600 tracking-tight mt-3">
+              ${{ Number(overview.expense_today ?? 0).toFixed(2) }}
+            </h3>
           </div>
-          <div class="text-red-400 text-4xl opacity-70">↓</div>
+          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 shadow-xs">
+            <ArrowTrendingDownIcon class="w-6 h-6" />
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
+          <span class="font-medium text-rose-600 group-hover:underline flex items-center gap-1">
+            {{ $t("DASHBOARD.view_history") }}
+            <ArrowUpRightIcon class="w-3.5 h-3.5" />
+          </span>
+          <span class="text-gray-400 font-medium">{{ $t("DASHBOARD.today") }}</span>
         </div>
       </div>
     </div>
@@ -360,7 +440,6 @@ const closeModal = () => {
             <p class="text-md font-bold text-gray-900">
               {{ objDetail["payment_status"] }}
             </p>
-            -->
           </div>
         </div>
 

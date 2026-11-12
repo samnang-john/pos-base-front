@@ -288,7 +288,7 @@ const closeModal = () => {
           </tr>
           <tr v-else v-for="(order, index) of listOrder" :key="order._id"
             class="animate-fade-in-down hover:bg-gray-50 transition-colors duration-150"
-            :style="{ 'animation-delay': index * 0.05 + 's' }" @click="openModal(order)">
+            :style="{ 'animation-delay': index * 0.05 + 's' }">
             <td class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-medium text-gray-700 sm:pl-6">
               {{ (index + 1).toString().padStart(2, "0") }}
             </td>
@@ -307,7 +307,7 @@ const closeModal = () => {
             </td>
 
             <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 max-w-xs truncate">
-              <button @click="downloadReceiptPDF(order._id)"
+              <button @click.stop="downloadReceiptPDF(order._id)"
                 class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-sm">
                 <DocumentTextIcon class="h-4 w-4 mr-2" />
                 Download PDF
