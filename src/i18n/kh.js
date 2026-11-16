@@ -224,6 +224,7 @@ export default {
         total_cube: 'ចំនួនម៉ែត្រគូបសរុប',
         cost_per_cube: 'តម្លៃដើមក្នុងមួយម៉ែត្រគូប',
         price_per_cube: 'តម្លៃលក់ចេញក្នុងមួយម៉ែត្រគូប',
+        note: 'ចំណាំ'
     },
     LOGIN: {
         welcome_to: 'សូមស្វាគមន៍មកកាន់',

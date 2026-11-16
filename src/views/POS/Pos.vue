@@ -78,7 +78,9 @@ function removeItem(item) {
 
 function lineTotal(item) {
   if (item.cubic_meters) {
-    return Number(item.price_per_kube || 0) * Number(item.cubic_meters || 0);
+    const raw = Number(item.price_per_kube || 0) * Number(item.cubic_meters || 0);
+    // Round up to 4 decimal places
+    return Math.ceil(raw * 10000) / 10000;
   }
   return Number(item.price_of_each || 0) * item.quantity;
 }
@@ -92,7 +94,10 @@ const subtotal = computed(() =>
 );
 
 const tax = computed(() => subtotal.value); //* 0.075
-const total = computed(() => subtotal.value);
+const total = computed(() => {
+  // Round up order total to 2 decimal places
+  return Math.ceil(subtotal.value * 100) / 100;
+});
 
 onMounted(async () => {
   try {
@@ -445,7 +450,7 @@ const toggleLang = () => {
                   <!-- Price & Remove button -->
                   <div class="flex items-center gap-2 flex-shrink-0">
                     <p class="font-black text-[#FFD700] text-base">
-                      ${{ lineTotal(item).toFixed(2) }}
+                      ${{ lineTotal(item).toFixed(4) }}
                     </p>
                     <button
                       @click="removeItem(item)"
@@ -499,7 +504,7 @@ const toggleLang = () => {
                   class="flex justify-between items-center mt-2 pt-1.5 border-t border-dashed border-white/10 text-xs">
                   <span class="text-gray-400">Final:</span>
                   <span class="font-bold text-[#FFD700]">
-                    ${{ Math.max(0, lineTotal(item) - item.discount).toFixed(2) }}
+                    ${{ Math.max(0, Math.ceil((lineTotal(item) - item.discount) * 100) / 100).toFixed(2) }}
                   </span>
                 </div>
               </div>

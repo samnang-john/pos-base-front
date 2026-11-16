@@ -226,7 +226,8 @@ export default {
         upload_hint: 'Upload Hint',
         total_cube: 'Total Cube',
         cost_per_cube: 'Cost per Cube',
-        price_per_cube: 'Price per Cube'
+        price_per_cube: 'Price per Cube',
+        note: 'Note'
     },
     LOGIN: {
         welcome_to: 'Welcome To',

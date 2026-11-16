@@ -50,7 +50,8 @@ function recalculateCubic() {
     } else {
       volume = (l * w * t * q) / 10000;
     }
-    modalCubicMeters.value = Number(volume.toFixed(4));
+    // Round down to 4 decimal places (no upward rounding)
+    modalCubicMeters.value = Math.floor(volume * 10000) / 10000;
   }
 }
 
@@ -61,7 +62,9 @@ const modalEstimatedCost = computed(() => {
       pendingProduct.value?.cost_of_each ||
       0
   );
-  return Number((cube * cost).toFixed(2));
+  // Round down to 4 decimal places (no upward rounding)
+  const raw = cube * cost;
+  return Math.floor(raw * 10000) / 10000;
 });
 
 // Add product to cart
@@ -170,7 +173,9 @@ function removeItem(item) {
 
 function lineTotal(item) {
   if (isLongCategory(item) || item.cubic_meters) {
-    return Number(item.cost_per_kube || item.cost_of_each || 0) * Number(item.cubic_meters || 0);
+    const raw = Number(item.cost_per_kube || item.cost_of_each || 0) * Number(item.cubic_meters || 0);
+    // Round down to 4 decimal places (no upward rounding)
+    return Math.floor(raw * 10000) / 10000;
   }
   return Number(item.cost_of_each || 0) * Number(item.quantity || 0);
 }
